@@ -18,36 +18,31 @@ namespace LaserAPI.Controllers
         }
 
         [HttpGet("send")]
-        public async Task<string> SendMessage()
+        public string SendMessage()
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            double previousMicroSeconds = 0.00;
             int iterations = 0;
             int durationInSeconds = 1;
 
             while (stopwatch.ElapsedMilliseconds < durationInSeconds * 1000)
             {
-                double ticks = stopwatch.ElapsedTicks;
-                double microSeconds = (ticks / Stopwatch.Frequency) * 1000000;
-
-                if (microSeconds - previousMicroSeconds > 80)
-                {
-                    iterations++;
-                    await _laserConnection.SendMessage("r5");
-                    previousMicroSeconds = microSeconds;
-                }
+                iterations++;
+                _laserConnection.SendMessage("r5");
             }
-            
+
             stopwatch.Stop();
             return $"{iterations} messages in {durationInSeconds} seconds";
         }
 
         [HttpPost]
-        public async Task Post (int value)
+        public void Post(int value)
         {
-            await _laserConnection.SendMessage($"r{value}");
+            for (int i = 0; i < 150000; i++)
+            {
+                _laserConnection.SendMessage($"r{value}");
+            }
         }
     }
 }
