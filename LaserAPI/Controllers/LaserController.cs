@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading;
-using System.Threading.Tasks;
+using LaserAPI.Models;
+using Newtonsoft.Json;
 
 namespace LaserAPI.Controllers
 {
@@ -11,7 +12,7 @@ namespace LaserAPI.Controllers
     public class LaserController : ControllerBase
     {
         private readonly LaserConnection _laserConnection;
-
+        
         public LaserController(LaserConnection laserConnection)
         {
             _laserConnection = laserConnection;
@@ -29,7 +30,12 @@ namespace LaserAPI.Controllers
             while (stopwatch.ElapsedMilliseconds < durationInSeconds * 1000)
             {
                 iterations++;
-                _laserConnection.SendMessage("r5");
+                string json = JsonConvert.SerializeObject(new LaserMessage
+                {
+                    Rgbxy = new short[] {511, 255, 0, -4000, 2000 }
+                }, Formatting.None);
+
+                _laserConnection.SendMessage(json);
             }
 
             stopwatch.Stop();
@@ -41,7 +47,12 @@ namespace LaserAPI.Controllers
         {
             for (int i = 0; i < 150000; i++)
             {
-                _laserConnection.SendMessage($"r{value}");
+                string json = JsonConvert.SerializeObject(new LaserMessage
+                {
+                    Rgbxy = new short[] { 511, 255, 0, -4000, 2000 }
+                }, Formatting.None);
+                    
+                _laserConnection.SendMessage(json);
             }
         }
     }
