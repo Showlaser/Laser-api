@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Net;
-using System.Net.WebSockets;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Sockets;
 
 namespace LaserAPI
 {
@@ -26,7 +25,7 @@ namespace LaserAPI
 
             await _socket.ConnectAsync(remoteEP);
         }
-        
+
         public void Disconnect()
         {
             _socket.Shutdown(SocketShutdown.Both);

@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31702.278
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaserAPI", "LaserAPI\LaserAPI.csproj", "{274C4749-487B-445B-A49C-B7BE13092DD4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LaserAPI", "LaserAPI\LaserAPI.csproj", "{274C4749-487B-445B-A49C-B7BE13092DD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaserAPITests", "LaserAPITests\LaserAPITests.csproj", "{88DCB790-057B-43E9-B574-3E6E4FC03C2E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{274C4749-487B-445B-A49C-B7BE13092DD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{274C4749-487B-445B-A49C-B7BE13092DD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{274C4749-487B-445B-A49C-B7BE13092DD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88DCB790-057B-43E9-B574-3E6E4FC03C2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88DCB790-057B-43E9-B574-3E6E4FC03C2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88DCB790-057B-43E9-B574-3E6E4FC03C2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88DCB790-057B-43E9-B574-3E6E4FC03C2E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
