@@ -5,12 +5,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Mapster" Version="7.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <Compile Remove="Dal\Migrations\**" />
+    <Content Remove="Dal\Migrations\**" />
+    <EmbeddedResource Remove="Dal\Migrations\**" />
+    <None Remove="Dal\Migrations\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Dal\" />
+    <PackageReference Include="Mapster" Version="7.2.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
 </Project>

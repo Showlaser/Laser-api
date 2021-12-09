@@ -37,6 +37,7 @@ namespace LaserAPI.Controllers
             }
         }
 
+        [HttpGet]
         public async Task<ActionResult<List<PatternViewmodel>>> All()
         {
             try
@@ -50,6 +51,7 @@ namespace LaserAPI.Controllers
             }
         }
 
+        [HttpPut]
         public async Task<ActionResult> Update(Pattern pattern)
         {
             try
@@ -64,6 +66,7 @@ namespace LaserAPI.Controllers
             }
         }
 
+        [HttpDelete]
         public async Task<ActionResult> Remove(Guid uuid)
         {
             try
