@@ -19,9 +19,14 @@ namespace LaserAPI.Logic
             _patternDal = patternDal;
         }
 
+        private bool ValidatePoints(List<PointDto> points)
+        {
+            return points.Any() && points.TrueForAll(p => p.PatternUuid != Guid.Empty);
+        }
+
         private void ValidatePattern(PatternDto pattern)
         {
-            bool patternValid = pattern != null && pattern.Points.Any() && pattern.Scale.IsBetweenOrEqualTo(0.1, 1);
+            bool patternValid = pattern != null && pattern.Scale.IsBetweenOrEqualTo(0.1, 1) && ValidatePoints(pattern.Points);
             if (!patternValid)
             {
                 throw new InvalidDataException(nameof(pattern));

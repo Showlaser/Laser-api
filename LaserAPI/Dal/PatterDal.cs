@@ -3,6 +3,7 @@ using LaserAPI.Models.Dto.Patterns;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Dal
@@ -31,7 +32,17 @@ namespace LaserAPI.Dal
 
         public async Task Update(PatternDto pattern)
         {
-            _context.Pattern.Update(pattern);
+            PatternDto dbPattern = await _context.Pattern.Where(p => p.Uuid == pattern.Uuid)
+                .Include(p => p.Points)
+                .FirstOrDefaultAsync();
+
+            if (dbPattern == null)
+            {
+                throw new KeyNotFoundException();
+            }
+
+            _context.Pattern.Remove(dbPattern);
+            await _context.Pattern.AddAsync(pattern);
             await _context.SaveChangesAsync();
         }
 

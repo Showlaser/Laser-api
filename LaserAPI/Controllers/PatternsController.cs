@@ -1,9 +1,9 @@
 ﻿using LaserAPI.Logic;
 using LaserAPI.Models.Dto.Patterns;
 using LaserAPI.Models.FromFrontend.Patterns;
+using LaserAPI.Models.Helper;
 using LaserAPI.Models.ToFrontend.Pattern;
 using Mapster;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -25,59 +25,55 @@ namespace LaserAPI.Controllers
         [HttpPost]
         public async Task<ActionResult> Add([FromBody] Pattern pattern)
         {
-            try
+            async Task Action()
             {
                 PatternDto patternDto = pattern.Adapt<PatternDto>();
                 await _patternLogic.Add(patternDto);
-                return Ok();
             }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+
+            var controllerErrorHandler = new ControllerErrorHandler();
+            await controllerErrorHandler.Execute(Action());
+            return StatusCode(controllerErrorHandler.StatusCode);
         }
 
         [HttpGet]
         public async Task<ActionResult<List<PatternViewmodel>>> All()
         {
-            try
+            async Task<List<PatternViewmodel>> Action()
             {
                 List<PatternDto> patterns = await _patternLogic.All();
                 return patterns.Adapt<List<PatternViewmodel>>();
             }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+
+            var controllerErrorHandler = new ControllerErrorHandler();
+            return await controllerErrorHandler.Execute(Action());
         }
 
         [HttpPut]
-        public async Task<ActionResult> Update(Pattern pattern)
+        public async Task<ActionResult> Update([FromBody] Pattern pattern)
         {
-            try
+            async Task Action()
             {
                 PatternDto patternDto = pattern.Adapt<PatternDto>();
                 await _patternLogic.Update(patternDto);
-                return Ok();
             }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+
+            var controllerErrorHandler = new ControllerErrorHandler();
+            await controllerErrorHandler.Execute(Action());
+            return StatusCode(controllerErrorHandler.StatusCode);
         }
 
         [HttpDelete]
         public async Task<ActionResult> Remove(Guid uuid)
         {
-            try
+            async Task Action()
             {
                 await _patternLogic.Remove(uuid);
-                return Ok();
             }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+
+            var controllerErrorHandler = new ControllerErrorHandler();
+            await controllerErrorHandler.Execute(Action());
+            return StatusCode(controllerErrorHandler.StatusCode);
         }
     }
 }
