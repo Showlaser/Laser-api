@@ -30,6 +30,11 @@ namespace LaserAPI.Dal
                 .ToListAsync();
         }
 
+        public async Task<bool> Exists(Guid uuid)
+        {
+            return await _context.Pattern.AnyAsync(p => p.Uuid == uuid);
+        }
+
         public async Task Update(PatternDto pattern)
         {
             PatternDto dbPattern = await _context.Pattern.Where(p => p.Uuid == pattern.Uuid)

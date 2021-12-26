@@ -6,6 +6,7 @@ namespace LaserAPI.Models.ToFrontend.Pattern
     public class PatternViewmodel
     {
         public Guid Uuid { get; set; }
+        public string Name { get; set; }
         public double Scale { get; set; }
         public List<PointsViewmodel> Points { get; set; }
     }

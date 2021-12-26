@@ -23,12 +23,12 @@ namespace LaserAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Add([FromBody] Pattern pattern)
+        public async Task<ActionResult> AddOrUpdate([FromBody] Pattern pattern)
         {
             async Task Action()
             {
                 PatternDto patternDto = pattern.Adapt<PatternDto>();
-                await _patternLogic.Add(patternDto);
+                await _patternLogic.AddOrUpdate(patternDto);
             }
 
             var controllerErrorHandler = new ControllerErrorHandler();
@@ -49,21 +49,7 @@ namespace LaserAPI.Controllers
             return await controllerErrorHandler.Execute(Action());
         }
 
-        [HttpPut]
-        public async Task<ActionResult> Update([FromBody] Pattern pattern)
-        {
-            async Task Action()
-            {
-                PatternDto patternDto = pattern.Adapt<PatternDto>();
-                await _patternLogic.Update(patternDto);
-            }
-
-            var controllerErrorHandler = new ControllerErrorHandler();
-            await controllerErrorHandler.Execute(Action());
-            return StatusCode(controllerErrorHandler.StatusCode);
-        }
-
-        [HttpDelete]
+        [HttpDelete("{uuid}")]
         public async Task<ActionResult> Remove(Guid uuid)
         {
             async Task Action()

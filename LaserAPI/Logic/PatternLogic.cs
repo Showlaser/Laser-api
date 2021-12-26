@@ -33,9 +33,15 @@ namespace LaserAPI.Logic
             };
         }
 
-        public async Task Add(PatternDto pattern)
+        public async Task AddOrUpdate(PatternDto pattern)
         {
             ValidatePattern(pattern);
+            if (await _patternDal.Exists(pattern.Uuid))
+            {
+                await _patternDal.Update(pattern);
+                return;
+            }
+
             await _patternDal.Add(pattern);
         }
 

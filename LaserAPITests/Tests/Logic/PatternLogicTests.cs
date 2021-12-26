@@ -22,31 +22,31 @@ namespace LaserAPITests.Logic
         [Test]
         public void AddTest()
         {
-            Assert.DoesNotThrowAsync(async () => await _patternLogic.Add(_patterns.Pattern));
+            Assert.DoesNotThrowAsync(async () => await _patternLogic.AddOrUpdate(_patterns.Pattern));
         }
 
         [Test]
         public void AddTestEmpty()
         {
-            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.Add(_patterns.Empty));
+            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_patterns.Empty));
         }
 
         [Test]
         public void AddTestScaleToHigh()
         {
-            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.Add(_patterns.ScaleToHigh));
+            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_patterns.ScaleToHigh));
         }
 
         [Test]
         public void AddTestScaleToLow()
         {
-            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.Add(_patterns.ScaleToLow));
+            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_patterns.ScaleToLow));
         }
 
         [Test]
         public void AddTestEmptyPoints()
         {
-            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.Add(_patterns.EmptyPoints));
+            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_patterns.EmptyPoints));
         }
 
         [Test]
