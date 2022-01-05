@@ -16,37 +16,37 @@ namespace LaserAPITests.Logic
     public class PatternLogicTests
     {
         private readonly PatternLogic _patternLogic = new MockPatternLogic().PatternLogic;
-        private readonly MockedPattern _patterns = new MockedPattern();
+        private readonly MockedPattern _pattern = new();
         private readonly List<PatternDto> _patternList = new MockedPattern().PatternList;
 
         [Test]
         public void AddTest()
         {
-            Assert.DoesNotThrowAsync(async () => await _patternLogic.AddOrUpdate(_patterns.Pattern));
+            Assert.DoesNotThrowAsync(async () => await _patternLogic.AddOrUpdate(_pattern.Pattern));
         }
 
         [Test]
         public void AddTestEmpty()
         {
-            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_patterns.Empty));
+            Assert.ThrowsAsync<NoNullAllowedException>(async () => await _patternLogic.AddOrUpdate(_pattern.Empty));
         }
 
         [Test]
         public void AddTestScaleToHigh()
         {
-            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_patterns.ScaleToHigh));
+            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_pattern.ScaleToHigh));
         }
 
         [Test]
         public void AddTestScaleToLow()
         {
-            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_patterns.ScaleToLow));
+            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_pattern.ScaleToLow));
         }
 
         [Test]
         public void AddTestEmptyPoints()
         {
-            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_patterns.EmptyPoints));
+            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_pattern.EmptyPoints));
         }
 
         [Test]
@@ -59,31 +59,31 @@ namespace LaserAPITests.Logic
         [Test]
         public void UpdateTest()
         {
-            Assert.DoesNotThrowAsync(async () => await _patternLogic.Update(_patterns.Pattern));
+            Assert.DoesNotThrowAsync(async () => await _patternLogic.Update(_pattern.Pattern));
         }
 
         [Test]
         public void UpdateTestEmpty()
         {
-            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.Update(_patterns.Empty));
+            Assert.ThrowsAsync<NoNullAllowedException>(async () => await _patternLogic.Update(_pattern.Empty));
         }
 
         [Test]
         public void UpdateTestScaleToHigh()
         {
-            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.Update(_patterns.ScaleToHigh));
+            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.Update(_pattern.ScaleToHigh));
         }
 
         [Test]
         public void UpdateTestScaleToLow()
         {
-            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.Update(_patterns.ScaleToLow));
+            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.Update(_pattern.ScaleToLow));
         }
 
         [Test]
         public void UpdateTestEmptyPoints()
         {
-            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.Update(_patterns.EmptyPoints));
+            Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.Update(_pattern.EmptyPoints));
         }
 
         [Test]

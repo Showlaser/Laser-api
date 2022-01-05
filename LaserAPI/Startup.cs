@@ -33,7 +33,7 @@ namespace LaserAPI
 
         private void AddDependencyInjection(ref IServiceCollection services)
         {
-            services.AddSingleton<LaserConnection>();
+            services.AddSingleton<LaserConnectionLogic>();
             services.AddScoped<PatternLogic>();
             services.AddScoped<IPatternDal, PatterDal>();
         }

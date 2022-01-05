@@ -18,11 +18,13 @@ namespace LaserAPITests.MockedModels.Pattern
             var pattern = new PatternDto
             {
                 Scale = 1.0,
+                Uuid = Guid.Parse("ca1529e8-ac96-4cfb-93fb-1bb075969766"),
                 Points = new List<PointDto>
                 {
                     new()
                     {
                         Uuid = Guid.Parse("81fb5f2d-5b16-4bfa-a1cf-f595ad1ce20a"),
+                        PatternUuid = Guid.Parse("ca1529e8-ac96-4cfb-93fb-1bb075969766"),
                         X = -2000,
                         Y = 2000,
                         ConnectedToUuid = Guid.Parse("81fb5f2d-5b16-4bfa-a1cf-f595ad1ce20a")
@@ -30,6 +32,7 @@ namespace LaserAPITests.MockedModels.Pattern
                     new()
                     {
                         Uuid = Guid.Parse("23b6e906-cf5d-4cdc-8667-1d938f68771b"),
+                        PatternUuid = Guid.Parse("ca1529e8-ac96-4cfb-93fb-1bb075969766"),
                         X = -2000,
                         Y = 2000,
                         ConnectedToUuid = Guid.Empty

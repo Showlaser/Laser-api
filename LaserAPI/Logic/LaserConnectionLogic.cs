@@ -1,29 +1,31 @@
-﻿using System;
+﻿using LaserAPI.Interfaces.Helper;
+using LaserAPI.Models.Helper.Laser;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LaserAPI
+namespace LaserAPI.Logic
 {
-    public class LaserConnection
+    public class LaserConnectionLogic : ILaserConnectionLogic
     {
         private Socket _socket;
 
-        public LaserConnection()
+        public LaserConnectionLogic()
         {
             Task.Run(async () => await Connect()).Wait();
         }
 
-        private async Task Connect()
+        public async Task Connect()
         {
             IPAddress address = IPAddress.Parse("192.168.1.177");
-            IPEndPoint remoteEP = new IPEndPoint(address, 80);
+            IPEndPoint remoteEp = new IPEndPoint(address, 80);
 
             _socket = new Socket(address.AddressFamily,
                 SocketType.Stream, ProtocolType.Tcp);
 
-            await _socket.ConnectAsync(remoteEP);
+            await _socket.ConnectAsync(remoteEp);
         }
 
         public void Disconnect()
@@ -32,11 +34,15 @@ namespace LaserAPI
             _socket.Close();
         }
 
-        public void SendMessage(string message)
+        public void SendMessage(LaserMessage message)
         {
             try
             {
-                byte[] msg = Encoding.ASCII.GetBytes(message);
+                short[] value = { message.RedLaser, message.GreenLaser, message.BlueLaser, message.X, message.Y };
+                string result = string.Join(",", value);
+                string json = "{d:[" + result + "]}";
+
+                byte[] msg = Encoding.ASCII.GetBytes(json);
                 _socket.Send(msg);
             }
             catch (Exception)
