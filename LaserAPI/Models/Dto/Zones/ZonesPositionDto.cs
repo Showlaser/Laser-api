@@ -6,7 +6,7 @@ namespace LaserAPI.Models.Dto.Zones
     {
         public Guid Uuid { get; set; }
         public Guid ZoneUuid { get; set; }
-        public short X { get; set; }
-        public short Y { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 }

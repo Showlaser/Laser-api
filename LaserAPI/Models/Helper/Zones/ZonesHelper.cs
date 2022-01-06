@@ -5,7 +5,61 @@ namespace LaserAPI.Models.Helper.Zones
 {
     public static class ZonesHelper
     {
-        //TODO add method to check if new position crosses a zone
+        public static List<ZonesHitDataHelper> GetZonesInPathOfPosition(IReadOnlyList<ZoneDto> zones, int previousX, int previousY, int newX, int newY)
+        {
+            var zonesInPath = new List<ZonesHitDataHelper>();
+
+            int zonesLength = zones.Count;
+            for (int i = 0; i < zonesLength; i++)
+            {
+                ZoneDto zone = zones[i];
+                ZoneSidesHitHelper zoneSidesHit = GetZoneSidesHitByPath(zone, previousX, previousY, newX, newY);
+
+                if (zoneSidesHit.BottomHit || zoneSidesHit.TopHit || zoneSidesHit.LeftHit || zoneSidesHit.RightHit)
+                {
+                    zonesInPath.Add(new ZonesHitDataHelper
+                    {
+                        Zone = zone,
+                        ZoneSidesHit = zoneSidesHit
+                    });
+                }
+            }
+
+            return zonesInPath;
+        }
+
+        /// <summary>
+        /// Checks if the path of the previous position and the new position crosses a zone
+        /// </summary>
+        /// <param name="zone"></param>
+        /// <param name="previousX"></param>
+        /// <param name="previousY"></param>
+        /// <param name="newX"></param>
+        /// <param name="newY"></param>
+        /// <returns>The zones that are crossed</returns>
+        private static ZoneSidesHitHelper GetZoneSidesHitByPath(ZoneDto zone, int previousX, int previousY, int newX,
+            int newY)
+        {
+            ZoneAbsolutePositionsHelper absolutePositionsHelper = new(zone);
+            return new ZoneSidesHitHelper
+            {
+                LeftHit = absolutePositionsHelper.LeftXAxisInZone.IsBetweenOrEqualTo(
+                    NumberHelper.GetLowestNumber(previousX, newX),
+                    NumberHelper.GetHighestNumber(previousX, newX)),
+
+                RightHit = absolutePositionsHelper.RightXAxisInZone.IsBetweenOrEqualTo(
+                    NumberHelper.GetLowestNumber(previousX, newX),
+                    NumberHelper.GetHighestNumber(previousX, newX)),
+
+                BottomHit = absolutePositionsHelper.LowestYAxisInZone.IsBetweenOrEqualTo(
+                    NumberHelper.GetLowestNumber(previousY, newY),
+                    NumberHelper.GetHighestNumber(previousY, newY)),
+
+                TopHit = absolutePositionsHelper.HighestYAxisInZone.IsBetweenOrEqualTo(
+                    NumberHelper.GetLowestNumber(previousY, newY),
+                    NumberHelper.GetHighestNumber(previousY, newY))
+            };
+        }
 
         /// <summary>
         /// Checks if the positions are within a zone
@@ -14,26 +68,16 @@ namespace LaserAPI.Models.Helper.Zones
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public static ZoneDto GetZoneWherePositionIsIn(IReadOnlyList<ZoneDto> zones, short x, short y)
+        public static ZoneDto GetZoneWherePositionIsIn(IReadOnlyList<ZoneDto> zones, int x, int y)
         {
             int zonesLength = zones.Count;
             for (int i = 0; i < zonesLength; i++)
             {
                 ZoneDto zone = zones[i];
+                ZoneAbsolutePositionsHelper absolutePositionsHelper = new(zone);
 
-                int highestPositionInZone = 0;
-                int lowestPositionInZone = 0;
-                int mostLeftPositionInZone = 0;
-                int mostRightPositionInZone = 0;
-
-                GetAbsolutePositionsFromZone(zone,
-                    ref mostLeftPositionInZone,
-                    ref mostRightPositionInZone,
-                    ref highestPositionInZone,
-                    ref lowestPositionInZone);
-
-                bool positionIsWithinZone = x.IsBetweenOrEqualTo(mostLeftPositionInZone, mostRightPositionInZone) &&
-                                            y.IsBetweenOrEqualTo(lowestPositionInZone, highestPositionInZone);
+                bool positionIsWithinZone = x.IsBetweenOrEqualTo(absolutePositionsHelper.LeftXAxisInZone, absolutePositionsHelper.RightXAxisInZone) &&
+                                            y.IsBetweenOrEqualTo(absolutePositionsHelper.LowestYAxisInZone, absolutePositionsHelper.HighestYAxisInZone);
 
                 if (positionIsWithinZone)
                 {
@@ -42,35 +86,6 @@ namespace LaserAPI.Models.Helper.Zones
             }
 
             return null;
-        }
-
-        private static void GetAbsolutePositionsFromZone(ZoneDto zone, ref int mostLeftPositionInZone, ref int mostRightPositionInZone,
-            ref int highestPositionInZone, ref int lowestPositionInZone)
-        {
-            int positionsLength = zone.Positions.Count;
-            for (int i = 0; i < positionsLength; i++)
-            {
-                ZonesPositionDto zonePosition = zone.Positions[i];
-                if (zonePosition.X < mostLeftPositionInZone)
-                {
-                    mostLeftPositionInZone = zonePosition.X;
-                }
-
-                if (zonePosition.X > mostRightPositionInZone)
-                {
-                    mostRightPositionInZone = zonePosition.X;
-                }
-
-                if (zonePosition.Y > highestPositionInZone)
-                {
-                    highestPositionInZone = zonePosition.Y;
-                }
-
-                if (zonePosition.Y < lowestPositionInZone)
-                {
-                    lowestPositionInZone = zonePosition.Y;
-                }
-            }
         }
     }
 }

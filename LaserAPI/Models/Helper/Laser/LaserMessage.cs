@@ -2,10 +2,10 @@
 {
     public class LaserMessage
     {
-        public short RedLaser { get; set; }
-        public short GreenLaser { get; set; }
-        public short BlueLaser { get; set; }
-        public short X { get; set; }
-        public short Y { get; set; }
+        public int RedLaser { get; set; }
+        public int GreenLaser { get; set; }
+        public int BlueLaser { get; set; }
+        public int X { get; set; }
+        public int Y { get; set; }
     }
 }

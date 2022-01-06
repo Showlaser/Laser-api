@@ -13,6 +13,8 @@ namespace LaserAPI.Logic
         private readonly ILaserConnectionLogic _laserSafetyLogic;
         private readonly List<ZoneDto> _zones;
         private readonly bool _skipZonesCheck;
+        private int _lastXPosition = 0;
+        private int _lastYPosition = 0;
 
         public LaserLogic(ILaserConnectionLogic laserSafetyLogic, IZoneDal zoneDal)
         {
@@ -35,6 +37,33 @@ namespace LaserAPI.Logic
             if (positionIsInSafetyZone)
             {
                 LaserSafetyHelper.LimitLaserPowerIfNecessary(ref message, zone.MaxLaserPowerInZonePwm);
+                _laserSafetyLogic.SendMessage(message);
+                return;
+            }
+
+            List<ZonesHitDataHelper> zonesCrossedData =
+                ZonesHelper.GetZonesInPathOfPosition(_zones, _lastXPosition, _lastYPosition, message.X, message.Y);
+
+            if (zonesCrossedData.Any())
+            {
+                List<LaserMessage> newLaserMessageCollection = new();
+                int zonesCrossedCount = zonesCrossedData.Count;
+
+                for (int i = 0; i < zonesCrossedCount; i++)
+                {
+                    ZonesHitDataHelper crossedZoneData = zonesCrossedData[i];
+                    ZoneDto crossedZone = crossedZoneData.Zone;
+                    int zonePositionsCount = crossedZone.Positions.Count;
+
+                    for (int j = 0; j < zonePositionsCount; j++)
+                    {
+                        ZonesPositionDto position = crossedZone.Positions[j];
+                        int newY = position.Y;
+
+                    }
+                }
+
+                return;
             }
 
             _laserSafetyLogic.SendMessage(message);

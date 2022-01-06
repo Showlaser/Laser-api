@@ -15,6 +15,6 @@ namespace LaserAPI.Models.Dto.Zones
         /// <summary>
         /// The maximum allowed laser power in a zone in PWM value
         /// </summary>
-        public short MaxLaserPowerInZonePwm { get; set; }
+        public int MaxLaserPowerInZonePwm { get; set; }
     }
 }

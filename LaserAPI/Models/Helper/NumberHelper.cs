@@ -3,7 +3,7 @@ using System.Data;
 
 namespace LaserAPI.Models.Helper
 {
-    public static class IsBetween
+    public static class NumberHelper
     {
         public static bool IsBetweenOrEqualTo(this object source, double min, double max)
         {
@@ -20,6 +20,16 @@ namespace LaserAPI.Models.Helper
         {
             var data = Convert.ToInt32(source);
             return data >= min && data <= max;
+        }
+
+        public static int GetHighestNumber(int nr1, int nr2)
+        {
+            return nr1 > nr2 ? nr1 : nr2;
+        }
+
+        public static int GetLowestNumber(int nr1, int nr2)
+        {
+            return nr1 < nr2 ? nr1 : nr2;
         }
     }
 }

@@ -38,7 +38,7 @@ namespace LaserAPI.Logic
         {
             try
             {
-                short[] value = { message.RedLaser, message.GreenLaser, message.BlueLaser, message.X, message.Y };
+                int[] value = { message.RedLaser, message.GreenLaser, message.BlueLaser, message.X, message.Y };
                 string result = string.Join(",", value);
                 string json = "{d:[" + result + "]}";
 

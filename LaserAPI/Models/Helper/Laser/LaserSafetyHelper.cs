@@ -7,7 +7,7 @@
         /// </summary>
         /// <param name="message">The message to modify</param>
         /// <param name="maxPowerPwm">The max power allowed in PWM value</param>
-        public static void LimitLaserPowerIfNecessary(ref LaserMessage message, short maxPowerPwm)
+        public static void LimitLaserPowerIfNecessary(ref LaserMessage message, int maxPowerPwm)
         {
             if (message.RedLaser > maxPowerPwm)
             {
