@@ -29,7 +29,7 @@ namespace LaserAPI.Logic
                 return;
             }
 
-            ZoneDto zone = ZonesHelper.GetZoneWherePositionIsIn(message.X, message.Y, _zones);
+            ZoneDto zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, message.X, message.Y);
             bool positionIsInSafetyZone = zone != null;
 
             if (positionIsInSafetyZone)

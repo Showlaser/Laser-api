@@ -20,7 +20,7 @@ namespace LaserAPI.Logic
         public async Task Connect()
         {
             IPAddress address = IPAddress.Parse("192.168.1.177");
-            IPEndPoint remoteEp = new IPEndPoint(address, 80);
+            IPEndPoint remoteEp = new(address, 80);
 
             _socket = new Socket(address.AddressFamily,
                 SocketType.Stream, ProtocolType.Tcp);

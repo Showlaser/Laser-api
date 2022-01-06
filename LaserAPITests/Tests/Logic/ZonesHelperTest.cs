@@ -16,7 +16,7 @@ namespace LaserAPITests.Tests.Logic
 
         public ZonesHelperTest()
         {
-            MockedZones mockedZones = new MockedZones();
+            MockedZones mockedZones = new();
             var mockedZoneDal = new Mock<IZoneDal>();
             mockedZoneDal.Setup(d => d.All()).ReturnsAsync(mockedZones.Zones);
 
@@ -39,7 +39,7 @@ namespace LaserAPITests.Tests.Logic
                 Y = -2000
             };
 
-            ZoneDto zone = ZonesHelper.GetZoneWherePositionIsIn(message.X, message.Y, _zones);
+            ZoneDto zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, message.X, message.Y);
             Assert.NotNull(zone);
         }
 
@@ -55,7 +55,7 @@ namespace LaserAPITests.Tests.Logic
                 Y = 4000
             };
 
-            ZoneDto zone = ZonesHelper.GetZoneWherePositionIsIn(message.X, message.Y, _zones);
+            ZoneDto zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, message.X, message.Y);
             Assert.Null(zone);
         }
     }

@@ -10,7 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LaserAPITests.Logic
+namespace LaserAPITests.Tests.Logic
 {
     [TestFixture]
     public class PatternLogicTests

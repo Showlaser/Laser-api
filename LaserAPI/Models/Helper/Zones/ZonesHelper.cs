@@ -1,39 +1,76 @@
 ﻿using LaserAPI.Models.Dto.Zones;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace LaserAPI.Models.Helper.Zones
 {
     public static class ZonesHelper
     {
-        private static short GetHighestPositionInZone(IEnumerable<short> zonePositions)
-        {
-            return zonePositions.Max();
-        }
+        //TODO add method to check if new position crosses a zone
 
-        private static short GetLowestPositionInZone(IEnumerable<short> zonePositions)
+        /// <summary>
+        /// Checks if the positions are within a zone
+        /// </summary>
+        /// <param name="zones"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public static ZoneDto GetZoneWherePositionIsIn(IReadOnlyList<ZoneDto> zones, short x, short y)
         {
-            return zonePositions.Min();
-        }
-
-        public static ZoneDto GetZoneWherePositionIsIn(short x, short y, List<ZoneDto> zones)
-        {
-            return zones.Find(zone =>
+            int zonesLength = zones.Count;
+            for (int i = 0; i < zonesLength; i++)
             {
-                IEnumerable<short> yCollection = zone.Positions.Select(pos => pos.Y);
-                IEnumerable<short> xCollection = zone.Positions.Select(pos => pos.X);
+                ZoneDto zone = zones[i];
 
-                var yPositions = yCollection as short[] ?? yCollection.ToArray();
-                short highestPosition = GetHighestPositionInZone(yPositions);
-                short lowestPosition = GetLowestPositionInZone(yPositions);
+                int highestPositionInZone = 0;
+                int lowestPositionInZone = 0;
+                int mostLeftPositionInZone = 0;
+                int mostRightPositionInZone = 0;
 
-                var xPositions = xCollection as short[] ?? xCollection.ToArray();
-                short mostLeftPosition = GetLowestPositionInZone(xPositions);
-                short mostRightPosition = GetHighestPositionInZone(xPositions);
+                GetAbsolutePositionsFromZone(zone,
+                    ref mostLeftPositionInZone,
+                    ref mostRightPositionInZone,
+                    ref highestPositionInZone,
+                    ref lowestPositionInZone);
 
-                return y <= highestPosition && y >= lowestPosition &&
-                    x >= mostLeftPosition && x <= mostRightPosition;
-            });
+                bool positionIsWithinZone = x.IsBetweenOrEqualTo(mostLeftPositionInZone, mostRightPositionInZone) &&
+                                            y.IsBetweenOrEqualTo(lowestPositionInZone, highestPositionInZone);
+
+                if (positionIsWithinZone)
+                {
+                    return zone;
+                }
+            }
+
+            return null;
+        }
+
+        private static void GetAbsolutePositionsFromZone(ZoneDto zone, ref int mostLeftPositionInZone, ref int mostRightPositionInZone,
+            ref int highestPositionInZone, ref int lowestPositionInZone)
+        {
+            int positionsLength = zone.Positions.Count;
+            for (int i = 0; i < positionsLength; i++)
+            {
+                ZonesPositionDto zonePosition = zone.Positions[i];
+                if (zonePosition.X < mostLeftPositionInZone)
+                {
+                    mostLeftPositionInZone = zonePosition.X;
+                }
+
+                if (zonePosition.X > mostRightPositionInZone)
+                {
+                    mostRightPositionInZone = zonePosition.X;
+                }
+
+                if (zonePosition.Y > highestPositionInZone)
+                {
+                    highestPositionInZone = zonePosition.Y;
+                }
+
+                if (zonePosition.Y < lowestPositionInZone)
+                {
+                    lowestPositionInZone = zonePosition.Y;
+                }
+            }
         }
     }
 }
