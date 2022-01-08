@@ -11,6 +11,8 @@ namespace LaserAPI.Logic
     public class LaserConnectionLogic : ILaserConnectionLogic
     {
         private Socket _socket;
+        private int _lastXPosition;
+        private int _lastYPosition;
 
         public LaserConnectionLogic()
         {
@@ -44,11 +46,23 @@ namespace LaserAPI.Logic
 
                 byte[] msg = Encoding.ASCII.GetBytes(json);
                 _socket.Send(msg);
+                _lastXPosition = message.X;
+                _lastYPosition = message.Y;
             }
             catch (Exception)
             {
                 Task.Run(async () => await Connect()).Wait();
             }
+        }
+
+        public int GetLastXPosition()
+        {
+            return _lastXPosition;
+        }
+
+        public int GetLastYPosition()
+        {
+            return _lastYPosition;
         }
     }
 }

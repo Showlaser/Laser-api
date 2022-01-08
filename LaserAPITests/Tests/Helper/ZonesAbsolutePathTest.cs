@@ -11,7 +11,7 @@ namespace LaserAPITests.Tests.Helper
         [Test]
         public void GetAbsoluteValuesTest()
         {
-            ZoneDto zone = new ZoneDto
+            ZoneDto zone = new()
             {
                 Positions = new List<ZonesPositionDto>
                 {

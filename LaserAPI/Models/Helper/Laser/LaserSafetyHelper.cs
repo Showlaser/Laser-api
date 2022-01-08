@@ -9,19 +9,26 @@
         /// <param name="maxPowerPwm">The max power allowed in PWM value</param>
         public static void LimitLaserPowerIfNecessary(ref LaserMessage message, int maxPowerPwm)
         {
-            if (message.RedLaser > maxPowerPwm)
+            int totalLaserPowerPwm = message.RedLaser + message.GreenLaser + message.BlueLaser;
+            int maxPowerPerLaserColorPwm = NumberHelper.Map(totalLaserPowerPwm, 0, 511, 0, totalLaserPowerPwm / 3);
+            if (totalLaserPowerPwm <= maxPowerPwm)
             {
-                message.RedLaser = maxPowerPwm;
+                return;
             }
 
-            if (message.GreenLaser > maxPowerPwm)
+            if (message.RedLaser > maxPowerPerLaserColorPwm)
             {
-                message.GreenLaser = maxPowerPwm;
+                message.RedLaser = NumberHelper.Map(message.RedLaser, 0, 511, 0, maxPowerPerLaserColorPwm);
             }
 
-            if (message.BlueLaser > maxPowerPwm)
+            if (message.GreenLaser > maxPowerPerLaserColorPwm)
             {
-                message.BlueLaser = maxPowerPwm;
+                message.GreenLaser = NumberHelper.Map(message.GreenLaser, 0, 511, 0, maxPowerPerLaserColorPwm);
+            }
+
+            if (message.BlueLaser > maxPowerPerLaserColorPwm)
+            {
+                message.BlueLaser = NumberHelper.Map(message.BlueLaser, 0, 511, 0, maxPowerPerLaserColorPwm);
             }
         }
     }

@@ -8,5 +8,7 @@ namespace LaserAPI.Interfaces.Helper
         Task Connect();
         void Disconnect();
         void SendMessage(LaserMessage message);
+        int GetLastXPosition();
+        int GetLastYPosition();
     }
 }

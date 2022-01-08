@@ -1,5 +1,6 @@
 ﻿using LaserAPI.Models.Dto.Zones;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LaserAPI.Models.Helper.Zones
 {
@@ -86,6 +87,11 @@ namespace LaserAPI.Models.Helper.Zones
             }
 
             return null;
+        }
+
+        public static ZoneDto GetZoneWhereMaxLaserPowerPwmIsHighest(List<ZoneDto> zones)
+        {
+            return zones.MaxBy(zone => zone.MaxLaserPowerInZonePwm);
         }
     }
 }

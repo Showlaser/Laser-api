@@ -31,5 +31,10 @@ namespace LaserAPI.Models.Helper
         {
             return nr1 < nr2 ? nr1 : nr2;
         }
+
+        public static int Map(int value, int fromLow, int fromHigh, int toLow, int toHigh)
+        {
+            return (value - fromLow) / (fromHigh - fromLow) * (toHigh - toLow) + toLow;
+        }
     }
 }
