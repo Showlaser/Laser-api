@@ -1,5 +1,4 @@
-﻿using LaserAPI.Interfaces.Helper;
-using LaserAPI.Models.Helper.Laser;
+﻿using LaserAPI.Models.Helper.Laser;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -8,15 +7,20 @@ using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
-    public class LaserConnectionLogic : ILaserConnectionLogic
+    public class LaserConnectionLogic
     {
+        private readonly bool _ranByUnitTest;
         private Socket _socket;
         private int _lastXPosition;
         private int _lastYPosition;
 
-        public LaserConnectionLogic()
+        public LaserConnectionLogic(bool ranByUnitTest)
         {
-            Task.Run(async () => await Connect()).Wait();
+            _ranByUnitTest = ranByUnitTest;
+            if (!ranByUnitTest)
+            {
+                Task.Run(async () => await Connect()).Wait();
+            }
         }
 
         public async Task Connect()
@@ -38,20 +42,23 @@ namespace LaserAPI.Logic
 
         public void SendMessage(LaserMessage message)
         {
-            try
+            if (!_ranByUnitTest)
             {
-                int[] value = { message.RedLaser, message.GreenLaser, message.BlueLaser, message.X, message.Y };
-                string result = string.Join(",", value);
-                string json = "{d:[" + result + "]}";
+                try
+                {
+                    int[] value = { message.RedLaser, message.GreenLaser, message.BlueLaser, message.X, message.Y };
+                    string result = string.Join(",", value);
+                    string json = "{d:[" + result + "]}";
 
-                byte[] msg = Encoding.ASCII.GetBytes(json);
-                _socket.Send(msg);
-                _lastXPosition = message.X;
-                _lastYPosition = message.Y;
-            }
-            catch (Exception)
-            {
-                Task.Run(async () => await Connect()).Wait();
+                    byte[] msg = Encoding.ASCII.GetBytes(json);
+                    _socket.Send(msg);
+                    _lastXPosition = message.X;
+                    _lastYPosition = message.Y;
+                }
+                catch (Exception)
+                {
+                    Task.Run(async () => await Connect()).Wait();
+                }
             }
         }
 

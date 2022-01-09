@@ -20,40 +20,30 @@ namespace LaserAPI.Models.Helper.Zones
 
         private void GetAbsolutePositionsFromZone(ZoneDto zone)
         {
-            int highestPositionInZone = 0;
-            int lowestPositionInZone = 0;
-            int mostLeftPositionInZone = 0;
-            int mostRightPositionInZone = 0;
-
             int positionsLength = zone.Positions.Count;
             for (int i = 0; i < positionsLength; i++)
             {
                 ZonesPositionDto zonePosition = zone.Positions[i];
-                if (zonePosition.X < mostLeftPositionInZone)
+                if (zonePosition.X < 0)
                 {
-                    mostLeftPositionInZone = zonePosition.X;
+                    LeftXAxisInZone = zonePosition.X;
                 }
 
-                if (zonePosition.X > mostRightPositionInZone)
+                if (zonePosition.X > 0)
                 {
-                    mostRightPositionInZone = zonePosition.X;
+                    RightXAxisInZone = zonePosition.X;
                 }
 
-                if (zonePosition.Y > highestPositionInZone)
+                if (zonePosition.Y > 0)
                 {
-                    highestPositionInZone = zonePosition.Y;
+                    HighestYAxisInZone = zonePosition.Y;
                 }
 
-                if (zonePosition.Y < lowestPositionInZone)
+                if (zonePosition.Y < 0)
                 {
-                    lowestPositionInZone = zonePosition.Y;
+                    LowestYAxisInZone = zonePosition.Y;
                 }
             }
-
-            HighestYAxisInZone = highestPositionInZone;
-            LowestYAxisInZone = lowestPositionInZone;
-            LeftXAxisInZone = mostLeftPositionInZone;
-            RightXAxisInZone = mostRightPositionInZone;
         }
     }
 }

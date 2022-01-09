@@ -14,6 +14,8 @@ namespace LaserAPI.Models.Helper.Zones
         public int TopXAxis { get; private set; }
         public int BottomXAxis { get; private set; }
 
+        public int TotalZoneSidesHit { get; private set; }
+
         /// <summary>
         /// Method to calculate the missing axis on the collision between the laser message coordinates and the zone
         /// The method sets the results in the properties LeftYAxis RightYAxis TopXAxis BottomXAxis
@@ -30,21 +32,25 @@ namespace LaserAPI.Models.Helper.Zones
             {
                 int yAxisHit = zoneAbsolutePositions.HighestYAxisInZone;
                 TopXAxis = CalculateSideXAxis(message, yAxisHit, lastXPosition, lastYPosition);
+                TotalZoneSidesHit++;
             }
             if (crossedZoneData.ZoneSidesHit.BottomHit)
             {
                 int yAxisHit = zoneAbsolutePositions.LowestYAxisInZone;
                 BottomXAxis = CalculateSideXAxis(message, yAxisHit, lastXPosition, lastYPosition);
+                TotalZoneSidesHit++;
             }
             if (crossedZoneData.ZoneSidesHit.LeftHit)
             {
                 int leftXAxis = zoneAbsolutePositions.LeftXAxisInZone;
                 LeftYAxis = CalculateSideYAxis(message, leftXAxis, lastXPosition, lastYPosition);
+                TotalZoneSidesHit++;
             }
             if (crossedZoneData.ZoneSidesHit.RightHit)
             {
                 int rightXAxis = zoneAbsolutePositions.RightXAxisInZone;
                 RightYAxis = CalculateSideYAxis(message, rightXAxis, lastXPosition, lastYPosition);
+                TotalZoneSidesHit++;
             }
         }
 

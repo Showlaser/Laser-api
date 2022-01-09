@@ -6,11 +6,12 @@ namespace LaserAPI.Models.Helper.Zones
 {
     public static class ZonesHelper
     {
-        public static List<ZonesHitDataHelper> GetZonesInPathOfPosition(IReadOnlyList<ZoneDto> zones, int previousX, int previousY, int newX, int newY)
+        public static IReadOnlyList<ZonesHitDataHelper> GetZonesInPathOfPosition(ZoneDto[] zones,
+            int previousX, int previousY, int newX, int newY, ref int zonesCrossedDataLength)
         {
-            var zonesInPath = new List<ZonesHitDataHelper>();
+            int zonesLength = zones.Length;
+            List<ZonesHitDataHelper> zonesInPath = new();
 
-            int zonesLength = zones.Count;
             for (int i = 0; i < zonesLength; i++)
             {
                 ZoneDto zone = zones[i];
@@ -18,6 +19,7 @@ namespace LaserAPI.Models.Helper.Zones
 
                 if (zoneSidesHit.BottomHit || zoneSidesHit.TopHit || zoneSidesHit.LeftHit || zoneSidesHit.RightHit)
                 {
+                    zonesCrossedDataLength++;
                     zonesInPath.Add(new ZonesHitDataHelper
                     {
                         Zone = zone,
@@ -47,15 +49,12 @@ namespace LaserAPI.Models.Helper.Zones
                 LeftHit = absolutePositionsHelper.LeftXAxisInZone.IsBetweenOrEqualTo(
                     NumberHelper.GetLowestNumber(previousX, newX),
                     NumberHelper.GetHighestNumber(previousX, newX)),
-
                 RightHit = absolutePositionsHelper.RightXAxisInZone.IsBetweenOrEqualTo(
                     NumberHelper.GetLowestNumber(previousX, newX),
                     NumberHelper.GetHighestNumber(previousX, newX)),
-
                 BottomHit = absolutePositionsHelper.LowestYAxisInZone.IsBetweenOrEqualTo(
                     NumberHelper.GetLowestNumber(previousY, newY),
                     NumberHelper.GetHighestNumber(previousY, newY)),
-
                 TopHit = absolutePositionsHelper.HighestYAxisInZone.IsBetweenOrEqualTo(
                     NumberHelper.GetLowestNumber(previousY, newY),
                     NumberHelper.GetHighestNumber(previousY, newY))

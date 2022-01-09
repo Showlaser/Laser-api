@@ -14,7 +14,7 @@ namespace LaserAPITests.Tests.Logic
     [TestFixture]
     public class ZonesHelperTest
     {
-        private readonly List<ZoneDto> _zones;
+        private readonly ZoneDto[] _zones;
 
         public ZonesHelperTest()
         {
@@ -24,7 +24,8 @@ namespace LaserAPITests.Tests.Logic
 
             _zones = mockedZoneDal.Object
                 .All()
-                .Result;
+                .Result
+                .ToArray();
 
             //TODO move this to different class
         }
@@ -86,10 +87,11 @@ namespace LaserAPITests.Tests.Logic
         [Test]
         public void GetZonesThatCrossesPathPerformanceTest()
         {
+            int length = 0;
             Stopwatch stopwatch = Stopwatch.StartNew();
             for (int i = 0; i < 2; i++)
             {
-                ZonesHelper.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000);
+                ZonesHelper.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000, ref length);
             }
 
             stopwatch.Stop();
@@ -99,11 +101,13 @@ namespace LaserAPITests.Tests.Logic
         [Test]
         public void GetZonesThatCrossesPathTest()
         {
-            List<ZoneDto> zones = ZonesHelper.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000)
+            int length = 0;
+
+            List<ZoneDto> zones = ZonesHelper.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000, ref length)
                 .Select(z => z.Zone)
                 .ToList();
 
-            List<ZoneDto> zones2 = ZonesHelper.GetZonesInPathOfPosition(_zones, -4000, 0, 4000, 0)
+            List<ZoneDto> zones2 = ZonesHelper.GetZonesInPathOfPosition(_zones, -4000, 0, 4000, 0, ref length)
                 .Select(z => z.Zone)
                 .ToList();
 

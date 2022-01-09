@@ -16,10 +16,9 @@ namespace LaserAPI.Models.Helper
             return data >= min && data <= max;
         }
 
-        public static bool IsBetweenOrEqualTo(this object source, int min, int max)
+        public static bool IsBetweenOrEqualTo(this int source, int min, int max)
         {
-            var data = Convert.ToInt32(source);
-            return data >= min && data <= max;
+            return source >= min && source <= max;
         }
 
         public static int GetHighestNumber(int nr1, int nr2)
