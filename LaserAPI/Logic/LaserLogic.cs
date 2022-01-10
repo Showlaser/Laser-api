@@ -74,7 +74,8 @@ namespace LaserAPI.Logic
             SetLastPositions(message);
         }
 
-        private void HandleZonesBetweenLaserCoordinates(LaserMessage originalMessage, ZonesHitDataHelper[] zonesCrossedData, int totalLaserPowerPwm)
+        private void HandleZonesBetweenLaserCoordinates(LaserMessage originalMessage,
+            ZonesHitDataHelper[] zonesCrossedData, int totalLaserPowerPwm)
         {
             List<LaserMessage> newLaserMessageCollection = new();
             int zonesCrossedCount = zonesCrossedData.Length;
