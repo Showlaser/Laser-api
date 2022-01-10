@@ -6,5 +6,6 @@ namespace LaserAPI.Models.Helper.Zones
     {
         public ZoneDto Zone { get; set; }
         public ZoneSidesHitHelper ZoneSidesHit { get; set; }
+        public ZoneAbsolutePositionsHelper ZoneAbsolutePositions { get; set; }
     }
 }

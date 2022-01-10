@@ -1,7 +1,6 @@
 ﻿using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper.Zones;
 using NUnit.Framework;
-using System.Collections.Generic;
 
 namespace LaserAPITests.Tests.Helper
 {
@@ -13,7 +12,7 @@ namespace LaserAPITests.Tests.Helper
         {
             ZoneDto zone = new()
             {
-                Positions = new List<ZonesPositionDto>
+                Positions = new ZonesPositionDto[]
                 {
                     new()
                     {

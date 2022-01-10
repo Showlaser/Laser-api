@@ -1,4 +1,5 @@
 ﻿using LaserAPI.Models.Helper.Laser;
+using System.Collections.Generic;
 
 namespace LaserAPI.Models.Helper.Zones
 {
@@ -24,34 +25,108 @@ namespace LaserAPI.Models.Helper.Zones
         /// <param name="crossedZoneData"></param>
         /// <param name="lastXPosition"></param>
         /// <param name="lastYPosition"></param>
-        public void GetCoordinateOfZoneCrossing(LaserMessage message, ZonesHitDataHelper crossedZoneData, int lastXPosition, int lastYPosition)
+        /// <param name="newMessageCollection"></param>
+        public void GetCoordinateOfZoneCrossing(LaserMessage message, ZonesHitDataHelper crossedZoneData, int lastXPosition, int lastYPosition,
+        ref List<LaserMessage> newMessageCollection)
         {
-            ZoneAbsolutePositionsHelper zoneAbsolutePositions = new(crossedZoneData.Zone);
-
+            ZoneAbsolutePositionsHelper zoneAbsolutePositions = crossedZoneData.ZoneAbsolutePositions;
             if (crossedZoneData.ZoneSidesHit.TopHit)
             {
-                int yAxisHit = zoneAbsolutePositions.HighestYAxisInZone;
-                TopXAxis = CalculateSideXAxis(message, yAxisHit, lastXPosition, lastYPosition);
-                TotalZoneSidesHit++;
+                HandleTopHit(message, crossedZoneData, lastXPosition, lastYPosition, newMessageCollection, zoneAbsolutePositions);
             }
+
             if (crossedZoneData.ZoneSidesHit.BottomHit)
             {
-                int yAxisHit = zoneAbsolutePositions.LowestYAxisInZone;
-                BottomXAxis = CalculateSideXAxis(message, yAxisHit, lastXPosition, lastYPosition);
-                TotalZoneSidesHit++;
+                HandleBottomHit(message, crossedZoneData, lastXPosition, lastYPosition, newMessageCollection, zoneAbsolutePositions);
             }
             if (crossedZoneData.ZoneSidesHit.LeftHit)
             {
-                int leftXAxis = zoneAbsolutePositions.LeftXAxisInZone;
-                LeftYAxis = CalculateSideYAxis(message, leftXAxis, lastXPosition, lastYPosition);
-                TotalZoneSidesHit++;
+                HandleLeftHit(message, crossedZoneData, lastXPosition, lastYPosition, newMessageCollection, zoneAbsolutePositions);
             }
             if (crossedZoneData.ZoneSidesHit.RightHit)
             {
-                int rightXAxis = zoneAbsolutePositions.RightXAxisInZone;
-                RightYAxis = CalculateSideYAxis(message, rightXAxis, lastXPosition, lastYPosition);
-                TotalZoneSidesHit++;
+                HandleRightHit(message, crossedZoneData, lastXPosition, lastYPosition, newMessageCollection, zoneAbsolutePositions);
             }
+        }
+
+        private void HandleRightHit(LaserMessage message, ZonesHitDataHelper crossedZoneData, int lastXPosition,
+            int lastYPosition, ICollection<LaserMessage> newMessageCollection, ZoneAbsolutePositionsHelper zoneAbsolutePositions)
+        {
+            int rightXAxis = zoneAbsolutePositions.RightXAxisInZone;
+            RightYAxis = CalculateSideYAxis(message, rightXAxis, lastXPosition, lastYPosition);
+            TotalZoneSidesHit++;
+
+            LaserMessage messageOnZoneEdge = new()
+            {
+                X = crossedZoneData.ZoneAbsolutePositions.RightXAxisInZone,
+                Y = crossedZoneData.ZoneSidesHit.RightYAxis,
+                RedLaser = message.RedLaser,
+                GreenLaser = message.GreenLaser,
+                BlueLaser = message.BlueLaser,
+            };
+
+            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
+            newMessageCollection.Add(messageOnZoneEdge);
+        }
+
+        private void HandleLeftHit(LaserMessage message, ZonesHitDataHelper crossedZoneData, int lastXPosition,
+            int lastYPosition, ICollection<LaserMessage> newMessageCollection, ZoneAbsolutePositionsHelper zoneAbsolutePositions)
+        {
+            int leftXAxis = zoneAbsolutePositions.LeftXAxisInZone;
+            LeftYAxis = CalculateSideYAxis(message, leftXAxis, lastXPosition, lastYPosition);
+            TotalZoneSidesHit++;
+
+            LaserMessage messageOnZoneEdge = new()
+            {
+                X = crossedZoneData.ZoneAbsolutePositions.LeftXAxisInZone,
+                Y = crossedZoneData.ZoneSidesHit.LeftYAxis,
+                RedLaser = message.RedLaser,
+                GreenLaser = message.GreenLaser,
+                BlueLaser = message.BlueLaser,
+            };
+
+            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
+            newMessageCollection.Add(messageOnZoneEdge);
+        }
+
+        private void HandleBottomHit(LaserMessage message, ZonesHitDataHelper crossedZoneData, int lastXPosition,
+            int lastYPosition, ICollection<LaserMessage> newMessageCollection, ZoneAbsolutePositionsHelper zoneAbsolutePositions)
+        {
+            int yAxisHit = zoneAbsolutePositions.LowestYAxisInZone;
+            BottomXAxis = CalculateSideXAxis(message, yAxisHit, lastXPosition, lastYPosition);
+            TotalZoneSidesHit++;
+
+            LaserMessage messageOnZoneEdge = new()
+            {
+                X = crossedZoneData.ZoneSidesHit.BottomXAxis,
+                Y = crossedZoneData.ZoneAbsolutePositions.LowestYAxisInZone,
+                RedLaser = message.RedLaser,
+                GreenLaser = message.GreenLaser,
+                BlueLaser = message.BlueLaser,
+            };
+
+            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
+            newMessageCollection.Add(messageOnZoneEdge);
+        }
+
+        private void HandleTopHit(LaserMessage message, ZonesHitDataHelper crossedZoneData, int lastXPosition,
+            int lastYPosition, ICollection<LaserMessage> newMessageCollection, ZoneAbsolutePositionsHelper zoneAbsolutePositions)
+        {
+            int yAxisHit = zoneAbsolutePositions.HighestYAxisInZone;
+            TopXAxis = CalculateSideXAxis(message, yAxisHit, lastXPosition, lastYPosition);
+            TotalZoneSidesHit++;
+
+            LaserMessage messageOnZoneEdge = new()
+            {
+                X = crossedZoneData.ZoneSidesHit.TopXAxis,
+                Y = zoneAbsolutePositions.HighestYAxisInZone,
+                RedLaser = message.RedLaser,
+                GreenLaser = message.GreenLaser,
+                BlueLaser = message.BlueLaser,
+            };
+
+            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
+            newMessageCollection.Add(messageOnZoneEdge);
         }
 
         private static int CalculateSideXAxis(LaserMessage message, int yAxisHit, int lastXPosition, int lastYPosition)

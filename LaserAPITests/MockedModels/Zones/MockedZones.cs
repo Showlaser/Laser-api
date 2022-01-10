@@ -14,7 +14,7 @@ namespace LaserAPITests.MockedModels.Zones
             {
                 MaxLaserPowerInZonePwm = 50,
                 Uuid = Guid.Parse("fc220bc5-68ff-45d8-8e51-d884687e324b"),
-                Positions = new List<ZonesPositionDto>
+                Positions = new ZonesPositionDto[]
                 {
                     new()
                     {
