@@ -3,9 +3,7 @@ using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper;
 using LaserAPI.Models.Helper.Laser;
 using LaserAPI.Models.Helper.Zones;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace LaserAPI.Logic
@@ -43,9 +41,7 @@ namespace LaserAPI.Logic
 
         public void SendData(LaserMessage message)
         {
-            Stopwatch sw = Stopwatch.StartNew();
             int totalLaserPowerPwm = message.RedLaser + message.GreenLaser + message.BlueLaser;
-
             bool skipSafetyZoneCheck = _safetyZonesNotActive || totalLaserPowerPwm == 0 ||
                                        _zoneWithHighestLaserPowerPwm.MaxLaserPowerInZonePwm >= totalLaserPowerPwm;
 
@@ -73,8 +69,6 @@ namespace LaserAPI.Logic
             if (zonesCrossedDataLength != 0)
             {
                 HandleZonesBetweenLaserCoordinates(message, zonesCrossedData, totalLaserPowerPwm);
-                sw.Stop();
-                Console.WriteLine(sw.ElapsedTicks);
                 return;
             }
 

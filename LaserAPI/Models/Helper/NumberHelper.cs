@@ -33,6 +33,10 @@ namespace LaserAPI.Models.Helper
 
         public static int Map(int value, int fromLow, int fromHigh, int toLow, int toHigh)
         {
+            if (value == 0 && fromLow == 0 && fromHigh == 0 && toLow == 0 && toHigh == 0)
+            {
+                return 0;
+            }
             return (value - fromLow) / (fromHigh - fromLow) * (toHigh - toLow) + toLow;
         }
     }
