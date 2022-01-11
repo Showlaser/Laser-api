@@ -6,7 +6,7 @@ namespace LaserAPI.Models.Helper.Zones
 {
     public static class ZonesHelper
     {
-        public static ZonesHitDataHelper[] GetZonesInPathOfPosition(ZoneDto[] zones,
+        public static ZonesHitDataHelper[] GetZonesInPathOfPosition(ZonesHitDataHelper[] zones,
             int previousX, int previousY, int newX, int newY, ref int zonesCrossedDataLength)
         {
             int zonesLength = zones.Length;
@@ -14,17 +14,14 @@ namespace LaserAPI.Models.Helper.Zones
 
             for (int i = 0; i < zonesLength; i++)
             {
-                ZoneDto zone = zones[i];
-                ZoneSidesHitHelper zoneSidesHit = GetZoneSidesHitByPath(zone, previousX, previousY, newX, newY);
+                ZonesHitDataHelper zoneHitData = zones[i];
+                ZoneSidesHitHelper zoneSidesHit = GetZoneSidesHitByPath(zoneHitData.Zone, previousX, previousY, newX, newY);
 
                 if (zoneSidesHit.BottomHit || zoneSidesHit.TopHit || zoneSidesHit.LeftHit || zoneSidesHit.RightHit)
                 {
                     zonesCrossedDataLength++;
-                    zonesInPath.Add(new ZonesHitDataHelper
-                    {
-                        Zone = zone,
-                        ZoneSidesHit = zoneSidesHit
-                    });
+                    zoneHitData.ZoneSidesHit = zoneSidesHit;
+                    zonesInPath.Add(zoneHitData);
                 }
             }
 
@@ -65,32 +62,32 @@ namespace LaserAPI.Models.Helper.Zones
         /// Checks if the positions are within a zone
         /// </summary>
         /// <param name="zones"></param>
+        /// <param name="zonesLength"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public static ZoneDto GetZoneWherePositionIsIn(ZoneDto[] zones, int x, int y)
+        public static ZonesHitDataHelper GetZoneWherePositionIsIn(ZonesHitDataHelper[] zones, int zonesLength, int x, int y)
         {
-            int zonesLength = zones.Length;
             for (int i = 0; i < zonesLength; i++)
             {
-                ZoneDto zone = zones[i];
-                ZoneAbsolutePositionsHelper absolutePositionsHelper = new(zone);
-
-                bool positionIsWithinZone = x.IsBetweenOrEqualTo(absolutePositionsHelper.LeftXAxisInZone, absolutePositionsHelper.RightXAxisInZone) &&
-                                            y.IsBetweenOrEqualTo(absolutePositionsHelper.LowestYAxisInZone, absolutePositionsHelper.HighestYAxisInZone);
+                ZonesHitDataHelper zoneHitData = zones[i];
+                bool positionIsWithinZone = x.IsBetweenOrEqualTo(zoneHitData.ZoneAbsolutePositions.LeftXAxisInZone, zoneHitData.ZoneAbsolutePositions.RightXAxisInZone) &&
+                                            y.IsBetweenOrEqualTo(zoneHitData.ZoneAbsolutePositions.LowestYAxisInZone, zoneHitData.ZoneAbsolutePositions.HighestYAxisInZone);
 
                 if (positionIsWithinZone)
                 {
-                    return zone;
+                    return zoneHitData;
                 }
             }
 
             return null;
         }
 
-        public static ZoneDto GetZoneWhereMaxLaserPowerPwmIsHighest(List<ZoneDto> zones)
+        public static ZoneDto GetZoneWhereMaxLaserPowerPwmIsHighest(List<ZonesHitDataHelper> zonesHitDataCollection)
         {
-            return zones.MaxBy(zone => zone.MaxLaserPowerInZonePwm);
+            return zonesHitDataCollection
+                .Select(zone => zone.Zone)
+                .MaxBy(zone => zone.MaxLaserPowerInZonePwm);
         }
     }
 }

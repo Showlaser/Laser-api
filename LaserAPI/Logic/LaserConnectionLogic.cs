@@ -11,8 +11,8 @@ namespace LaserAPI.Logic
     {
         private readonly bool _ranByUnitTest;
         private Socket _socket;
-        private int _lastXPosition;
-        private int _lastYPosition;
+        public int LastXPosition { get; private set; }
+        public int LastYPosition { get; private set; }
 
         public LaserConnectionLogic(bool ranByUnitTest)
         {
@@ -52,8 +52,8 @@ namespace LaserAPI.Logic
 
                     byte[] msg = Encoding.ASCII.GetBytes(json);
                     _socket.Send(msg);
-                    _lastXPosition = message.X;
-                    _lastYPosition = message.Y;
+                    LastXPosition = message.X;
+                    LastYPosition = message.Y;
                 }
                 catch (Exception)
                 {
@@ -64,12 +64,12 @@ namespace LaserAPI.Logic
 
         public int GetLastXPosition()
         {
-            return _lastXPosition;
+            return LastXPosition;
         }
 
         public int GetLastYPosition()
         {
-            return _lastYPosition;
+            return LastYPosition;
         }
     }
 }

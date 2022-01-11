@@ -13,34 +13,39 @@ namespace LaserAPI.Logic
     public class LaserLogic
     {
         private readonly LaserConnectionLogic _laserConnectionLogic;
-        private readonly ZoneDto[] _zones;
+        private readonly ZonesHitDataHelper[] _zones;
+        private readonly int _zonesLength;
         private readonly bool _safetyZonesNotActive;
-        private int _lastXPosition;
-        private int _lastYPosition;
         private readonly ZoneDto _zoneWithHighestLaserPowerPwm;
 
         public LaserLogic(LaserConnectionLogic laserConnectionLogic, IZoneDal zoneDal)
         {
             _laserConnectionLogic = laserConnectionLogic;
-            _zones = zoneDal
+            ZoneDto[] zones = zoneDal
                 .All()
                 .Result
                 .ToArray();
 
-            _safetyZonesNotActive = !_zones.Any();
+            List<ZonesHitDataHelper> zonesHitDataCollection = new();
+            foreach (var zone in zones)
+            {
+                zonesHitDataCollection.Add(new ZonesHitDataHelper
+                {
+                    Zone = zone,
+                    ZoneAbsolutePositions = new ZoneAbsolutePositionsHelper(zone),
+                });
+            }
+            _zones = zonesHitDataCollection.ToArray();
+            _safetyZonesNotActive = !zones.Any();
+            _zonesLength = _zones.Length;
             _zoneWithHighestLaserPowerPwm = ZonesHelper.GetZoneWhereMaxLaserPowerPwmIsHighest(_zones.ToList());
-        }
-
-        private void SetLastPositions(LaserMessage message)
-        {
-            _lastXPosition = message.X;
-            _lastYPosition = message.Y;
         }
 
         public void SendData(LaserMessage message)
         {
             Stopwatch sw = Stopwatch.StartNew();
             int totalLaserPowerPwm = message.RedLaser + message.GreenLaser + message.BlueLaser;
+
             bool skipSafetyZoneCheck = _safetyZonesNotActive || totalLaserPowerPwm == 0 ||
                                        _zoneWithHighestLaserPowerPwm.MaxLaserPowerInZonePwm >= totalLaserPowerPwm;
 
@@ -50,20 +55,19 @@ namespace LaserAPI.Logic
                 return;
             }
 
-            ZoneDto zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, message.X, message.Y);
-            bool positionIsInSafetyZone = zone != null;
+            ZonesHitDataHelper zoneHitData = ZonesHelper.GetZoneWherePositionIsIn(_zones, _zonesLength, message.X, message.Y);
+            bool positionIsInSafetyZone = zoneHitData != null;
 
             if (positionIsInSafetyZone)
             {
-                LaserSafetyHelper.LimitLaserPowerIfNecessary(ref message, zone.MaxLaserPowerInZonePwm);
+                LaserSafetyHelper.LimitLaserPowerIfNecessary(ref message, zoneHitData.Zone.MaxLaserPowerInZonePwm);
                 _laserConnectionLogic.SendMessage(message);
-                SetLastPositions(message);
                 return;
             }
 
             int zonesCrossedDataLength = 0;
             ZonesHitDataHelper[] zonesCrossedData =
-                    ZonesHelper.GetZonesInPathOfPosition(_zones, _lastXPosition, _lastYPosition,
+                    ZonesHelper.GetZonesInPathOfPosition(_zones, _laserConnectionLogic.LastXPosition, _laserConnectionLogic.LastYPosition,
                         message.X, message.Y, ref zonesCrossedDataLength);
 
             if (zonesCrossedDataLength != 0)
@@ -75,7 +79,6 @@ namespace LaserAPI.Logic
             }
 
             _laserConnectionLogic.SendMessage(message);
-            SetLastPositions(message);
         }
 
         private void HandleZonesBetweenLaserCoordinates(LaserMessage originalMessage,
@@ -94,8 +97,8 @@ namespace LaserAPI.Logic
                 }
 
                 zonesCrossedData[i].ZoneAbsolutePositions = new ZoneAbsolutePositionsHelper(crossedZoneData.Zone);
-                crossedZoneData.ZoneSidesHit.GetCoordinateOfZoneCrossing(originalMessage, crossedZoneData, _lastXPosition,
-                    _lastYPosition, ref newLaserMessageCollection);
+                crossedZoneData.ZoneSidesHit.GetCoordinateOfZoneCrossing(originalMessage, crossedZoneData, _laserConnectionLogic.LastXPosition,
+                    _laserConnectionLogic.LastYPosition, ref newLaserMessageCollection);
             }
 
             SortAndSendMessagesByClosedPoint(newLaserMessageCollection, originalMessage, newLaserMessageCollection.Count);
@@ -103,10 +106,10 @@ namespace LaserAPI.Logic
 
         private void SortAndSendMessagesByClosedPoint(List<LaserMessage> messages, LaserMessage startPoint, int messageCount)
         {
-            int differenceInYAxis = NumberHelper.GetHighestNumber(startPoint.Y, _lastXPosition) -
-                                    NumberHelper.GetLowestNumber(startPoint.Y, _lastXPosition);
-            int differenceInXAxis = NumberHelper.GetHighestNumber(startPoint.X, _lastXPosition) -
-                                    NumberHelper.GetLowestNumber(startPoint.X, _lastXPosition);
+            int differenceInYAxis = NumberHelper.GetHighestNumber(startPoint.Y, _laserConnectionLogic.LastXPosition) -
+                                    NumberHelper.GetLowestNumber(startPoint.Y, _laserConnectionLogic.LastXPosition);
+            int differenceInXAxis = NumberHelper.GetHighestNumber(startPoint.X, _laserConnectionLogic.LastXPosition) -
+                                    NumberHelper.GetLowestNumber(startPoint.X, _laserConnectionLogic.LastXPosition);
 
             bool checkByXAxis = differenceInXAxis > differenceInYAxis;
             if (messageCount > 1) // performance optimization
@@ -128,7 +131,6 @@ namespace LaserAPI.Logic
             }
 
             _laserConnectionLogic.SendMessage(startPoint);
-            SetLastPositions(startPoint);
         }
 
         private int GetMessageIndexClosestToPoint(IReadOnlyList<LaserMessage> messages, int messageLength, bool checkByXAxis)
@@ -141,8 +143,8 @@ namespace LaserAPI.Logic
 
                 switch (checkByXAxis)
                 {
-                    case true when _lastXPosition - message.X < _lastXPosition - closestMessage.X:
-                    case false when _lastYPosition - message.Y < _lastYPosition - closestMessage.Y:
+                    case true when _laserConnectionLogic.LastXPosition - message.X < _laserConnectionLogic.LastXPosition - closestMessage.X:
+                    case false when _laserConnectionLogic.LastYPosition - message.Y < _laserConnectionLogic.LastYPosition - closestMessage.Y:
                         closestMessageIndex = i;
                         break;
                 }
