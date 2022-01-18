@@ -13,19 +13,17 @@ namespace LaserAPI.Logic
         private Socket _socket;
         public int LastXPosition { get; private set; }
         public int LastYPosition { get; private set; }
+        private string _ipAddress;
 
         public LaserConnectionLogic(bool ranByUnitTest)
         {
             _ranByUnitTest = ranByUnitTest;
-            if (!ranByUnitTest)
-            {
-                Task.Run(async () => await Connect()).Wait();
-            }
         }
 
-        public async Task Connect()
+        public async Task Connect(string ipAddress)
         {
-            IPAddress address = IPAddress.Parse("192.168.1.177");
+            _ipAddress = ipAddress;
+            IPAddress address = IPAddress.Parse(ipAddress);
             IPEndPoint remoteEp = new(address, 80);
 
             _socket = new Socket(address.AddressFamily,
@@ -42,34 +40,25 @@ namespace LaserAPI.Logic
 
         public void SendMessage(LaserMessage message)
         {
-            if (!_ranByUnitTest)
+            if (_ranByUnitTest)
             {
-                try
-                {
-                    int[] value = { message.RedLaser, message.GreenLaser, message.BlueLaser, message.X, message.Y };
-                    string result = string.Join(",", value);
-                    string json = "{d:[" + result + "]}";
-
-                    byte[] msg = Encoding.ASCII.GetBytes(json);
-                    _socket.Send(msg);
-                    LastXPosition = message.X;
-                    LastYPosition = message.Y;
-                }
-                catch (Exception)
-                {
-                    Task.Run(async () => await Connect()).Wait();
-                }
+                return;
             }
-        }
+            try
+            {
+                int[] value = { message.RedLaser, message.GreenLaser, message.BlueLaser, message.X, message.Y };
+                string result = string.Join(",", value);
+                string json = "{d:[" + result + "]}";
 
-        public int GetLastXPosition()
-        {
-            return LastXPosition;
-        }
-
-        public int GetLastYPosition()
-        {
-            return LastYPosition;
+                byte[] msg = Encoding.ASCII.GetBytes(json);
+                _socket.Send(msg);
+                LastXPosition = message.X;
+                LastYPosition = message.Y;
+            }
+            catch (Exception)
+            {
+                Task.Run(async () => await Connect(_ipAddress)).Wait();
+            }
         }
     }
 }
