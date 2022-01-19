@@ -8,6 +8,6 @@ namespace LaserAPI.Models.FromFrontend.Patterns
         public Guid Uuid { get; set; }
         public string Name { get; set; }
         public double Scale { get; set; }
-        public List<Point> Points { get; set; }
+        public List<PatternPoint> Points { get; set; }
     }
 }

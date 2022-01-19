@@ -2,7 +2,7 @@
 
 namespace LaserAPI.Models.FromFrontend.Patterns
 {
-    public class Point
+    public class PatternPoint
     {
         public Guid Uuid { get; set; }
         public Guid PatternUuid { get; set; }

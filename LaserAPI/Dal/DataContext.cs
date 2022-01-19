@@ -1,4 +1,5 @@
-﻿using LaserAPI.Models.Dto.Patterns;
+﻿using LaserAPI.Models.Dto.Animations;
+using LaserAPI.Models.Dto.Patterns;
 using Microsoft.EntityFrameworkCore;
 
 namespace LaserAPI.Dal
@@ -7,6 +8,7 @@ namespace LaserAPI.Dal
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
         public virtual DbSet<PatternDto> Pattern { get; set; }
+        public virtual DbSet<AnimationDto> Animation { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -19,6 +21,32 @@ namespace LaserAPI.Dal
             });
 
             builder.Entity<PointDto>(e =>
+            {
+                e.HasKey(p => p.Uuid);
+            });
+
+            builder.Entity<AnimationDto>(e =>
+            {
+                e.HasKey(a => a.Uuid);
+                e.HasMany(a => a.PatternAnimation)
+                    .WithOne()
+                    .HasForeignKey(a => a.AnimationUuid);
+            });
+
+            builder.Entity<PatternAnimationDto>(e =>
+            {
+                e.HasKey(pa => pa.Uuid);
+            });
+
+            builder.Entity<PatternAnimationSettingsDto>(e =>
+            {
+                e.HasKey(pas => pas.Uuid);
+                e.HasMany(pas => pas.Points)
+                    .WithOne()
+                    .HasForeignKey(pas => pas.PatternAnimationUuid);
+            });
+
+            builder.Entity<AnimationPointDto>(e =>
             {
                 e.HasKey(p => p.Uuid);
             });
