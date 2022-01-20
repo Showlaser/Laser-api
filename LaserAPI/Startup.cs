@@ -36,7 +36,9 @@ namespace LaserAPI
             LaserConnectionLogic connectionLogic = new(false);
             services.AddSingleton(connectionLogic);
             services.AddScoped<PatternLogic>();
+            services.AddScoped<AnimationLogic>();
             services.AddScoped<IPatternDal, PatterDal>();
+            services.AddScoped<IAnimationDal, AnimationDal>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
