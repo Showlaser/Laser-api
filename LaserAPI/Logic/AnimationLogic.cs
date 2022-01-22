@@ -28,9 +28,17 @@ namespace LaserAPI.Logic
         {
             return settings.TrueForAll(setting => setting.CenterX.IsBetweenOrEqualTo(-4000, 4000) &&
                    setting.CenterY.IsBetweenOrEqualTo(-4000, 4000) &&
-                   setting.StartTimeMs > 0 &&
-                   setting.TimeLineId.IsBetweenOrEqualTo(0, 3) &&
                    setting.Scale.IsBetweenOrEqualTo(0.1, 1));
+        }
+
+        private static bool PatternAnimationValid(List<PatternAnimationDto> patternAnimations)
+        {
+            return patternAnimations.TrueForAll(patternAnimation =>
+                   patternAnimation.AnimationUuid != Guid.Empty &&
+                   patternAnimation.DurationTimeMs > 0 &&
+                   patternAnimation.StartTimeMs > 0 &&
+                   patternAnimation.TimeLineId.IsBetweenOrEqualTo(0, 3) &&
+                   patternAnimation.Uuid != Guid.Empty);
         }
 
         private static void ValidateAnimation(AnimationDto animation)
@@ -41,7 +49,8 @@ namespace LaserAPI.Logic
                                       .ToList()) &&
                                 PointsValid(animation.PatternAnimation
                                     .SelectMany(p => p.Settings.Points)
-                                    .ToList());
+                                    .ToList()) &&
+                                  PatternAnimationValid(animation.PatternAnimation);
             if (!animationValid)
             {
                 throw new InvalidDataException(nameof(animation));

@@ -40,9 +40,6 @@ namespace LaserAPI.Migrations
                 {
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     PatternAnimationUuid = table.Column<Guid>(type: "TEXT", nullable: false),
-                    StartTimeMs = table.Column<int>(type: "INTEGER", nullable: false),
-                    DurationTimeMs = table.Column<int>(type: "INTEGER", nullable: false),
-                    TimeLineId = table.Column<int>(type: "INTEGER", nullable: false),
                     Scale = table.Column<double>(type: "REAL", nullable: false),
                     CenterX = table.Column<int>(type: "INTEGER", nullable: false),
                     CenterY = table.Column<int>(type: "INTEGER", nullable: false)
@@ -59,8 +56,7 @@ namespace LaserAPI.Migrations
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     PatternUuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     X = table.Column<int>(type: "INTEGER", nullable: false),
-                    Y = table.Column<int>(type: "INTEGER", nullable: false),
-                    ConnectedToUuid = table.Column<Guid>(type: "TEXT", nullable: false)
+                    Y = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -80,9 +76,7 @@ namespace LaserAPI.Migrations
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     PatternAnimationUuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     X = table.Column<int>(type: "INTEGER", nullable: false),
-                    Y = table.Column<int>(type: "INTEGER", nullable: false),
-                    ConnectedToUuid = table.Column<Guid>(type: "TEXT", nullable: false),
-                    TimeMs = table.Column<int>(type: "INTEGER", nullable: false)
+                    Y = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -101,7 +95,10 @@ namespace LaserAPI.Migrations
                 {
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     AnimationUuid = table.Column<Guid>(type: "TEXT", nullable: false),
-                    SettingsUuid = table.Column<Guid>(type: "TEXT", nullable: true)
+                    SettingsUuid = table.Column<Guid>(type: "TEXT", nullable: true),
+                    StartTimeMs = table.Column<int>(type: "INTEGER", nullable: false),
+                    DurationTimeMs = table.Column<int>(type: "INTEGER", nullable: false),
+                    TimeLineId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

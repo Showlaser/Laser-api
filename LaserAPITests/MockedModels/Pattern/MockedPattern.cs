@@ -27,7 +27,6 @@ namespace LaserAPITests.MockedModels.Pattern
                         PatternUuid = Guid.Parse("ca1529e8-ac96-4cfb-93fb-1bb075969766"),
                         X = -2000,
                         Y = 2000,
-                        ConnectedToUuid = Guid.Parse("81fb5f2d-5b16-4bfa-a1cf-f595ad1ce20a")
                     },
                     new()
                     {
@@ -35,7 +34,6 @@ namespace LaserAPITests.MockedModels.Pattern
                         PatternUuid = Guid.Parse("ca1529e8-ac96-4cfb-93fb-1bb075969766"),
                         X = -2000,
                         Y = 2000,
-                        ConnectedToUuid = Guid.Empty
                     }
                 }
             };
@@ -50,14 +48,12 @@ namespace LaserAPITests.MockedModels.Pattern
                         Uuid = Guid.Parse("1fa48d00-47cb-4987-a9c7-a8c8d1af236d"),
                         X = -2000,
                         Y = 2000,
-                        ConnectedToUuid = Guid.Parse("9f4c57c9-c818-49e7-aff9-25954da4ab91")
                     },
                     new()
                     {
                         Uuid = Guid.Parse("9f4c57c9-c818-49e7-aff9-25954da4ab91"),
                         X = -2000,
                         Y = 2000,
-                        ConnectedToUuid = Guid.Empty
                     }
                 }
             };

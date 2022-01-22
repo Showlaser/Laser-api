@@ -37,14 +37,8 @@ namespace LaserAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ConnectedToUuid")
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid>("PatternAnimationUuid")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("TimeMs")
-                        .HasColumnType("INTEGER");
 
                     b.Property<int>("X")
                         .HasColumnType("INTEGER");
@@ -68,8 +62,17 @@ namespace LaserAPI.Migrations
                     b.Property<Guid>("AnimationUuid")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("DurationTimeMs")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid?>("SettingsUuid")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("StartTimeMs")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TimeLineId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Uuid");
 
@@ -92,20 +95,11 @@ namespace LaserAPI.Migrations
                     b.Property<int>("CenterY")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("DurationTimeMs")
-                        .HasColumnType("INTEGER");
-
                     b.Property<Guid>("PatternAnimationUuid")
                         .HasColumnType("TEXT");
 
                     b.Property<double>("Scale")
                         .HasColumnType("REAL");
-
-                    b.Property<int>("StartTimeMs")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TimeLineId")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Uuid");
 
@@ -133,9 +127,6 @@ namespace LaserAPI.Migrations
                 {
                     b.Property<Guid>("Uuid")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ConnectedToUuid")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("PatternUuid")
