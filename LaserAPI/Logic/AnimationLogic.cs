@@ -21,22 +21,20 @@ namespace LaserAPI.Logic
 
         private static bool PointsValid(List<AnimationPointDto> points)
         {
-            return points.Any() && points.TrueForAll(p => p.PatternAnimationUuid != Guid.Empty);
+            return points.Any() && points.TrueForAll(p => p.TimelineSettingsUuid != Guid.Empty);
         }
 
-        private static bool SettingsValid(List<PatternAnimationSettingsDto> settings)
+        private static bool SettingsValid(List<TimelineSettingsDto> settings)
         {
             return settings.TrueForAll(setting => setting.CenterX.IsBetweenOrEqualTo(-4000, 4000) &&
                    setting.CenterY.IsBetweenOrEqualTo(-4000, 4000) &&
                    setting.Scale.IsBetweenOrEqualTo(0.1, 1));
         }
 
-        private static bool PatternAnimationValid(List<PatternAnimationDto> patternAnimations)
+        private static bool PatternAnimationValid(List<AnimationTimelineDto> patternAnimations)
         {
             return patternAnimations.TrueForAll(patternAnimation =>
                    patternAnimation.AnimationUuid != Guid.Empty &&
-                   patternAnimation.DurationTimeMs > 0 &&
-                   patternAnimation.StartTimeMs > 0 &&
                    patternAnimation.TimeLineId.IsBetweenOrEqualTo(0, 3) &&
                    patternAnimation.Uuid != Guid.Empty);
         }
@@ -44,13 +42,13 @@ namespace LaserAPI.Logic
         private static void ValidateAnimation(AnimationDto animation)
         {
             bool animationValid = animation != null &&
-                                  SettingsValid(animation.PatternAnimation
+                                  SettingsValid(animation.AnimationTimeline
                                       .Select(p => p.Settings)
                                       .ToList()) &&
-                                PointsValid(animation.PatternAnimation
+                                PointsValid(animation.AnimationTimeline
                                     .SelectMany(p => p.Settings.Points)
                                     .ToList()) &&
-                                  PatternAnimationValid(animation.PatternAnimation);
+                                  PatternAnimationValid(animation.AnimationTimeline);
             if (!animationValid)
             {
                 throw new InvalidDataException(nameof(animation));

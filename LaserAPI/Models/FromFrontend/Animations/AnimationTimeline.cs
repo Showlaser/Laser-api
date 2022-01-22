@@ -2,10 +2,11 @@
 
 namespace LaserAPI.Models.FromFrontend.Animations
 {
-    public class PatternAnimation
+    public class AnimationTimeline
     {
         public Guid Uuid { get; set; }
         public Guid AnimationUuid { get; set; }
-        public PatternAnimationSettings Settings { get; set; }
+        public TimelineSettings Settings { get; set; }
+        public int TimeLineId { get; set; }
     }
 }
