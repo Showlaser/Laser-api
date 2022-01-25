@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace LaserAPI.Models.FromFrontend.Animations
+namespace LaserAPI.Models.ToFrontend.Animations
 {
-    public class AnimationTimeline
+    public class PatternAnimation
     {
         public Guid Uuid { get; set; }
         public Guid AnimationUuid { get; set; }
-        public TimelineSettings Settings { get; set; }
+        public TimelineSettingsViewmodel Settings { get; set; }
         public int TimeLineId { get; set; }
     }
 }

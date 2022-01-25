@@ -24,14 +24,14 @@ namespace LaserAPI.Logic
             return points.Any() && points.TrueForAll(p => p.TimelineSettingsUuid != Guid.Empty);
         }
 
-        private static bool SettingsValid(List<TimelineSettingsDto> settings)
+        private static bool SettingsValid(List<PatternAnimationSettingsDto> settings)
         {
             return settings.TrueForAll(setting => setting.CenterX.IsBetweenOrEqualTo(-4000, 4000) &&
                    setting.CenterY.IsBetweenOrEqualTo(-4000, 4000) &&
                    setting.Scale.IsBetweenOrEqualTo(0.1, 1));
         }
 
-        private static bool PatternAnimationValid(List<AnimationTimelineDto> patternAnimations)
+        private static bool PatternAnimationValid(List<PatternAnimationDto> patternAnimations)
         {
             return patternAnimations.TrueForAll(patternAnimation =>
                    patternAnimation.AnimationUuid != Guid.Empty &&
@@ -42,13 +42,13 @@ namespace LaserAPI.Logic
         private static void ValidateAnimation(AnimationDto animation)
         {
             bool animationValid = animation != null &&
-                                  SettingsValid(animation.AnimationTimeline
-                                      .Select(p => p.Settings)
+                                  SettingsValid(animation.PatternAnimations
+                                      .Select(p => p.AnimationSettings)
                                       .ToList()) &&
-                                PointsValid(animation.AnimationTimeline
-                                    .SelectMany(p => p.Settings.Points)
+                                PointsValid(animation.PatternAnimations
+                                    .SelectMany(p => p.AnimationSettings.Points)
                                     .ToList()) &&
-                                  PatternAnimationValid(animation.AnimationTimeline);
+                                  PatternAnimationValid(animation.PatternAnimations);
             if (!animationValid)
             {
                 throw new InvalidDataException(nameof(animation));

@@ -28,17 +28,17 @@ namespace LaserAPI.Dal
             builder.Entity<AnimationDto>(e =>
             {
                 e.HasKey(a => a.Uuid);
-                e.HasMany(a => a.AnimationTimeline)
+                e.HasMany(a => a.PatternAnimations)
                     .WithOne()
                     .HasForeignKey(a => a.AnimationUuid);
             });
 
-            builder.Entity<AnimationTimelineDto>(e =>
+            builder.Entity<PatternAnimationDto>(e =>
             {
                 e.HasKey(pa => pa.Uuid);
             });
 
-            builder.Entity<TimelineSettingsDto>(e =>
+            builder.Entity<PatternAnimationSettingsDto>(e =>
             {
                 e.HasKey(pas => pas.Uuid);
                 e.HasMany(pas => pas.Points)
