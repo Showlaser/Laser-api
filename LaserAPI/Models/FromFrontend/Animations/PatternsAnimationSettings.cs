@@ -6,7 +6,7 @@ namespace LaserAPI.Models.FromFrontend.Animations
     public class PatternsAnimationSettings
     {
         public Guid Uuid { get; set; }
-        public Guid AnimationTimelineUuid { get; set; }
+        public Guid PatternAnimationUuid { get; set; }
         public double Scale { get; set; }
         public int CenterX { get; set; }
         public int CenterY { get; set; }

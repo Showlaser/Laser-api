@@ -39,16 +39,27 @@ namespace LaserAPI.Logic
                    patternAnimation.Uuid != Guid.Empty);
         }
 
+        private static bool AnimationDoesNotContainsSettingsWithSameStartTime(AnimationDto animation)
+        {
+            List<int> startTimeCollection = animation.PatternAnimations
+                .SelectMany(pa => pa.AnimationSettings
+                    .Select(ase => ase.StartTime))
+                .ToList();
+
+            return startTimeCollection.Distinct().Any();
+        }
+
         private static void ValidateAnimation(AnimationDto animation)
         {
             bool animationValid = animation != null &&
-                                  SettingsValid(animation.PatternAnimations
-                                      .Select(p => p.AnimationSettings)
-                                      .ToList()) &&
-                                PointsValid(animation.PatternAnimations
-                                    .SelectMany(p => p.AnimationSettings.Points)
-                                    .ToList()) &&
-                                  PatternAnimationValid(animation.PatternAnimations);
+                                  animation.PatternAnimations
+                                      .TrueForAll(pa => pa.AnimationSettings
+                                          .TrueForAll(ase => SettingsValid(pa.AnimationSettings))) &&
+                                  animation.PatternAnimations
+                                      .TrueForAll(pa => pa.AnimationSettings
+                                          .TrueForAll(ase => PointsValid(ase.Points))) &&
+                                  PatternAnimationValid(animation.PatternAnimations) &&
+                                  AnimationDoesNotContainsSettingsWithSameStartTime(animation);
             if (!animationValid)
             {
                 throw new InvalidDataException(nameof(animation));

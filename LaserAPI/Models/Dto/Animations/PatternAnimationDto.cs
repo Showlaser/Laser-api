@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace LaserAPI.Models.Dto.Animations
 {
@@ -6,7 +7,8 @@ namespace LaserAPI.Models.Dto.Animations
     {
         public Guid Uuid { get; set; }
         public Guid AnimationUuid { get; set; }
-        public PatternAnimationSettingsDto AnimationSettings { get; set; }
+        public List<PatternAnimationSettingsDto> AnimationSettings { get; set; }
         public int TimeLineId { get; set; }
+        public string Name { get; set; }
     }
 }
