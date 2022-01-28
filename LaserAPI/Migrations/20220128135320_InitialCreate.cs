@@ -61,7 +61,10 @@ namespace LaserAPI.Migrations
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     PatternUuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     X = table.Column<int>(type: "INTEGER", nullable: false),
-                    Y = table.Column<int>(type: "INTEGER", nullable: false)
+                    Y = table.Column<int>(type: "INTEGER", nullable: false),
+                    RedLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
+                    GreenLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
+                    BlueLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -103,7 +106,10 @@ namespace LaserAPI.Migrations
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     TimelineSettingsUuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     X = table.Column<int>(type: "INTEGER", nullable: false),
-                    Y = table.Column<int>(type: "INTEGER", nullable: false)
+                    Y = table.Column<int>(type: "INTEGER", nullable: false),
+                    RedLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
+                    GreenLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
+                    BlueLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -21,7 +21,12 @@ namespace LaserAPI.Logic
 
         private static bool ValidatePoints(List<PointDto> points)
         {
-            return points.Any() && points.TrueForAll(p => p.PatternUuid != Guid.Empty);
+            return points.Any() && points.TrueForAll(p => p.PatternUuid != Guid.Empty &&
+                                                          p.Y.IsBetweenOrEqualTo(-4000, 4000) &&
+                                                          p.X.IsBetweenOrEqualTo(-4000, 4000) &&
+                                                          p.RedLaserPowerPwm.IsBetweenOrEqualTo(0, 511) &&
+                                                          p.GreenLaserPowerPwm.IsBetweenOrEqualTo(0, 511) &&
+                                                          p.BlueLaserPowerPwm.IsBetweenOrEqualTo(0, 511));
         }
 
         private static void ValidatePattern(PatternDto pattern)

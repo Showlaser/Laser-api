@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LaserAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220127095826_InitialCreate")]
+    [Migration("20220128135320_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,6 +38,15 @@ namespace LaserAPI.Migrations
                     b.Property<Guid>("Uuid")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("BlueLaserPowerPwm")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GreenLaserPowerPwm")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RedLaserPowerPwm")
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("TimelineSettingsUuid")
                         .HasColumnType("TEXT");
@@ -131,8 +140,17 @@ namespace LaserAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("BlueLaserPowerPwm")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GreenLaserPowerPwm")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("PatternUuid")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("RedLaserPowerPwm")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("X")
                         .HasColumnType("INTEGER");

@@ -37,6 +37,15 @@ namespace LaserAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("BlueLaserPowerPwm")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GreenLaserPowerPwm")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RedLaserPowerPwm")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("TimelineSettingsUuid")
                         .HasColumnType("TEXT");
 
@@ -129,8 +138,17 @@ namespace LaserAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("BlueLaserPowerPwm")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GreenLaserPowerPwm")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid>("PatternUuid")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("RedLaserPowerPwm")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("X")
                         .HasColumnType("INTEGER");
