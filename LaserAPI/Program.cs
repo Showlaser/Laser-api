@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using System.Diagnostics;
 
 namespace LaserAPI
 {
@@ -7,6 +8,7 @@ namespace LaserAPI
     {
         public static void Main(string[] args)
         {
+            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.RealTime;
             CreateHostBuilder(args).Build().Run();
         }
 
