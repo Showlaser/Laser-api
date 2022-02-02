@@ -2,7 +2,6 @@
 using LaserAPI.Models.Helper.Laser;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Controllers
@@ -14,34 +13,50 @@ namespace LaserAPI.Controllers
         [HttpGet]
         public async Task<string> Send()
         {
-            const int durationMs = 50000;
-            const int delayTime = 10000;
+            const int durationMs = 4000;
             int iterations = 0;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
 
             while (stopwatch.ElapsedMilliseconds < durationMs)
             {
-                iterations++;
+                if (iterations < 1500)
+                {
+                    iterations++;
+                }
 
                 await LaserConnectionLogic.SendMessage(new LaserMessage
                 {
-                    RedLaser = 2,
-                    BlueLaser = 6,
-                    GreenLaser = 7,
-                    X = 2000,
+                    RedLaser = 7,
+                    BlueLaser = 0,
+                    GreenLaser = 0,
+                    X = -50 - iterations,
                     Y = 0
                 });
-                Thread.SpinWait(delayTime);
                 await LaserConnectionLogic.SendMessage(new LaserMessage
                 {
-                    RedLaser = 2,
-                    BlueLaser = 6,
+                    RedLaser = 0,
+                    BlueLaser = 7,
+                    GreenLaser = 0,
+                    X = 0,
+                    Y = 50 + iterations
+                });
+                await LaserConnectionLogic.SendMessage(new LaserMessage
+                {
+                    RedLaser = 0,
+                    BlueLaser = 0,
                     GreenLaser = 7,
-                    X = -2000,
+                    X = 50 + iterations,
                     Y = 0
                 });
-                Thread.SpinWait(delayTime);
+                await LaserConnectionLogic.SendMessage(new LaserMessage
+                {
+                    RedLaser = 0,
+                    BlueLaser = 7,
+                    GreenLaser = 7,
+                    X = 0,
+                    Y = -50 - iterations,
+                });
             }
 
             stopwatch.Stop();
