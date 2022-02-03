@@ -163,6 +163,42 @@ namespace LaserAPI.Migrations
                     b.ToTable("PointDto");
                 });
 
+            modelBuilder.Entity("LaserAPI.Models.Dto.Zones.ZoneDto", b =>
+                {
+                    b.Property<Guid>("Uuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MaxLaserPowerInZonePwm")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Uuid");
+
+                    b.ToTable("Zone");
+                });
+
+            modelBuilder.Entity("LaserAPI.Models.Dto.Zones.ZonesPositionDto", b =>
+                {
+                    b.Property<Guid>("Uuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("X")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("ZoneUuid")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Uuid");
+
+                    b.HasIndex("ZoneUuid");
+
+                    b.ToTable("ZonesPositionDto");
+                });
+
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.AnimationPointDto", b =>
                 {
                     b.HasOne("LaserAPI.Models.Dto.Animations.PatternAnimationSettingsDto", null)
@@ -197,6 +233,15 @@ namespace LaserAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LaserAPI.Models.Dto.Zones.ZonesPositionDto", b =>
+                {
+                    b.HasOne("LaserAPI.Models.Dto.Zones.ZoneDto", null)
+                        .WithMany("Positions")
+                        .HasForeignKey("ZoneUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.AnimationDto", b =>
                 {
                     b.Navigation("PatternAnimations");
@@ -215,6 +260,11 @@ namespace LaserAPI.Migrations
             modelBuilder.Entity("LaserAPI.Models.Dto.Patterns.PatternDto", b =>
                 {
                     b.Navigation("Points");
+                });
+
+            modelBuilder.Entity("LaserAPI.Models.Dto.Zones.ZoneDto", b =>
+                {
+                    b.Navigation("Positions");
                 });
 #pragma warning restore 612, 618
         }

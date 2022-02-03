@@ -35,6 +35,18 @@ namespace LaserAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Zone",
+                columns: table => new
+                {
+                    Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
+                    MaxLaserPowerInZonePwm = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Zone", x => x.Uuid);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PatternAnimationDto",
                 columns: table => new
                 {
@@ -73,6 +85,26 @@ namespace LaserAPI.Migrations
                         name: "FK_PointDto_Pattern_PatternUuid",
                         column: x => x.PatternUuid,
                         principalTable: "Pattern",
+                        principalColumn: "Uuid",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ZonesPositionDto",
+                columns: table => new
+                {
+                    Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
+                    ZoneUuid = table.Column<Guid>(type: "TEXT", nullable: false),
+                    X = table.Column<int>(type: "INTEGER", nullable: false),
+                    Y = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ZonesPositionDto", x => x.Uuid);
+                    table.ForeignKey(
+                        name: "FK_ZonesPositionDto_Zone_ZoneUuid",
+                        column: x => x.ZoneUuid,
+                        principalTable: "Zone",
                         principalColumn: "Uuid",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -141,6 +173,11 @@ namespace LaserAPI.Migrations
                 name: "IX_PointDto_PatternUuid",
                 table: "PointDto",
                 column: "PatternUuid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ZonesPositionDto_ZoneUuid",
+                table: "ZonesPositionDto",
+                column: "ZoneUuid");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -152,10 +189,16 @@ namespace LaserAPI.Migrations
                 name: "PointDto");
 
             migrationBuilder.DropTable(
+                name: "ZonesPositionDto");
+
+            migrationBuilder.DropTable(
                 name: "PatternAnimationSettingsDto");
 
             migrationBuilder.DropTable(
                 name: "Pattern");
+
+            migrationBuilder.DropTable(
+                name: "Zone");
 
             migrationBuilder.DropTable(
                 name: "PatternAnimationDto");

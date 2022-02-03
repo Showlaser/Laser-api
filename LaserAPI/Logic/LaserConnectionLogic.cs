@@ -9,7 +9,7 @@ namespace LaserAPI.Logic
 {
     public static class LaserConnectionLogic
     {
-        private static readonly bool _ranByUnitTest;
+        public static bool RanByUnitTest { get; set; } = false;
         public static int LastXPosition { get; private set; }
         public static int LastYPosition { get; private set; }
         private static TcpListener _server;
@@ -43,7 +43,7 @@ namespace LaserAPI.Logic
 
         public static async Task SendMessage(LaserMessage message)
         {
-            if (_ranByUnitTest)
+            if (RanByUnitTest)
             {
                 return;
             }
@@ -62,7 +62,7 @@ namespace LaserAPI.Logic
                 var utf8 = new UTF8Encoding();
                 byte[] msg = utf8.GetBytes(json);
 
-                await _stream.WriteAsync(msg, 0, msg.Length);
+                await _stream.WriteAsync(msg);
 
                 LastXPosition = message.X;
                 LastYPosition = message.Y;

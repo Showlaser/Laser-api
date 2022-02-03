@@ -49,8 +49,8 @@ namespace LaserAPITests.Tests.Logic
                 RedLaser = 0,
                 GreenLaser = 255,
                 BlueLaser = 255,
-                X = 2000,
-                Y = -2000
+                X = 4000,
+                Y = -4000
             };
 
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -71,8 +71,8 @@ namespace LaserAPITests.Tests.Logic
                 RedLaser = 0,
                 GreenLaser = 255,
                 BlueLaser = 255,
-                X = 2000,
-                Y = -2000
+                X = 4000,
+                Y = -4000
             };
 
             ZonesHitDataHelper zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, _zones.Length, message.X, message.Y);
@@ -87,7 +87,7 @@ namespace LaserAPITests.Tests.Logic
                 RedLaser = 0,
                 GreenLaser = 255,
                 BlueLaser = 255,
-                X = 2000,
+                X = 4000,
                 Y = 4000
             };
 

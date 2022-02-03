@@ -24,7 +24,7 @@ namespace LaserAPITests.Tests.Logic
                 BlueLaser = 0,
                 GreenLaser = 100,
                 X = 0,
-                Y = 2000
+                Y = 4000
             });
         }
     }
