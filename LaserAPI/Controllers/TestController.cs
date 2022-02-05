@@ -13,21 +13,36 @@ namespace LaserAPI.Controllers
         [HttpGet]
         public async Task<string> Send()
         {
-            const int durationMs = 4000;
+            const int durationMs = 5000;
+            const int max = 6;
             int iterations = 0;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-
+            bool reverse = false;
             while (stopwatch.ElapsedMilliseconds < durationMs)
             {
-                if (iterations < 1500)
+                if (iterations < 1500 && !reverse)
                 {
-                    iterations++;
+                    iterations += 5;
+                }
+                else if (iterations > 0 && reverse)
+                {
+                    iterations -= 5;
+                }
+
+                if (iterations == 1500)
+                {
+                    reverse = true;
+                }
+
+                if (iterations == 0)
+                {
+                    reverse = false;
                 }
 
                 await LaserConnectionLogic.SendMessage(new LaserMessage
                 {
-                    RedLaser = 7,
+                    RedLaser = max,
                     BlueLaser = 0,
                     GreenLaser = 0,
                     X = -50 - iterations,
@@ -36,7 +51,7 @@ namespace LaserAPI.Controllers
                 await LaserConnectionLogic.SendMessage(new LaserMessage
                 {
                     RedLaser = 0,
-                    BlueLaser = 7,
+                    BlueLaser = max,
                     GreenLaser = 0,
                     X = 0,
                     Y = 50 + iterations
@@ -45,17 +60,9 @@ namespace LaserAPI.Controllers
                 {
                     RedLaser = 0,
                     BlueLaser = 0,
-                    GreenLaser = 7,
+                    GreenLaser = max,
                     X = 50 + iterations,
                     Y = 0
-                });
-                await LaserConnectionLogic.SendMessage(new LaserMessage
-                {
-                    RedLaser = 0,
-                    BlueLaser = 7,
-                    GreenLaser = 7,
-                    X = 0,
-                    Y = -50 - iterations,
                 });
             }
 
