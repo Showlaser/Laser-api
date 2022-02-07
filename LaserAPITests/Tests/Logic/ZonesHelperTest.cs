@@ -14,7 +14,7 @@ namespace LaserAPITests.Tests.Logic
     [TestFixture]
     public class ZonesHelperTest
     {
-        private readonly ZonesHitDataHelper[] _zones;
+        private readonly List<ZonesHitDataHelper> _zones;
 
         public ZonesHelperTest()
         {
@@ -22,10 +22,9 @@ namespace LaserAPITests.Tests.Logic
             var mockedZoneDal = new Mock<IZoneDal>();
             mockedZoneDal.Setup(d => d.All()).ReturnsAsync(mockedZones.Zones);
 
-            ZoneDto[] zones = mockedZoneDal.Object
+            List<ZoneDto> zones = mockedZoneDal.Object
                 .All()
-                .Result
-                .ToArray();
+                .Result;
 
             List<ZonesHitDataHelper> zoneHitDataCollection = new();
             foreach (var zone in zones)
@@ -33,10 +32,11 @@ namespace LaserAPITests.Tests.Logic
                 zoneHitDataCollection.Add(new ZonesHitDataHelper
                 {
                     Zone = zone,
+                    ZoneAbsolutePositions = new ZoneAbsolutePositionsHelper(zone)
                 });
             }
 
-            _zones = zoneHitDataCollection.ToArray();
+            _zones = zoneHitDataCollection;
 
             //TODO move this to different class
         }
@@ -56,7 +56,7 @@ namespace LaserAPITests.Tests.Logic
             Stopwatch stopwatch = Stopwatch.StartNew();
             for (int i = 0; i < 2; i++)
             {
-                ZonesHelper.GetZoneWherePositionIsIn(_zones, _zones.Length, message.X, message.Y);
+                ZonesHelper.GetZoneWherePositionIsIn(_zones, _zones.Count, message.X, message.Y);
             }
 
             stopwatch.Stop();
@@ -75,7 +75,7 @@ namespace LaserAPITests.Tests.Logic
                 Y = -4000
             };
 
-            ZonesHitDataHelper zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, _zones.Length, message.X, message.Y);
+            ZonesHitDataHelper zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, _zones.Count, message.X, message.Y);
             Assert.NotNull(zone);
         }
 
@@ -91,7 +91,7 @@ namespace LaserAPITests.Tests.Logic
                 Y = 4000
             };
 
-            ZonesHitDataHelper zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, _zones.Length, message.X, message.Y);
+            ZonesHitDataHelper zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, _zones.Count, message.X, message.Y);
             Assert.Null(zone);
         }
 

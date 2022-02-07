@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace LaserAPI.Models.FromFrontend.Zones
 {
@@ -9,7 +10,7 @@ namespace LaserAPI.Models.FromFrontend.Zones
         /// <summary>
         /// All positions in the zone
         /// </summary>
-        public ZonesPosition[] Positions { get; set; }
+        public List<ZonesPosition> Positions { get; set; }
 
         /// <summary>
         /// The maximum allowed laser power in a zone in PWM value

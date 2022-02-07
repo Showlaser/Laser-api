@@ -11,17 +11,16 @@ namespace LaserAPI.Logic
 {
     public class LaserLogic
     {
-        private readonly ZonesHitDataHelper[] _zones;
+        private readonly List<ZonesHitDataHelper> _zones;
         private readonly int _zonesLength;
         private readonly bool _safetyZonesNotActive;
         private readonly ZoneDto _zoneWithHighestLaserPowerPwm;
 
         public LaserLogic(IZoneDal zoneDal)
         {
-            ZoneDto[] zones = zoneDal
+            List<ZoneDto> zones = zoneDal
                 .All()
-                .Result
-                .ToArray();
+                .Result;
 
             List<ZonesHitDataHelper> zonesHitDataCollection = new();
             foreach (var zone in zones)
@@ -32,9 +31,9 @@ namespace LaserAPI.Logic
                     ZoneAbsolutePositions = new ZoneAbsolutePositionsHelper(zone),
                 });
             }
-            _zones = zonesHitDataCollection.ToArray();
+            _zones = zonesHitDataCollection;
             _safetyZonesNotActive = !zones.Any();
-            _zonesLength = _zones.Length;
+            _zonesLength = _zones.Count;
             _zoneWithHighestLaserPowerPwm = ZonesHelper.GetZoneWhereMaxLaserPowerPwmIsHighest(_zones.ToList());
         }
 
@@ -61,7 +60,7 @@ namespace LaserAPI.Logic
             }
 
             int zonesCrossedDataLength = 0;
-            ZonesHitDataHelper[] zonesCrossedData =
+            List<ZonesHitDataHelper> zonesCrossedData =
                     ZonesHelper.GetZonesInPathOfPosition(_zones, LaserConnectionLogic.LastXPosition, LaserConnectionLogic.LastYPosition,
                         message.X, message.Y, ref zonesCrossedDataLength);
 
@@ -75,10 +74,10 @@ namespace LaserAPI.Logic
         }
 
         private static async Task HandleZonesBetweenLaserCoordinates(LaserMessage originalMessage,
-            ZonesHitDataHelper[] zonesCrossedData, int totalLaserPowerPwm)
+            List<ZonesHitDataHelper> zonesCrossedData, int totalLaserPowerPwm)
         {
             List<LaserMessage> newLaserMessageCollection = new();
-            int zonesCrossedCount = zonesCrossedData.Length;
+            int zonesCrossedCount = zonesCrossedData.Count;
 
             for (int i = 0; i < zonesCrossedCount; i++)
             {

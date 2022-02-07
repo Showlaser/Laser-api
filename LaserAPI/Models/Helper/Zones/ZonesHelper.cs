@@ -6,10 +6,10 @@ namespace LaserAPI.Models.Helper.Zones
 {
     public static class ZonesHelper
     {
-        public static ZonesHitDataHelper[] GetZonesInPathOfPosition(ZonesHitDataHelper[] zones,
+        public static List<ZonesHitDataHelper> GetZonesInPathOfPosition(List<ZonesHitDataHelper> zones,
             int previousX, int previousY, int newX, int newY, ref int zonesCrossedDataLength)
         {
-            int zonesLength = zones.Length;
+            int zonesLength = zones.Count;
             List<ZonesHitDataHelper> zonesInPath = new();
 
             for (int i = 0; i < zonesLength; i++)
@@ -25,7 +25,7 @@ namespace LaserAPI.Models.Helper.Zones
                 }
             }
 
-            return zonesInPath.ToArray();
+            return zonesInPath;
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace LaserAPI.Models.Helper.Zones
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public static ZonesHitDataHelper GetZoneWherePositionIsIn(ZonesHitDataHelper[] zones, int zonesLength, int x, int y)
+        public static ZonesHitDataHelper GetZoneWherePositionIsIn(List<ZonesHitDataHelper> zones, int zonesLength, int x, int y)
         {
             for (int i = 0; i < zonesLength; i++)
             {
