@@ -16,6 +16,7 @@ namespace LaserAPITests.Mock
             var mockedZoneDal = new Mock<IZoneDal>();
             mockedZoneDal.Setup(d => d.All()).ReturnsAsync(mockedZones.Zones);
             var mockedLaserLogic = new LaserLogic(mockedZoneDal.Object);
+            LaserConnectionLogic.RanByUnitTest = true;
 
             LaserLogic = mockedLaserLogic;
         }

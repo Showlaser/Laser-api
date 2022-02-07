@@ -18,14 +18,14 @@ namespace LaserAPITests.Tests.Logic
         [Test]
         public void SendDataTest()
         {
-            _laserLogic.SendData(new LaserMessage
+            Assert.DoesNotThrowAsync(async () => await _laserLogic.SendData(new LaserMessage
             {
                 RedLaser = 255,
                 BlueLaser = 0,
                 GreenLaser = 100,
                 X = 0,
                 Y = 4000
-            });
+            }));
         }
     }
 }

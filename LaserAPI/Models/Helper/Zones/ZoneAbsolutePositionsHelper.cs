@@ -1,4 +1,5 @@
 ﻿using LaserAPI.Models.Dto.Zones;
+using System.Linq;
 
 namespace LaserAPI.Models.Helper.Zones
 {
@@ -20,29 +21,10 @@ namespace LaserAPI.Models.Helper.Zones
 
         private void GetAbsolutePositionsFromZone(ZoneDto zone)
         {
-            for (int i = 0; i < 4; i++)
-            {
-                ZonesPositionDto zonePosition = zone.Positions[i];
-                switch (zonePosition.X)
-                {
-                    case < 0:
-                        LeftXAxisInZone = zonePosition.X;
-                        break;
-                    case > 0:
-                        RightXAxisInZone = zonePosition.X;
-                        break;
-                }
-
-                switch (zonePosition.Y)
-                {
-                    case > 0:
-                        HighestYAxisInZone = zonePosition.Y;
-                        break;
-                    case < 0:
-                        LowestYAxisInZone = zonePosition.Y;
-                        break;
-                }
-            }
+            LeftXAxisInZone = zone.Positions.GroupBy(z => z.X).First().Key;
+            RightXAxisInZone = zone.Positions.GroupBy(z => z.X).Last().Key;
+            LowestYAxisInZone = zone.Positions.GroupBy(z => z.Y).First().Key;
+            HighestYAxisInZone = zone.Positions.GroupBy(z => z.Y).Last().Key;
         }
     }
 }
