@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LaserAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220205215916_patternUpdate")]
-    partial class patternUpdate
+    [Migration("20220207123919_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -45,11 +45,11 @@ namespace LaserAPI.Migrations
                     b.Property<int>("GreenLaserPowerPwm")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid>("PatternAnimationSettingsUuid")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("RedLaserPowerPwm")
                         .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("TimelineSettingsUuid")
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("X")
                         .HasColumnType("INTEGER");
@@ -59,7 +59,7 @@ namespace LaserAPI.Migrations
 
                     b.HasKey("Uuid");
 
-                    b.HasIndex("TimelineSettingsUuid");
+                    b.HasIndex("PatternAnimationSettingsUuid");
 
                     b.ToTable("AnimationPointDto");
                 });
@@ -208,7 +208,7 @@ namespace LaserAPI.Migrations
                 {
                     b.HasOne("LaserAPI.Models.Dto.Animations.PatternAnimationSettingsDto", null)
                         .WithMany("Points")
-                        .HasForeignKey("TimelineSettingsUuid")
+                        .HasForeignKey("PatternAnimationSettingsUuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

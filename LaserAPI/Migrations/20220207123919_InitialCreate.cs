@@ -52,6 +52,7 @@ namespace LaserAPI.Migrations
                 {
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     AnimationUuid = table.Column<Guid>(type: "TEXT", nullable: false),
+                    StartTimeOffset = table.Column<int>(type: "INTEGER", nullable: false),
                     TimeLineId = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true)
                 },
@@ -136,7 +137,7 @@ namespace LaserAPI.Migrations
                 columns: table => new
                 {
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
-                    TimelineSettingsUuid = table.Column<Guid>(type: "TEXT", nullable: false),
+                    PatternAnimationSettingsUuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     X = table.Column<int>(type: "INTEGER", nullable: false),
                     Y = table.Column<int>(type: "INTEGER", nullable: false),
                     RedLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
@@ -147,17 +148,17 @@ namespace LaserAPI.Migrations
                 {
                     table.PrimaryKey("PK_AnimationPointDto", x => x.Uuid);
                     table.ForeignKey(
-                        name: "FK_AnimationPointDto_PatternAnimationSettingsDto_TimelineSettingsUuid",
-                        column: x => x.TimelineSettingsUuid,
+                        name: "FK_AnimationPointDto_PatternAnimationSettingsDto_PatternAnimationSettingsUuid",
+                        column: x => x.PatternAnimationSettingsUuid,
                         principalTable: "PatternAnimationSettingsDto",
                         principalColumn: "Uuid",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AnimationPointDto_TimelineSettingsUuid",
+                name: "IX_AnimationPointDto_PatternAnimationSettingsUuid",
                 table: "AnimationPointDto",
-                column: "TimelineSettingsUuid");
+                column: "PatternAnimationSettingsUuid");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PatternAnimationDto_AnimationUuid",

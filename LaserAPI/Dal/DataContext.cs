@@ -45,7 +45,7 @@ namespace LaserAPI.Dal
                 e.HasKey(pas => pas.Uuid);
                 e.HasMany(pas => pas.Points)
                     .WithOne()
-                    .HasForeignKey(pas => pas.TimelineSettingsUuid);
+                    .HasForeignKey(pas => pas.PatternAnimationSettingsUuid);
             });
 
             builder.Entity<AnimationPointDto>(e =>

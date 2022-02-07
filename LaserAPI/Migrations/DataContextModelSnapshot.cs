@@ -43,11 +43,11 @@ namespace LaserAPI.Migrations
                     b.Property<int>("GreenLaserPowerPwm")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid>("PatternAnimationSettingsUuid")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("RedLaserPowerPwm")
                         .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("TimelineSettingsUuid")
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("X")
                         .HasColumnType("INTEGER");
@@ -57,7 +57,7 @@ namespace LaserAPI.Migrations
 
                     b.HasKey("Uuid");
 
-                    b.HasIndex("TimelineSettingsUuid");
+                    b.HasIndex("PatternAnimationSettingsUuid");
 
                     b.ToTable("AnimationPointDto");
                 });
@@ -206,7 +206,7 @@ namespace LaserAPI.Migrations
                 {
                     b.HasOne("LaserAPI.Models.Dto.Animations.PatternAnimationSettingsDto", null)
                         .WithMany("Points")
-                        .HasForeignKey("TimelineSettingsUuid")
+                        .HasForeignKey("PatternAnimationSettingsUuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
