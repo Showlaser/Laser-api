@@ -1,9 +1,9 @@
 name: CI laser api
 
 on:
+  push:
+    branches: [main]
   pull_request:
-    paths:
-      - "LaserAPI/**"
     branches: [main]
 
 jobs:
@@ -18,13 +18,7 @@ jobs:
           dotnet-version: 6.0.x
       - name: Restore dependencies
         run: dotnet restore
-        working-directory: Authentication_Service
       - name: Build
         run: dotnet build --no-restore
-        working-directory: Authentication_Service
       - name: Test
         run: dotnet test --no-build --verbosity normal
-        working-directory: Authentication_Service
-
-    env:
-      CI: true
