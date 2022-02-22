@@ -119,17 +119,17 @@ namespace LaserAPI.Migrations
                     Scale = table.Column<double>(type: "REAL", nullable: false),
                     CenterX = table.Column<int>(type: "INTEGER", nullable: false),
                     CenterY = table.Column<int>(type: "INTEGER", nullable: false),
-                    StartTime = table.Column<int>(type: "INTEGER", nullable: false),
-                    PatternAnimationDtoUuid = table.Column<Guid>(type: "TEXT", nullable: true)
+                    StartTime = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PatternAnimationSettingsDto", x => x.Uuid);
                     table.ForeignKey(
-                        name: "FK_PatternAnimationSettingsDto_PatternAnimationDto_PatternAnimationDtoUuid",
-                        column: x => x.PatternAnimationDtoUuid,
+                        name: "FK_PatternAnimationSettingsDto_PatternAnimationDto_PatternAnimationUuid",
+                        column: x => x.PatternAnimationUuid,
                         principalTable: "PatternAnimationDto",
-                        principalColumn: "Uuid");
+                        principalColumn: "Uuid",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -166,9 +166,9 @@ namespace LaserAPI.Migrations
                 column: "AnimationUuid");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PatternAnimationSettingsDto_PatternAnimationDtoUuid",
+                name: "IX_PatternAnimationSettingsDto_PatternAnimationUuid",
                 table: "PatternAnimationSettingsDto",
-                column: "PatternAnimationDtoUuid");
+                column: "PatternAnimationUuid");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PointDto_PatternUuid",

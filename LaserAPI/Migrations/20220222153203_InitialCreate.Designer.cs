@@ -11,13 +11,13 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LaserAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220207123919_InitialCreate")]
+    [Migration("20220222153203_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.2");
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.AnimationDto", b =>
                 {
@@ -101,9 +101,6 @@ namespace LaserAPI.Migrations
                     b.Property<int>("CenterY")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("PatternAnimationDtoUuid")
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid>("PatternAnimationUuid")
                         .HasColumnType("TEXT");
 
@@ -115,7 +112,7 @@ namespace LaserAPI.Migrations
 
                     b.HasKey("Uuid");
 
-                    b.HasIndex("PatternAnimationDtoUuid");
+                    b.HasIndex("PatternAnimationUuid");
 
                     b.ToTable("PatternAnimationSettingsDto");
                 });
@@ -226,7 +223,9 @@ namespace LaserAPI.Migrations
                 {
                     b.HasOne("LaserAPI.Models.Dto.Animations.PatternAnimationDto", null)
                         .WithMany("AnimationSettings")
-                        .HasForeignKey("PatternAnimationDtoUuid");
+                        .HasForeignKey("PatternAnimationUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Patterns.PointDto", b =>

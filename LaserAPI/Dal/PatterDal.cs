@@ -53,7 +53,12 @@ namespace LaserAPI.Dal
 
         public async Task Remove(Guid uuid)
         {
-            PatternDto pattern = await _context.Pattern.FindAsync(uuid);
+            PatternDto pattern = (await _context.Pattern
+                .Where(p => p.Uuid == uuid)
+                .Include(p => p.Points)
+                .ToListAsync())
+                .FirstOrDefault();
+
             if (pattern == null)
             {
                 throw new KeyNotFoundException(nameof(uuid));

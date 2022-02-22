@@ -13,8 +13,8 @@ namespace LaserAPI.Controllers
         [HttpGet]
         public async Task<string> Send()
         {
-            const int durationMs = 5000;
-            const int max = 6;
+            const int durationMs = 25000;
+            const int max = 8;
             int iterations = 0;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -46,7 +46,7 @@ namespace LaserAPI.Controllers
                     BlueLaser = 0,
                     GreenLaser = 0,
                     X = -50 - iterations,
-                    Y = 0
+                    Y = 2000
                 });
                 await LaserConnectionLogic.SendMessage(new LaserMessage
                 {
@@ -54,7 +54,7 @@ namespace LaserAPI.Controllers
                     BlueLaser = max,
                     GreenLaser = 0,
                     X = 0,
-                    Y = 50 + iterations
+                    Y = 2000 - iterations
                 });
                 await LaserConnectionLogic.SendMessage(new LaserMessage
                 {
@@ -62,7 +62,7 @@ namespace LaserAPI.Controllers
                     BlueLaser = 0,
                     GreenLaser = max,
                     X = 50 + iterations,
-                    Y = 0
+                    Y = 2000
                 });
             }
 

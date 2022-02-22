@@ -88,12 +88,6 @@ namespace LaserAPI.Logic
             return await _animationDal.All();
         }
 
-        public async Task Update(AnimationDto animation)
-        {
-            ValidateAnimation(animation);
-            await _animationDal.Update(animation);
-        }
-
         public async Task Remove(Guid uuid)
         {
             if (uuid == Guid.Empty)

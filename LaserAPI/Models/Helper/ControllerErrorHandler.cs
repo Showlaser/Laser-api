@@ -32,8 +32,9 @@ namespace LaserAPI.Models.Helper
             {
                 StatusCode = StatusCodes.Status304NotModified;
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                Console.WriteLine(exception);
                 StatusCode = StatusCodes.Status500InternalServerError;
             }
 
@@ -59,8 +60,9 @@ namespace LaserAPI.Models.Helper
             {
                 StatusCode = StatusCodes.Status304NotModified;
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                Console.WriteLine(exception);
                 StatusCode = StatusCodes.Status500InternalServerError;
             }
         }

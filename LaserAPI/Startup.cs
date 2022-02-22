@@ -24,10 +24,10 @@ namespace LaserAPI
         {
             services.AddControllers();
             string connectionString = Configuration.GetConnectionString("DefaultConnection");
-
             services.AddDbContextPool<DataContext>(
                 dbContextOptions => dbContextOptions
-                    .UseSqlite(connectionString));
+                    .UseSqlite(connectionString)
+                    .EnableSensitiveDataLogging());
             AddDependencyInjection(ref services);
         }
 
@@ -73,10 +73,10 @@ namespace LaserAPI
         /// <param name="app">IApplicationBuilder object</param>
         private static void CreateDatabaseIfNotExist(IApplicationBuilder app)
         {
-            var serviceScope = app.ApplicationServices
+            IServiceScope serviceScope = app.ApplicationServices
                 .GetRequiredService<IServiceScopeFactory>()
                 .CreateScope();
-            var context = serviceScope.ServiceProvider.GetService<DataContext>();
+            DataContext context = serviceScope.ServiceProvider.GetService<DataContext>();
             context.Database.Migrate();
         }
     }

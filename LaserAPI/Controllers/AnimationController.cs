@@ -31,7 +31,7 @@ namespace LaserAPI.Controllers
                 await _animationLogic.AddOrUpdate(animationDto);
             }
 
-            var controllerErrorHandler = new ControllerErrorHandler();
+            ControllerErrorHandler controllerErrorHandler = new ControllerErrorHandler();
             await controllerErrorHandler.Execute(Action());
             return StatusCode(controllerErrorHandler.StatusCode);
         }
@@ -45,7 +45,7 @@ namespace LaserAPI.Controllers
                 return animations.Adapt<List<AnimationViewModel>>();
             }
 
-            var controllerErrorHandler = new ControllerErrorHandler();
+            ControllerErrorHandler controllerErrorHandler = new ControllerErrorHandler();
             return await controllerErrorHandler.Execute(Action());
         }
 
@@ -57,7 +57,7 @@ namespace LaserAPI.Controllers
                 await _animationLogic.Remove(uuid);
             }
 
-            var controllerErrorHandler = new ControllerErrorHandler();
+            ControllerErrorHandler controllerErrorHandler = new ControllerErrorHandler();
             await controllerErrorHandler.Execute(Action());
             return StatusCode(controllerErrorHandler.StatusCode);
         }
