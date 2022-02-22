@@ -56,8 +56,9 @@ namespace LaserAPI.Models.Helper
             {
                 StatusCode = StatusCodes.Status404NotFound;
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException exception)
             {
+                Console.WriteLine(exception);
                 StatusCode = StatusCodes.Status304NotModified;
             }
             catch (Exception exception)

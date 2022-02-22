@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LaserAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220222153203_InitialCreate")]
+    [Migration("20220222202024_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -103,6 +103,9 @@ namespace LaserAPI.Migrations
 
                     b.Property<Guid>("PatternAnimationUuid")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Rotation")
+                        .HasColumnType("INTEGER");
 
                     b.Property<double>("Scale")
                         .HasColumnType("REAL");

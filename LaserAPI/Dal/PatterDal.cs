@@ -37,18 +37,8 @@ namespace LaserAPI.Dal
 
         public async Task Update(PatternDto pattern)
         {
-            PatternDto dbPattern = await _context.Pattern.Where(p => p.Uuid == pattern.Uuid)
-                .Include(p => p.Points)
-                .FirstOrDefaultAsync();
-
-            if (dbPattern == null)
-            {
-                throw new KeyNotFoundException();
-            }
-
-            _context.Pattern.Remove(dbPattern);
-            await _context.Pattern.AddAsync(pattern);
-            await _context.SaveChangesAsync();
+            await Remove(pattern.Uuid);
+            await Add(pattern);
         }
 
         public async Task Remove(Guid uuid)

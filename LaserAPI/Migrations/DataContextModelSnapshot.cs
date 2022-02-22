@@ -102,6 +102,9 @@ namespace LaserAPI.Migrations
                     b.Property<Guid>("PatternAnimationUuid")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Rotation")
+                        .HasColumnType("INTEGER");
+
                     b.Property<double>("Scale")
                         .HasColumnType("REAL");
 

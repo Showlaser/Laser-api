@@ -3,7 +3,6 @@ using LaserAPI.Models.Dto.Animations;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Dal
@@ -23,6 +22,15 @@ namespace LaserAPI.Dal
             await _context.SaveChangesAsync();
         }
 
+        private async Task<AnimationDto> Find(Guid uuid)
+        {
+            return await _context.Animation
+                .Include(a => a.PatternAnimations)
+                .ThenInclude(pa => pa.AnimationSettings)
+                .ThenInclude(ast => ast.Points)
+                .SingleOrDefaultAsync(a => a.Uuid == uuid);
+        }
+
         public async Task<List<AnimationDto>> All()
         {
             return await _context.Animation
@@ -39,18 +47,13 @@ namespace LaserAPI.Dal
 
         public async Task Update(AnimationDto animation)
         {
-            _context.Animation.Update(animation);
-            await _context.SaveChangesAsync();
+            await Remove(animation.Uuid);
+            await Add(animation);
         }
 
         public async Task Remove(Guid uuid)
         {
-            AnimationDto animationToRemove = (await _context.Animation.Where(a => a.Uuid == uuid)
-                .Include(a => a.PatternAnimations)
-                .ThenInclude(pa => pa.AnimationSettings)
-                .ThenInclude(ast => ast.Points)
-                .ToListAsync()).FirstOrDefault();
-
+            AnimationDto animationToRemove = await Find(uuid);
             if (animationToRemove == null)
             {
                 throw new KeyNotFoundException();

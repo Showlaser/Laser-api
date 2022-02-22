@@ -117,6 +117,7 @@ namespace LaserAPI.Migrations
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     PatternAnimationUuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     Scale = table.Column<double>(type: "REAL", nullable: false),
+                    Rotation = table.Column<int>(type: "INTEGER", nullable: false),
                     CenterX = table.Column<int>(type: "INTEGER", nullable: false),
                     CenterY = table.Column<int>(type: "INTEGER", nullable: false),
                     StartTime = table.Column<int>(type: "INTEGER", nullable: false)
