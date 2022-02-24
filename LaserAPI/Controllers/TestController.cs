@@ -13,7 +13,7 @@ namespace LaserAPI.Controllers
         [HttpGet]
         public async Task<string> Send()
         {
-            const int durationMs = 25000;
+            const int durationMs = 2000;
             const int max = 8;
             int iterations = 0;
 
