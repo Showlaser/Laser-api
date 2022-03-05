@@ -52,9 +52,10 @@ namespace LaserAPI
             app.UseRouting();
             app.UseCors(builder =>
             {
-                builder.AllowAnyOrigin();
-                builder.AllowAnyMethod();
-                builder.AllowAnyHeader();
+                builder.WithOrigins("http://localhost:3000")
+                    .AllowCredentials()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
             });
 
             app.UseAuthorization();

@@ -1,9 +1,11 @@
 ﻿using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.Helper;
+using LaserAPI.Models.Helper.Laser;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -42,6 +44,52 @@ namespace LaserAPI.Logic
                    patternAnimation.AnimationUuid != Guid.Empty &&
                    patternAnimation.TimeLineId.IsBetweenOrEqualTo(0, 3) &&
                    patternAnimation.Uuid != Guid.Empty);
+        }
+
+        public async Task PlayAnimation(AnimationDto animation)
+        {
+            int animationDuration = AnimationHelper.GetAnimationDuration(animation);
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            while (stopwatch.ElapsedMilliseconds < animationDuration)
+            {
+                List<PatternAnimationDto> patternAnimationsToPlay = PatternAnimationHelper
+                    .GetPatternAnimationsBetweenTimeMs(animation, stopwatch.ElapsedMilliseconds);
+                if (patternAnimationsToPlay == null)
+                {
+                    continue;
+                }
+
+                PatternAnimationSettingsDto settingToPlay = null;
+                foreach (PatternAnimationDto patternAnimation in patternAnimationsToPlay)
+                {
+                    PatternAnimationSettingsDto closestPatternAnimationSettings = PatternSettingsHelper
+                        .GetSettingClosestToTimeMs(patternAnimation.AnimationSettings, patternAnimation.StartTimeOffset,
+                            stopwatch.ElapsedMilliseconds);
+
+                    if (closestPatternAnimationSettings != null)
+                    {
+                        settingToPlay = closestPatternAnimationSettings;
+                    }
+                }
+
+                if (settingToPlay == null)
+                {
+                    continue;
+                }
+
+                foreach (AnimationPointDto point in settingToPlay.Points)
+                {
+                    await LaserConnectionLogic.SendMessage(new LaserMessage
+                    {
+                        X = point.X + settingToPlay.CenterX,
+                        Y = point.Y + settingToPlay.CenterY,
+                        RedLaser = point.RedLaserPowerPwm,
+                        GreenLaser = point.GreenLaserPowerPwm,
+                        BlueLaser = point.BlueLaserPowerPwm,
+                    });
+                }
+            }
         }
 
         private static bool AnimationDoesNotContainsSettingsWithSameStartTime(AnimationDto animation)
