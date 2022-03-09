@@ -59,8 +59,10 @@ namespace LaserAPI.Logic
 
             while (stopwatch.ElapsedMilliseconds < 500)
             {
-                foreach (PointDto point in pattern.Points)
+                int pointsLength = pattern.Points.Count;
+                for (int index = 0; index < pointsLength; index++)
                 {
+                    PointDto point = pattern.Points[index];
                     await LaserConnectionLogic.SendMessage(new LaserMessage
                     {
                         RedLaser = point.RedLaserPowerPwm,

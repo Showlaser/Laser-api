@@ -55,9 +55,6 @@ namespace LaserAPI.Logic
 
             try
             {
-                Console.WriteLine(message.RedLaser);
-                Console.WriteLine(message.GreenLaser);
-                Console.WriteLine(message.BlueLaser);
                 int[] value = { message.RedLaser, message.GreenLaser, message.BlueLaser, message.X, message.Y };
                 string result = string.Join(",", value);
                 string json = @"{""d"":[" + result + "]}";
@@ -80,7 +77,6 @@ namespace LaserAPI.Logic
                 _client.Close();
                 _server.Stop();
                 Connect();
-                return;
             }
         }
     }

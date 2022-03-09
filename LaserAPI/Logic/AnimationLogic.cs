@@ -49,10 +49,11 @@ namespace LaserAPI.Logic
         public async Task PlayAnimation(AnimationDto animation)
         {
             int animationDuration = AnimationHelper.GetAnimationDuration(animation);
-
+            int iterations = 0;
             Stopwatch stopwatch = Stopwatch.StartNew();
             while (stopwatch.ElapsedMilliseconds < animationDuration)
             {
+                iterations++;
                 List<PatternAnimationDto> patternAnimationsToPlay = PatternAnimationHelper
                     .GetPatternAnimationsBetweenTimeMs(animation, stopwatch.ElapsedMilliseconds);
                 if (patternAnimationsToPlay == null)
@@ -60,34 +61,59 @@ namespace LaserAPI.Logic
                     continue;
                 }
 
-                PatternAnimationSettingsDto settingToPlay = null;
-                foreach (PatternAnimationDto patternAnimation in patternAnimationsToPlay)
+                List<PatternAnimationSettingsDto> settingsToPlay = new();
+                int patternAnimationsLength = patternAnimationsToPlay.Count;
+
+                long stopwatchTime = stopwatch.ElapsedMilliseconds;
+                for (int i = 0; i < patternAnimationsLength; i++)
                 {
+                    PatternAnimationDto patternAnimation = patternAnimationsToPlay[i];
                     PatternAnimationSettingsDto closestPatternAnimationSettings = PatternSettingsHelper
                         .GetSettingClosestToTimeMs(patternAnimation.AnimationSettings, patternAnimation.StartTimeOffset,
-                            stopwatch.ElapsedMilliseconds);
+                            stopwatchTime);
 
                     if (closestPatternAnimationSettings != null)
                     {
-                        settingToPlay = closestPatternAnimationSettings;
+                        settingsToPlay.Add(closestPatternAnimationSettings);
                     }
                 }
 
-                if (settingToPlay == null)
+                if (!settingsToPlay.Any())
                 {
                     continue;
                 }
 
-                foreach (AnimationPointDto point in settingToPlay.Points)
+                int settingsToPlayLength = settingsToPlay.Count;
+
+                for (int i = 0; i < settingsToPlayLength; i++)
                 {
-                    await LaserConnectionLogic.SendMessage(new LaserMessage
+                    PatternAnimationSettingsDto settingToPlay = settingsToPlay[i];
+
+                    int pointsCount = settingToPlay.Points.Count;
+                    for (int k = 0; k < pointsCount; k++)
                     {
-                        X = point.X + settingToPlay.CenterX,
-                        Y = point.Y + settingToPlay.CenterY,
-                        RedLaser = point.RedLaserPowerPwm,
-                        GreenLaser = point.GreenLaserPowerPwm,
-                        BlueLaser = point.BlueLaserPowerPwm,
-                    });
+                        AnimationPointDto point = settingToPlay.Points[k];
+                        await LaserConnectionLogic.SendMessage(new LaserMessage
+                        {
+                            X = point.X + settingToPlay.CenterX,
+                            Y = point.Y + settingToPlay.CenterY,
+                            RedLaser = point.RedLaserPowerPwm,
+                            GreenLaser = point.GreenLaserPowerPwm,
+                            BlueLaser = point.BlueLaserPowerPwm,
+                        });
+
+                        if (k == pointsCount - 1)
+                        {
+                            await LaserConnectionLogic.SendMessage(new LaserMessage
+                            {
+                                X = point.X + settingToPlay.CenterX,
+                                Y = point.Y + settingToPlay.CenterY,
+                                RedLaser = 0,
+                                GreenLaser = 0,
+                                BlueLaser = 0,
+                            });
+                        }
+                    }
                 }
             }
         }
