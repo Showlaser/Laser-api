@@ -93,21 +93,23 @@ namespace LaserAPI.Logic
                     for (int k = 0; k < pointsCount; k++)
                     {
                         AnimationPointDto point = settingToPlay.Points[k];
+                        AnimationPointDto rotatedPoint = RotatePoint(point, settingToPlay);
+
                         await LaserConnectionLogic.SendMessage(new LaserMessage
                         {
-                            X = point.X + settingToPlay.CenterX,
-                            Y = point.Y + settingToPlay.CenterY,
-                            RedLaser = point.RedLaserPowerPwm,
-                            GreenLaser = point.GreenLaserPowerPwm,
-                            BlueLaser = point.BlueLaserPowerPwm,
+                            X = rotatedPoint.X,
+                            Y = rotatedPoint.Y,
+                            RedLaser = rotatedPoint.RedLaserPowerPwm,
+                            GreenLaser = rotatedPoint.GreenLaserPowerPwm,
+                            BlueLaser = rotatedPoint.BlueLaserPowerPwm,
                         });
 
                         if (k == pointsCount - 1)
                         {
                             await LaserConnectionLogic.SendMessage(new LaserMessage
                             {
-                                X = point.X + settingToPlay.CenterX,
-                                Y = point.Y + settingToPlay.CenterY,
+                                X = rotatedPoint.X,
+                                Y = rotatedPoint.Y,
                                 RedLaser = 0,
                                 GreenLaser = 0,
                                 BlueLaser = 0,
@@ -116,6 +118,27 @@ namespace LaserAPI.Logic
                     }
                 }
             }
+        }
+
+        private static AnimationPointDto RotatePoint(AnimationPointDto point, PatternAnimationSettingsDto setting)
+        {
+            double radians = (Math.PI / 180) * setting.Rotation;
+            double cos = Math.Cos(radians);
+            double sin = Math.Sin(radians);
+
+            int xWithOffset = point.X + setting.CenterX;
+            int yWithOffset = point.Y + setting.CenterY;
+
+            int x = (int)(cos * xWithOffset + sin * yWithOffset);
+            int y = (int)(cos * yWithOffset - sin * xWithOffset);
+            return new AnimationPointDto
+            {
+                X = x,
+                Y = y,
+                RedLaserPowerPwm = point.RedLaserPowerPwm,
+                GreenLaserPowerPwm = point.GreenLaserPowerPwm,
+                BlueLaserPowerPwm = point.BlueLaserPowerPwm,
+            };
         }
 
         private static bool AnimationDoesNotContainsSettingsWithSameStartTime(AnimationDto animation)
