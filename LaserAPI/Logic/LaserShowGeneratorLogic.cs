@@ -41,12 +41,12 @@ namespace LaserAPI.Logic
             _audioAnalyser.Capture.DataAvailable += CaptureOnDataAvailable;
             _audioAnalyser.Capture.StartRecording();
             _audioAnalyser.SpectrumCalculated += AudioAnalyserOnSpectrumCalculated;
-            _audioAnalyser.SampleAggregator.PerformFFT = true;
+            _audioAnalyser.SampleAggregator.PerformFft = true;
         }
 
         public void Stop()
         {
-            _audioAnalyser.SampleAggregator.PerformFFT = false;
+            _audioAnalyser.SampleAggregator.PerformFft = false;
             _audioAnalyser.Capture.StopRecording();
         }
 

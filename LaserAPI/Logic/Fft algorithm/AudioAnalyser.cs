@@ -31,7 +31,7 @@ namespace LaserAPI.Logic.Fft_algorithm
             Capture = new WasapiLoopbackCapture();
             SampleAggregator = new SampleAggregator();
             SampleAggregator.FftCalculated += FftCalculated;
-            SampleAggregator.PerformFFT = true;
+            SampleAggregator.PerformFft = true;
         }
 
         void FftCalculated(object sender, FftEventArgs fftEvent)

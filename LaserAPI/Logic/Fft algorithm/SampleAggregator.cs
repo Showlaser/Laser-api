@@ -6,48 +6,48 @@ namespace LaserAPI.Logic.Fft_algoritm
     public class SampleAggregator
     {
         public event EventHandler<FftEventArgs> FftCalculated;
-        public bool PerformFFT { get; set; }
+        public bool PerformFft { get; set; }
 
-        private readonly Complex[] fftBuffer;
-        private readonly FftEventArgs fftArgs;
-        private int fftPos;
-        private readonly int fftLength;
-        private readonly int m;
+        private readonly Complex[] _fftBuffer;
+        private readonly FftEventArgs _fftArgs;
+        private int _fftPos;
+        private const int FftLength = 2048;
+        private readonly int _m;
 
         public SampleAggregator()
         {
-            if (!IsPowerOfTwo(fftLength))
+            if (!IsPowerOfTwo(FftLength))
             {
                 throw new ArgumentException("Invalid FFT length");
             }
-            m = (int)Math.Log(fftLength, 2.0);
-            fftBuffer = new Complex[fftLength];
-            fftArgs = new FftEventArgs(fftBuffer);
+            _m = (int)Math.Log(FftLength, 2.0);
+            _fftBuffer = new Complex[FftLength];
+            _fftArgs = new FftEventArgs(_fftBuffer);
         }
 
-        static bool IsPowerOfTwo(int x)
+        private static bool IsPowerOfTwo(int x)
         {
             return (x & (x - 1)) == 0;
         }
 
         public void Add(float value)
         {
-            if (!PerformFFT || FftCalculated == null)
+            if (!PerformFft || FftCalculated == null)
             {
                 return;
             }
 
-            fftBuffer[fftPos].X = (float)(value * FastFourierTransform.HannWindow(fftPos, fftLength));
-            fftBuffer[fftPos].Y = 0;
-            fftPos++;
-            if (fftPos < fftLength)
+            _fftBuffer[_fftPos].X = (float)(value * FastFourierTransform.HannWindow(_fftPos, FftLength));
+            _fftBuffer[_fftPos].Y = 0;
+            _fftPos++;
+            if (_fftPos < FftLength)
             {
                 return;
             }
 
-            fftPos = 0;
-            FastFourierTransform.FFT(true, m, fftBuffer);
-            FftCalculated(this, fftArgs);
+            _fftPos = 0;
+            FastFourierTransform.FFT(true, _m, _fftBuffer);
+            FftCalculated(this, _fftArgs);
         }
     }
 }

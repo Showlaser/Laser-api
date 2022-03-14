@@ -3,6 +3,7 @@ using LaserAPI.Models.Dto.Animations;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Dal
@@ -47,8 +48,21 @@ namespace LaserAPI.Dal
 
         public async Task Update(AnimationDto animation)
         {
-            await Remove(animation.Uuid);
-            await Add(animation);
+            AnimationDto dbAnimation = await _context.Animation.Include(a => a.PatternAnimations)
+                .ThenInclude(pa => pa.AnimationSettings)
+                .ThenInclude(ast => ast.Points)
+                .SingleOrDefaultAsync(a => a.Uuid == animation.Uuid);
+
+            if (dbAnimation == null)
+            {
+                throw new NoNullAllowedException();
+            }
+
+            dbAnimation.PatternAnimations = animation.PatternAnimations;
+            dbAnimation.Name = animation.Name;
+
+            _context.Animation.Update(animation);
+            await _context.SaveChangesAsync();
         }
 
         public async Task Remove(Guid uuid)
