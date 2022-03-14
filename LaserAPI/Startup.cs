@@ -1,6 +1,7 @@
 using LaserAPI.Dal;
 using LaserAPI.Interfaces.Dal;
 using LaserAPI.Logic;
+using LaserAPI.Logic.Fft_algorithm;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,7 @@ namespace LaserAPI
             services.AddScoped<PatternLogic>();
             services.AddScoped<AnimationLogic>();
             services.AddScoped<ZoneLogic>();
+            services.AddScoped<AudioAnalyser>();
             services.AddScoped<IPatternDal, PatterDal>();
             services.AddScoped<IAnimationDal, AnimationDal>();
             services.AddScoped<IZoneDal, ZoneDal>();

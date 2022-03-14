@@ -11,8 +11,8 @@ namespace LaserAPITests.Mock
 
         public MockPatternLogic()
         {
-            var mockedPattern = new MockedPattern();
-            var patternDalMock = new Mock<IPatternDal>();
+            MockedPattern? mockedPattern = new MockedPattern();
+            Mock<IPatternDal>? patternDalMock = new Mock<IPatternDal>();
             patternDalMock.Setup(p => p.All()).ReturnsAsync(mockedPattern.PatternList);
 
             PatternLogic = new PatternLogic(patternDalMock.Object);

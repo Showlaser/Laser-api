@@ -1,11 +1,12 @@
 ﻿using LaserAPI.Logic;
 using LaserAPI.Models.Helper.Laser;
 using LaserAPITests.Mock;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
 
 namespace LaserAPITests.Tests.Logic
 {
-    [TestFixture]
+    [TestClass]
     internal class LaserLogicTest
     {
         private readonly LaserLogic _laserLogic;
@@ -15,17 +16,17 @@ namespace LaserAPITests.Tests.Logic
             _laserLogic = new MockLaserLogic().LaserLogic;
         }
 
-        [Test]
-        public void SendDataTest()
+        [TestMethod]
+        public async Task SendDataTest()
         {
-            Assert.DoesNotThrowAsync(async () => await _laserLogic.SendData(new LaserMessage
+            await _laserLogic.SendData(new LaserMessage
             {
                 RedLaser = 255,
                 BlueLaser = 0,
                 GreenLaser = 100,
                 X = 0,
                 Y = 4000
-            }));
+            });
         }
     }
 }
