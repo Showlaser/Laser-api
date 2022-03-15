@@ -5,19 +5,21 @@ namespace LaserAPI.Models.Helper.FftHelper
 {
     public static class FftHelper
     {
-        public static Range GetFftFrequencyRangeByGenre(Enums.MusicGenre genre)
+        private static readonly Dictionary<Enums.MusicGenre, AlgorithmSettings> AlgorithmSettings = new()
         {
-            Dictionary<Enums.MusicGenre, Range> fftFrequencyRange = new();
-            fftFrequencyRange.Add(Enums.MusicGenre.Hardstyle, new Range(1, 5));
-            fftFrequencyRange.Add(Enums.MusicGenre.Hardcore, new Range(1, 5));
-            fftFrequencyRange.Add(Enums.MusicGenre.Classic, new Range(5, 10));
-            fftFrequencyRange.Add(Enums.MusicGenre.Techno, new Range(1, 5));
-            fftFrequencyRange.Add(Enums.MusicGenre.Metal, new Range(3, 8));
-            fftFrequencyRange.Add(Enums.MusicGenre.Trance, new Range(1, 5));
-            fftFrequencyRange.Add(Enums.MusicGenre.Rock, new Range(3, 8));
-            fftFrequencyRange.Add(Enums.MusicGenre.House, new Range(1, 5));
+            { Enums.MusicGenre.Hardstyle, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.015 } },
+            { Enums.MusicGenre.Hardcore, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.015 } },
+            { Enums.MusicGenre.Classic, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 } },
+            { Enums.MusicGenre.Techno, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 } },
+            { Enums.MusicGenre.Metal, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 } },
+            { Enums.MusicGenre.Trance, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 } },
+            { Enums.MusicGenre.Rock, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 } },
+            { Enums.MusicGenre.House, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 } },
+        };
 
-            return fftFrequencyRange[genre];
+        public static AlgorithmSettings GetAlgorithmSettingsByGenre(Enums.MusicGenre genre)
+        {
+            return AlgorithmSettings[genre];
         }
     }
 }

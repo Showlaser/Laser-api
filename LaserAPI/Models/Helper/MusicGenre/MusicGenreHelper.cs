@@ -23,7 +23,7 @@ namespace LaserAPI.Models.Helper.MusicGenre
                     string spotifyMusicGenre = spotifyMusicGenres[j].ToLower();
                     if (spotifyMusicGenre.Contains(genre))
                     {
-                        return (Enums.MusicGenre)Enum.Parse(typeof(Enums.MusicGenre), genre);
+                        return (Enums.MusicGenre)Enum.Parse(typeof(Enums.MusicGenre), genre, true);
                     }
                 }
             }

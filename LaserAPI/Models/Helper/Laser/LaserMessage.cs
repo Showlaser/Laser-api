@@ -1,5 +1,8 @@
-﻿namespace LaserAPI.Models.Helper.Laser
+﻿using System;
+
+namespace LaserAPI.Models.Helper.Laser
 {
+    [Serializable]
     public class LaserMessage
     {
         public LaserMessage()

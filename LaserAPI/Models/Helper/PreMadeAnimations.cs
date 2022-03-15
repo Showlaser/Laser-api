@@ -6,6 +6,13 @@ namespace LaserAPI.Models.Helper
 {
     public class PreMadeAnimations
     {
+        private readonly double _speed;
+
+        public PreMadeAnimations(double speed)
+        {
+            _speed = speed;
+        }
+
         private static int GenerateRandomValueBetweenBoundaries(int center)
         {
             int randomValue = new Random(Guid.NewGuid().GetHashCode()).Next(-4000, 4000);
@@ -96,7 +103,7 @@ namespace LaserAPI.Models.Helper
                                     GetPoint(-4000, 0),
                                     GetPoint(4000, 0),
                                 },
-                                patternAnimationUuid, centerX, centerY, rotation, scale, 100),
+                                patternAnimationUuid, centerX, centerY, rotation, scale, Convert.ToInt32(1200 / _speed)),
                         }
                     }
                 }
@@ -115,7 +122,7 @@ namespace LaserAPI.Models.Helper
                     {
                         GetRandomPoint(centerX, centerY),
                     },
-                    patternAnimationUuid, centerX, centerY, rotation, scale, i + 2));
+                    patternAnimationUuid, centerX, centerY, rotation, scale, Convert.ToInt32(i + 20 / _speed)));
             }
 
             return new AnimationDto

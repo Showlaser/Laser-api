@@ -43,6 +43,7 @@ namespace LaserAPI.Logic
 
         public static async Task SendMessage(LaserMessage message)
         {
+            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref message, 6);
             if (RanByUnitTest)
             {
                 return;

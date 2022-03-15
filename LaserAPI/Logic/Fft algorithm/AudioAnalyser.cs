@@ -15,7 +15,6 @@ namespace LaserAPI.Logic.Fft_algorithm
         public WasapiCapture Capture { get; private set; }
         public SampleAggregator SampleAggregator { get; private set; }
         public MMDevice AudioDevice { get; set; }
-        public float ScaleLogBase { get; set; }
         private readonly Queue<double[]> _dataBuffer = new();
 
         public MMDeviceCollection GetDevices()

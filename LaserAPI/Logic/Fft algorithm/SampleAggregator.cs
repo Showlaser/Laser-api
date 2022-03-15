@@ -11,7 +11,7 @@ namespace LaserAPI.Logic.Fft_algoritm
         private readonly Complex[] _fftBuffer;
         private readonly FftEventArgs _fftArgs;
         private int _fftPos;
-        private const int FftLength = 2048;
+        private const int FftLength = 1024;
         private readonly int _m;
 
         public SampleAggregator()
