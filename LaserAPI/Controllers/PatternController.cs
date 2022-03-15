@@ -13,13 +13,27 @@ namespace LaserAPI.Controllers
 {
     [Route("pattern")]
     [ApiController]
-    public class PatternsController : ControllerBase
+    public class PatternController : ControllerBase
     {
         private readonly PatternLogic _patternLogic;
 
-        public PatternsController(PatternLogic patternLogic)
+        public PatternController(PatternLogic patternLogic)
         {
             _patternLogic = patternLogic;
+        }
+
+        [HttpPost("play")]
+        public async Task<ActionResult> PlayPattern([FromBody] Pattern pattern)
+        {
+            async Task Action()
+            {
+                PatternDto patternDto = pattern.Adapt<PatternDto>();
+                await _patternLogic.PlayPattern(patternDto);
+            }
+
+            ControllerErrorHandler controllerErrorHandler = new();
+            await controllerErrorHandler.Execute(Action());
+            return StatusCode(controllerErrorHandler.StatusCode);
         }
 
         [HttpPost]
@@ -31,7 +45,7 @@ namespace LaserAPI.Controllers
                 await _patternLogic.AddOrUpdate(patternDto);
             }
 
-            var controllerErrorHandler = new ControllerErrorHandler();
+            ControllerErrorHandler controllerErrorHandler = new();
             await controllerErrorHandler.Execute(Action());
             return StatusCode(controllerErrorHandler.StatusCode);
         }
@@ -45,7 +59,7 @@ namespace LaserAPI.Controllers
                 return patterns.Adapt<List<PatternViewmodel>>();
             }
 
-            var controllerErrorHandler = new ControllerErrorHandler();
+            ControllerErrorHandler controllerErrorHandler = new();
             return await controllerErrorHandler.Execute(Action());
         }
 
@@ -57,7 +71,7 @@ namespace LaserAPI.Controllers
                 await _patternLogic.Remove(uuid);
             }
 
-            var controllerErrorHandler = new ControllerErrorHandler();
+            ControllerErrorHandler controllerErrorHandler = new();
             await controllerErrorHandler.Execute(Action());
             return StatusCode(controllerErrorHandler.StatusCode);
         }

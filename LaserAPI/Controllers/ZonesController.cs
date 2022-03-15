@@ -31,7 +31,7 @@ namespace LaserAPI.Controllers
                 await _zoneLogic.AddOrUpdate(zoneDto);
             }
 
-            var controllerErrorHandler = new ControllerErrorHandler();
+            ControllerErrorHandler controllerErrorHandler = new ControllerErrorHandler();
             await controllerErrorHandler.Execute(Action());
             return StatusCode(controllerErrorHandler.StatusCode);
         }
@@ -45,7 +45,7 @@ namespace LaserAPI.Controllers
                 return zones.Adapt<List<ZoneViewmodel>>();
             }
 
-            var controllerErrorHandler = new ControllerErrorHandler();
+            ControllerErrorHandler controllerErrorHandler = new ControllerErrorHandler();
             return await controllerErrorHandler.Execute(Action());
         }
 
@@ -57,7 +57,7 @@ namespace LaserAPI.Controllers
                 await _zoneLogic.Remove(uuid);
             }
 
-            var controllerErrorHandler = new ControllerErrorHandler();
+            ControllerErrorHandler controllerErrorHandler = new ControllerErrorHandler();
             await controllerErrorHandler.Execute(Action());
             return StatusCode(controllerErrorHandler.StatusCode);
         }

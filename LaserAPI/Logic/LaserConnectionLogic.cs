@@ -43,6 +43,7 @@ namespace LaserAPI.Logic
 
         public static async Task SendMessage(LaserMessage message)
         {
+            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref message, 6);
             if (RanByUnitTest)
             {
                 return;
@@ -59,16 +60,21 @@ namespace LaserAPI.Logic
                 string result = string.Join(",", value);
                 string json = @"{""d"":[" + result + "]}";
 
-                var utf8 = new UTF8Encoding();
-                byte[] msg = utf8.GetBytes(json);
+                UTF8Encoding utf8 = new();
 
+                byte[] msg = utf8.GetBytes(json);
                 await _stream.WriteAsync(msg);
+
+                byte[] bytes = new byte[msg.Length];
+                await _stream.ReadAsync(bytes);
+                string data = utf8.GetString(bytes);
 
                 LastXPosition = message.X;
                 LastYPosition = message.Y;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 _client.Close();
                 _server.Stop();
                 Connect();

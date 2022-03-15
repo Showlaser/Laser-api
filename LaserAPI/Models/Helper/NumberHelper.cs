@@ -7,7 +7,7 @@ namespace LaserAPI.Models.Helper
     {
         public static bool IsBetweenOrEqualTo(this object source, double min, double max)
         {
-            var data = Convert.ToDouble(source);
+            double data = Convert.ToDouble(source);
             if (double.IsNaN(data))
             {
                 throw new NoNullAllowedException(nameof(source));

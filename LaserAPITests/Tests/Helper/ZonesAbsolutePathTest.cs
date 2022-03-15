@@ -1,14 +1,14 @@
 ﻿using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper.Zones;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 
 namespace LaserAPITests.Tests.Helper
 {
-    [TestFixture]
+    [TestClass]
     internal class ZonesAbsolutePathTest
     {
-        [Test]
+        [TestMethod]
         public void GetAbsoluteValuesTest()
         {
             ZoneDto zone = new()

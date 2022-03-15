@@ -1,6 +1,7 @@
 using LaserAPI.Dal;
 using LaserAPI.Interfaces.Dal;
 using LaserAPI.Logic;
+using LaserAPI.Logic.Fft_algorithm;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -24,10 +25,10 @@ namespace LaserAPI
         {
             services.AddControllers();
             string connectionString = Configuration.GetConnectionString("DefaultConnection");
-
             services.AddDbContextPool<DataContext>(
                 dbContextOptions => dbContextOptions
-                    .UseSqlite(connectionString));
+                    .UseSqlite(connectionString, o =>
+                        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
             AddDependencyInjection(ref services);
         }
 
@@ -36,9 +37,13 @@ namespace LaserAPI
             services.AddScoped<PatternLogic>();
             services.AddScoped<AnimationLogic>();
             services.AddScoped<ZoneLogic>();
+            services.AddScoped<LasershowLogic>();
+            services.AddSingleton<AudioAnalyser>();
+            services.AddSingleton<LaserShowGeneratorLogic>();
             services.AddScoped<IPatternDal, PatterDal>();
             services.AddScoped<IAnimationDal, AnimationDal>();
             services.AddScoped<IZoneDal, ZoneDal>();
+            services.AddScoped<ILasershowDal, LasershowDal>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,9 +57,10 @@ namespace LaserAPI
             app.UseRouting();
             app.UseCors(builder =>
             {
-                builder.AllowAnyOrigin();
-                builder.AllowAnyMethod();
-                builder.AllowAnyHeader();
+                builder.WithOrigins("http://localhost:3000")
+                    .AllowCredentials()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
             });
 
             app.UseAuthorization();
@@ -73,10 +79,10 @@ namespace LaserAPI
         /// <param name="app">IApplicationBuilder object</param>
         private static void CreateDatabaseIfNotExist(IApplicationBuilder app)
         {
-            var serviceScope = app.ApplicationServices
+            IServiceScope serviceScope = app.ApplicationServices
                 .GetRequiredService<IServiceScopeFactory>()
                 .CreateScope();
-            var context = serviceScope.ServiceProvider.GetService<DataContext>();
+            DataContext context = serviceScope.ServiceProvider.GetService<DataContext>();
             context.Database.Migrate();
         }
     }

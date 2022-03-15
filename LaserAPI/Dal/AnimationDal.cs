@@ -3,6 +3,7 @@ using LaserAPI.Models.Dto.Animations;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Dal
@@ -22,9 +23,22 @@ namespace LaserAPI.Dal
             await _context.SaveChangesAsync();
         }
 
+        private async Task<AnimationDto> Find(Guid uuid)
+        {
+            return await _context.Animation
+                .Include(a => a.PatternAnimations)
+                .ThenInclude(pa => pa.AnimationSettings)
+                .ThenInclude(ast => ast.Points)
+                .SingleOrDefaultAsync(a => a.Uuid == uuid);
+        }
+
         public async Task<List<AnimationDto>> All()
         {
-            return await _context.Animation.ToListAsync();
+            return await _context.Animation
+                .Include(a => a.PatternAnimations)
+                .ThenInclude(pa => pa.AnimationSettings)
+                .ThenInclude(ast => ast.Points)
+                .ToListAsync();
         }
 
         public async Task<bool> Exists(Guid uuid)
@@ -34,13 +48,26 @@ namespace LaserAPI.Dal
 
         public async Task Update(AnimationDto animation)
         {
+            AnimationDto dbAnimation = await _context.Animation.Include(a => a.PatternAnimations)
+                .ThenInclude(pa => pa.AnimationSettings)
+                .ThenInclude(ast => ast.Points)
+                .SingleOrDefaultAsync(a => a.Uuid == animation.Uuid);
+
+            if (dbAnimation == null)
+            {
+                throw new NoNullAllowedException();
+            }
+
+            dbAnimation.PatternAnimations = animation.PatternAnimations;
+            dbAnimation.Name = animation.Name;
+
             _context.Animation.Update(animation);
             await _context.SaveChangesAsync();
         }
 
         public async Task Remove(Guid uuid)
         {
-            AnimationDto animationToRemove = await _context.Animation.FindAsync(uuid);
+            AnimationDto animationToRemove = await Find(uuid);
             if (animationToRemove == null)
             {
                 throw new KeyNotFoundException();

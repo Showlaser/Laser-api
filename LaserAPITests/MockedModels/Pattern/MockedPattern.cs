@@ -15,7 +15,7 @@ namespace LaserAPITests.MockedModels.Pattern
 
         public MockedPattern()
         {
-            var pattern = new PatternDto
+            PatternDto? pattern = new PatternDto
             {
                 Scale = 1.0,
                 Uuid = Guid.Parse("ca1529e8-ac96-4cfb-93fb-1bb075969766"),
@@ -38,7 +38,7 @@ namespace LaserAPITests.MockedModels.Pattern
                 }
             };
 
-            var pattern2 = new PatternDto
+            PatternDto? pattern2 = new PatternDto
             {
                 Scale = 0.5,
                 Points = new List<PointDto>

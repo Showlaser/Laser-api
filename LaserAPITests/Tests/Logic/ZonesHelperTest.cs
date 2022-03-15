@@ -3,15 +3,15 @@ using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper.Laser;
 using LaserAPI.Models.Helper.Zones;
 using LaserAPITests.MockedModels.Zones;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NUnit.Framework;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
 namespace LaserAPITests.Tests.Logic
 {
-    [TestFixture]
+    [TestClass]
     public class ZonesHelperTest
     {
         private readonly List<ZonesHitDataHelper> _zones;
@@ -19,32 +19,29 @@ namespace LaserAPITests.Tests.Logic
         public ZonesHelperTest()
         {
             MockedZones mockedZones = new();
-            var mockedZoneDal = new Mock<IZoneDal>();
+            Mock<IZoneDal> mockedZoneDal = new();
             mockedZoneDal.Setup(d => d.All()).ReturnsAsync(mockedZones.Zones);
-
             List<ZoneDto> zones = mockedZoneDal.Object
                 .All()
                 .Result;
 
-            List<ZonesHitDataHelper> zoneHitDataCollection = new();
-            foreach (var zone in zones)
-            {
-                zoneHitDataCollection.Add(new ZonesHitDataHelper
-                {
-                    Zone = zone,
-                    ZoneAbsolutePositions = new ZoneAbsolutePositionsHelper(zone)
-                });
-            }
+            List<ZonesHitDataHelper> zoneHitDataCollection = zones
+                .Select(zone =>
+                    new ZonesHitDataHelper
+                    {
+                        Zone = zone,
+                        ZoneAbsolutePositions = new ZoneAbsolutePositionsHelper(zone)
+                    }).ToList();
 
             _zones = zoneHitDataCollection;
 
             //TODO move this to different class
         }
 
-        [Test]
+        [TestMethod]
         public void GetZoneWherePositionIsInPerformanceTest()
         {
-            var message = new LaserMessage
+            LaserMessage message = new()
             {
                 RedLaser = 0,
                 GreenLaser = 255,
@@ -60,29 +57,22 @@ namespace LaserAPITests.Tests.Logic
             }
 
             stopwatch.Stop();
-            Assert.LessOrEqual(stopwatch.ElapsedMilliseconds, 1);
+            Assert.IsTrue(stopwatch.ElapsedMilliseconds <= 1);
         }
 
-        [Test]
+        [TestMethod]
         public void GetZoneWherePositionIsInTest()
         {
-            var message = new LaserMessage
-            {
-                RedLaser = 0,
-                GreenLaser = 255,
-                BlueLaser = 255,
-                X = 4000,
-                Y = -4000
-            };
+            LaserMessage message = new(0, 255, 255, 4000, -4000);
 
             ZonesHitDataHelper zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, _zones.Count, message.X, message.Y);
-            Assert.NotNull(zone);
+            Assert.IsNotNull(zone);
         }
 
-        [Test]
+        [TestMethod]
         public void GetZoneWherePositionIsNotInTest()
         {
-            var message = new LaserMessage
+            LaserMessage message = new()
             {
                 RedLaser = 0,
                 GreenLaser = 255,
@@ -92,10 +82,10 @@ namespace LaserAPITests.Tests.Logic
             };
 
             ZonesHitDataHelper zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, _zones.Count, message.X, message.Y);
-            Assert.Null(zone);
+            Assert.IsNotNull(zone);
         }
 
-        [Test]
+        [TestMethod]
         public void GetZonesThatCrossesPathPerformanceTest()
         {
             int length = 0;
@@ -106,10 +96,10 @@ namespace LaserAPITests.Tests.Logic
             }
 
             stopwatch.Stop();
-            Assert.LessOrEqual(stopwatch.ElapsedMilliseconds, 1);
+            Assert.IsTrue(stopwatch.ElapsedMilliseconds <= 1);
         }
 
-        [Test]
+        [TestMethod]
         public void GetZonesThatCrossesPathTest()
         {
             int length = 0;

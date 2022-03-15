@@ -1,4 +1,5 @@
 ﻿using LaserAPI.Models.Dto.Animations;
+using LaserAPI.Models.Dto.Lasershow;
 using LaserAPI.Models.Dto.Patterns;
 using LaserAPI.Models.Dto.Zones;
 using Microsoft.EntityFrameworkCore;
@@ -11,15 +12,23 @@ namespace LaserAPI.Dal
         public virtual DbSet<PatternDto> Pattern { get; set; }
         public virtual DbSet<AnimationDto> Animation { get; set; }
         public virtual DbSet<ZoneDto> Zone { get; set; }
+        public virtual DbSet<LasershowDto> Lasershow { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Entity<LasershowDto>(e =>
+            {
+                e.HasKey(p => p.Uuid);
+            });
+
+            builder.Entity<LasershowAnimationDto>(e =>
+            {
+                e.HasKey(p => p.Uuid);
+            });
+
             builder.Entity<PatternDto>(e =>
             {
                 e.HasKey(p => p.Uuid);
-                e.HasMany(p => p.Points)
-                    .WithOne()
-                    .HasForeignKey(p => p.PatternUuid);
             });
 
             builder.Entity<PointDto>(e =>
@@ -30,9 +39,6 @@ namespace LaserAPI.Dal
             builder.Entity<AnimationDto>(e =>
             {
                 e.HasKey(a => a.Uuid);
-                e.HasMany(a => a.PatternAnimations)
-                    .WithOne()
-                    .HasForeignKey(a => a.AnimationUuid);
             });
 
             builder.Entity<PatternAnimationDto>(e =>
@@ -43,9 +49,6 @@ namespace LaserAPI.Dal
             builder.Entity<PatternAnimationSettingsDto>(e =>
             {
                 e.HasKey(pas => pas.Uuid);
-                e.HasMany(pas => pas.Points)
-                    .WithOne()
-                    .HasForeignKey(pas => pas.PatternAnimationSettingsUuid);
             });
 
             builder.Entity<AnimationPointDto>(e =>
@@ -56,9 +59,6 @@ namespace LaserAPI.Dal
             builder.Entity<ZoneDto>(e =>
             {
                 e.HasKey(z => z.Uuid);
-                e.HasMany(zp => zp.Positions)
-                    .WithOne()
-                    .HasForeignKey(z => z.ZoneUuid);
             });
 
             builder.Entity<ZonesPositionDto>(e =>

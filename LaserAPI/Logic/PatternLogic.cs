@@ -1,9 +1,11 @@
 ﻿using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Patterns;
 using LaserAPI.Models.Helper;
+using LaserAPI.Models.Helper.Laser;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -48,6 +50,31 @@ namespace LaserAPI.Logic
             }
 
             await _patternDal.Add(pattern);
+        }
+
+        public async Task PlayPattern(PatternDto pattern)
+        {
+            ValidatePattern(pattern);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            while (stopwatch.ElapsedMilliseconds < 500)
+            {
+                int pointsLength = pattern.Points.Count;
+                for (int index = 0; index < pointsLength; index++)
+                {
+                    PointDto point = pattern.Points[index];
+                    await LaserConnectionLogic.SendMessage(new LaserMessage
+                    {
+                        RedLaser = point.RedLaserPowerPwm,
+                        GreenLaser = point.GreenLaserPowerPwm,
+                        BlueLaser = point.BlueLaserPowerPwm,
+                        X = point.X,
+                        Y = point.Y,
+                    });
+                }
+            }
+
+            stopwatch.Stop();
         }
 
         public async Task<List<PatternDto>> All()

@@ -23,7 +23,7 @@ namespace LaserAPI.Logic
                 .Result;
 
             List<ZonesHitDataHelper> zonesHitDataCollection = new();
-            foreach (var zone in zones)
+            foreach (ZoneDto zone in zones)
             {
                 zonesHitDataCollection.Add(new ZonesHitDataHelper
                 {
