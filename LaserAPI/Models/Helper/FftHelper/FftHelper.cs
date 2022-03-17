@@ -9,7 +9,7 @@ namespace LaserAPI.Models.Helper.FftHelper
         {
             return genre.ToString().ToLower() switch
             {
-                "hardstyle" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.020 },
+                "hardstyle" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.018 },
                 "hardcore" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.015 },
                 "classic" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
                 "techno" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
