@@ -43,6 +43,9 @@ namespace LaserAPI.Migrations
                     b.Property<int>("GreenLaserPowerPwm")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid?>("PatternAnimationSettingsDtoUuid")
                         .HasColumnType("TEXT");
 
@@ -168,7 +171,7 @@ namespace LaserAPI.Migrations
 
                     b.HasKey("Uuid");
 
-                    b.ToTable("LasershowDto");
+                    b.ToTable("Lasershow");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Patterns.PatternDto", b =>
@@ -198,6 +201,9 @@ namespace LaserAPI.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("GreenLaserPowerPwm")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Order")
                         .HasColumnType("INTEGER");
 
                     b.Property<Guid?>("PatternDtoUuid")

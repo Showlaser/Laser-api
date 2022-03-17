@@ -20,7 +20,7 @@ namespace LaserAPI.Logic
         {
             try
             {
-                IPAddress localAddress = IPAddress.Parse("192.168.1.31");
+                IPAddress localAddress = IPAddress.Parse("172.25.189.12");
                 _server = new TcpListener(localAddress, 50000)
                 {
                     Server =
@@ -43,7 +43,7 @@ namespace LaserAPI.Logic
 
         public static async Task SendMessage(LaserMessage message)
         {
-            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref message, 6);
+            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref message, 20);
             if (RanByUnitTest)
             {
                 return;

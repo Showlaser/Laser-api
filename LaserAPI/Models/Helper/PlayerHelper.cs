@@ -75,6 +75,7 @@ namespace LaserAPI.Models.Helper
                 for (int i = 0; i < settingsToPlayLength; i++)
                 {
                     PatternAnimationSettingsDto settingToPlay = settingsToPlay[i];
+                     settingToPlay.Points = settingToPlay.Points.OrderBy(p => p.Order).ToList();
 
                     int pointsCount = settingToPlay.Points.Count;
                     for (int k = 0; k < pointsCount; k++)

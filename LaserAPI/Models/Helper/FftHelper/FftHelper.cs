@@ -5,21 +5,20 @@ namespace LaserAPI.Models.Helper.FftHelper
 {
     public static class FftHelper
     {
-        private static readonly Dictionary<Enums.MusicGenre, AlgorithmSettings> AlgorithmSettings = new()
-        {
-            { Enums.MusicGenre.Hardstyle, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.015 } },
-            { Enums.MusicGenre.Hardcore, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.015 } },
-            { Enums.MusicGenre.Classic, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 } },
-            { Enums.MusicGenre.Techno, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 } },
-            { Enums.MusicGenre.Metal, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 } },
-            { Enums.MusicGenre.Trance, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 } },
-            { Enums.MusicGenre.Rock, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 } },
-            { Enums.MusicGenre.House, new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 } },
-        };
-
         public static AlgorithmSettings GetAlgorithmSettingsByGenre(Enums.MusicGenre genre)
         {
-            return AlgorithmSettings[genre];
+            return genre.ToString().ToLower() switch
+            {
+                "hardstyle" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.020 },
+                "hardcore" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.015 },
+                "classic" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                "techno" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                "metal" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                "trance" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                "rock" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                "house" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                _ => null
+            };
         }
     }
 }

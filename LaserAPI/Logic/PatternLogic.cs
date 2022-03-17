@@ -56,6 +56,7 @@ namespace LaserAPI.Logic
         {
             ValidatePattern(pattern);
             Stopwatch stopwatch = Stopwatch.StartNew();
+            pattern.Points = pattern.Points.OrderBy(p => p.Order).ToList();
 
             while (stopwatch.ElapsedMilliseconds < 500)
             {

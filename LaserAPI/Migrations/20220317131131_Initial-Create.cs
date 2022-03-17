@@ -22,7 +22,7 @@ namespace LaserAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "LasershowDto",
+                name: "Lasershow",
                 columns: table => new
                 {
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -30,7 +30,7 @@ namespace LaserAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LasershowDto", x => x.Uuid);
+                    table.PrimaryKey("PK_Lasershow", x => x.Uuid);
                 });
 
             migrationBuilder.CreateTable(
@@ -99,9 +99,9 @@ namespace LaserAPI.Migrations
                         principalTable: "Animation",
                         principalColumn: "Uuid");
                     table.ForeignKey(
-                        name: "FK_LasershowAnimationDto_LasershowDto_LasershowDtoUuid",
+                        name: "FK_LasershowAnimationDto_Lasershow_LasershowDtoUuid",
                         column: x => x.LasershowDtoUuid,
-                        principalTable: "LasershowDto",
+                        principalTable: "Lasershow",
                         principalColumn: "Uuid");
                 });
 
@@ -116,6 +116,7 @@ namespace LaserAPI.Migrations
                     RedLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
                     GreenLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
                     BlueLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
+                    Order = table.Column<int>(type: "INTEGER", nullable: false),
                     PatternDtoUuid = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -182,6 +183,7 @@ namespace LaserAPI.Migrations
                     RedLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
                     GreenLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
                     BlueLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
+                    Order = table.Column<int>(type: "INTEGER", nullable: false),
                     PatternAnimationSettingsDtoUuid = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -248,7 +250,7 @@ namespace LaserAPI.Migrations
                 name: "PatternAnimationSettingsDto");
 
             migrationBuilder.DropTable(
-                name: "LasershowDto");
+                name: "Lasershow");
 
             migrationBuilder.DropTable(
                 name: "Pattern");

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LaserAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220314190816_InitialCreate")]
+    [Migration("20220317131131_Initial-Create")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,6 +43,9 @@ namespace LaserAPI.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("GreenLaserPowerPwm")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Order")
                         .HasColumnType("INTEGER");
 
                     b.Property<Guid?>("PatternAnimationSettingsDtoUuid")
@@ -170,7 +173,7 @@ namespace LaserAPI.Migrations
 
                     b.HasKey("Uuid");
 
-                    b.ToTable("LasershowDto");
+                    b.ToTable("Lasershow");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Patterns.PatternDto", b =>
@@ -200,6 +203,9 @@ namespace LaserAPI.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("GreenLaserPowerPwm")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Order")
                         .HasColumnType("INTEGER");
 
                     b.Property<Guid?>("PatternDtoUuid")

@@ -41,9 +41,9 @@ namespace LaserAPI.Models.Helper
 
             return new AnimationPointDto
             {
-                RedLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(0, 255),
-                GreenLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(0, 255),
-                BlueLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(0, 255),
+                RedLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
+                GreenLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
+                BlueLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
                 X = randomX,
                 Y = randomY
             };
@@ -53,9 +53,9 @@ namespace LaserAPI.Models.Helper
         {
             return new AnimationPointDto
             {
-                RedLaserPowerPwm = 7, // laserPower ?? new Random(Guid.NewGuid().GetHashCode()).Next(0, 255),
-                GreenLaserPowerPwm = 0,
-                BlueLaserPowerPwm = 0,
+                RedLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
+                GreenLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
+                BlueLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
                 X = x,
                 Y = y,
             };
@@ -130,7 +130,7 @@ namespace LaserAPI.Models.Helper
                                     GetPoint(-4000, 0),
                                     GetPoint(4000, 0),
                                 },
-                                patternAnimationUuid, centerX, centerY, rotation, scale, Convert.ToInt32(1200 / _speed)),
+                                patternAnimationUuid, centerX, centerY, rotation, scale, Convert.ToInt32(2200 / _speed)),
                         }
                     }
                 }
@@ -149,7 +149,7 @@ namespace LaserAPI.Models.Helper
                     {
                         GetRandomPoint(centerX, centerY),
                     },
-                    patternAnimationUuid, centerX, centerY, rotation, scale, Convert.ToInt32(i + 20 / _speed)));
+                    patternAnimationUuid, centerX, centerY, rotation, scale, Convert.ToInt32(i * 5 / _speed)));
             }
 
             return new AnimationDto

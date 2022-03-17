@@ -11,5 +11,6 @@ namespace LaserAPI.Models.FromFrontend.Animations
         public int RedLaserPowerPwm { get; set; }
         public int GreenLaserPowerPwm { get; set; }
         public int BlueLaserPowerPwm { get; set; }
+        public int Order { get; set; }
     }
 }
