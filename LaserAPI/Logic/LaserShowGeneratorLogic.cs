@@ -9,7 +9,6 @@ using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -90,10 +89,6 @@ namespace LaserAPI.Logic
 
             double threshold = _algorithmSettings.Threshold;
             bool taskAvailable = _playAnimationTask == null || _playAnimationTask.IsCompleted;
-            if (average > threshold)
-            {
-                Debug.WriteLine(average);
-            }
 
             if (average > threshold && taskAvailable)
             {

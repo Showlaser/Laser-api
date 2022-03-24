@@ -20,7 +20,7 @@ namespace LaserAPI.Logic
         {
             try
             {
-                IPAddress localAddress = IPAddress.Parse("172.25.189.12");
+                IPAddress localAddress = IPAddress.Parse("192.168.1.31");
                 _server = new TcpListener(localAddress, 50000)
                 {
                     Server =
@@ -56,7 +56,7 @@ namespace LaserAPI.Logic
 
             try
             {
-                int[] value = { message.RedLaser, message.GreenLaser, message.BlueLaser, message.X, message.Y };
+                int[] value = { 8, message.GreenLaser, message.BlueLaser, message.X, message.Y };
                 string result = string.Join(",", value);
                 string json = @"{""d"":[" + result + "]}";
 
