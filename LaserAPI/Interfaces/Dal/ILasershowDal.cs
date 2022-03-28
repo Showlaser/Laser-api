@@ -23,6 +23,13 @@ namespace LaserAPI.Interfaces.Dal
         public Task Update(LasershowDto lasershow);
 
         /// <summary>
+        /// Checks if the lasershow exists by name or uuid
+        /// </summary>
+        /// <param name="lasershow">The lasershow to check</param>
+        /// <returns>True if a lasershow with the same name or uuid or both is present in the database, else false is returned</returns>
+        public Task<bool> Exists(LasershowDto lasershow);
+
+        /// <summary>
         /// Removes the lasershow which matches the uuid
         /// </summary>
         /// <param name="uuid">The uuid of the lasershow to remove</param>

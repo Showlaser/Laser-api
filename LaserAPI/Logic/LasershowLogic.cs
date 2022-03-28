@@ -16,16 +16,16 @@ namespace LaserAPI.Logic
             _lasershowDal = lasershowDal;
         }
 
-        public async Task Add(LasershowDto lasershow)
+        public async Task AddOrUpdate(LasershowDto lasershow)
         {
             LasershowHelper.LasershowValid(lasershow);
-            await _lasershowDal.Add(lasershow);
-        }
+            if (await _lasershowDal.Exists(lasershow))
+            {
+                await _lasershowDal.Update(lasershow);
+                return;
+            }
 
-        public async Task Update(LasershowDto lasershow)
-        {
-            LasershowHelper.LasershowValid(lasershow);
-            await _lasershowDal.Update(lasershow);
+            await _lasershowDal.Add(lasershow);
         }
 
         public async Task<List<LasershowDto>> All()

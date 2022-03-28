@@ -47,6 +47,11 @@ namespace LaserAPI.Dal
             await _context.SaveChangesAsync();
         }
 
+        public async Task<bool> Exists(LasershowDto lasershow)
+        {
+            return await _context.Lasershow.AnyAsync(l => l.Name == lasershow.Name || l.Uuid == lasershow.Uuid);
+        }
+
         public async Task Remove(Guid uuid)
         {
             LasershowDto dbLasershow = await _context.Lasershow

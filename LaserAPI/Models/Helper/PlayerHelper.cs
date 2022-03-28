@@ -52,18 +52,8 @@ namespace LaserAPI.Models.Helper
                 int patternAnimationsLength = patternAnimationsToPlay.Count;
 
                 long stopwatchTime = stopwatch.ElapsedMilliseconds;
-                for (int i = 0; i < patternAnimationsLength; i++)
-                {
-                    PatternAnimationDto patternAnimation = patternAnimationsToPlay[i];
-                    PatternAnimationSettingsDto closestPatternAnimationSettings = PatternSettingsHelper
-                        .GetSettingClosestToTimeMs(patternAnimation.AnimationSettings, patternAnimation.StartTimeOffset,
-                            stopwatchTime);
-
-                    if (closestPatternAnimationSettings != null)
-                    {
-                        settingsToPlay.Add(closestPatternAnimationSettings);
-                    }
-                }
+                GetPatternAnimationSettingsToPlay(patternAnimationsLength, patternAnimationsToPlay,
+                    stopwatchTime, ref settingsToPlay);
 
                 if (!settingsToPlay.Any())
                 {
@@ -71,39 +61,59 @@ namespace LaserAPI.Models.Helper
                 }
 
                 int settingsToPlayLength = settingsToPlay.Count;
-
                 for (int i = 0; i < settingsToPlayLength; i++)
                 {
                     PatternAnimationSettingsDto settingToPlay = settingsToPlay[i];
-                     settingToPlay.Points = settingToPlay.Points.OrderBy(p => p.Order).ToList();
+                    settingToPlay.Points = settingToPlay.Points.OrderBy(p => p.Order).ToList();
+                    await PlayAnimationPoints(settingToPlay);
+                }
+            }
+        }
 
-                    int pointsCount = settingToPlay.Points.Count;
-                    for (int k = 0; k < pointsCount; k++)
+        private static async Task PlayAnimationPoints(PatternAnimationSettingsDto settingToPlay)
+        {
+            int pointsCount = settingToPlay.Points.Count;
+            for (int k = 0; k < pointsCount; k++)
+            {
+                AnimationPointDto point = settingToPlay.Points[k];
+                AnimationPointDto rotatedPoint = RotatePoint(point, settingToPlay);
+
+                await LaserConnectionLogic.SendMessage(new LaserMessage
+                {
+                    X = rotatedPoint.X,
+                    Y = rotatedPoint.Y,
+                    RedLaser = rotatedPoint.RedLaserPowerPwm,
+                    GreenLaser = rotatedPoint.GreenLaserPowerPwm,
+                    BlueLaser = rotatedPoint.BlueLaserPowerPwm,
+                });
+
+                if (k == pointsCount - 1)
+                {
+                    await LaserConnectionLogic.SendMessage(new LaserMessage
                     {
-                        AnimationPointDto point = settingToPlay.Points[k];
-                        AnimationPointDto rotatedPoint = RotatePoint(point, settingToPlay);
+                        X = rotatedPoint.X,
+                        Y = rotatedPoint.Y,
+                        RedLaser = 0,
+                        GreenLaser = 0,
+                        BlueLaser = 0,
+                    });
+                }
+            }
+        }
 
-                        await LaserConnectionLogic.SendMessage(new LaserMessage
-                        {
-                            X = rotatedPoint.X,
-                            Y = rotatedPoint.Y,
-                            RedLaser = rotatedPoint.RedLaserPowerPwm,
-                            GreenLaser = rotatedPoint.GreenLaserPowerPwm,
-                            BlueLaser = rotatedPoint.BlueLaserPowerPwm,
-                        });
+        private static void GetPatternAnimationSettingsToPlay(int patternAnimationsLength, IReadOnlyList<PatternAnimationDto> patternAnimationsToPlay,
+            long stopwatchTime, ref List<PatternAnimationSettingsDto> settingsToPlay)
+        {
+            for (int i = 0; i < patternAnimationsLength; i++)
+            {
+                PatternAnimationDto patternAnimation = patternAnimationsToPlay[i];
+                PatternAnimationSettingsDto closestPatternAnimationSettings = PatternSettingsHelper
+                    .GetSettingClosestToTimeMs(patternAnimation.AnimationSettings, patternAnimation.StartTimeOffset,
+                        stopwatchTime);
 
-                        if (k == pointsCount - 1)
-                        {
-                            await LaserConnectionLogic.SendMessage(new LaserMessage
-                            {
-                                X = rotatedPoint.X,
-                                Y = rotatedPoint.Y,
-                                RedLaser = 0,
-                                GreenLaser = 0,
-                                BlueLaser = 0,
-                            });
-                        }
-                    }
+                if (closestPatternAnimationSettings != null)
+                {
+                    settingsToPlay.Add(closestPatternAnimationSettings);
                 }
             }
         }
