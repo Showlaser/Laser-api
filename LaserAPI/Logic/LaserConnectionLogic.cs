@@ -56,7 +56,7 @@ namespace LaserAPI.Logic
 
             try
             {
-                int[] value = { 8, message.GreenLaser, message.BlueLaser, message.X, message.Y };
+                int[] value = { message.RedLaser, message.GreenLaser, message.BlueLaser, message.X, message.Y };
                 string result = string.Join(",", value);
                 string json = @"{""d"":[" + result + "]}";
 
