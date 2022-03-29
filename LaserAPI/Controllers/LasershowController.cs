@@ -42,7 +42,7 @@ namespace LaserAPI.Controllers
             async Task Action()
             {
                 LasershowDto lasershowDto = lasershow.Adapt<LasershowDto>();
-                await PlayerHelper.PlayLasershow(lasershowDto);
+                await _lasershowLogic.PlayLasershow(lasershowDto);
             }
 
             ControllerErrorHandler controllerErrorHandler = new();

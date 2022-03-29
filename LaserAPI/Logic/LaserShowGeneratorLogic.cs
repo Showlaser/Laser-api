@@ -17,14 +17,16 @@ namespace LaserAPI.Logic
     public class LaserShowGeneratorLogic
     {
         private readonly AudioAnalyser _audioAnalyser;
+        private readonly AnimationLogic _animationLogic;
         private double[] _spectrumData;
         private SongData _songData = new();
         private AlgorithmSettings _algorithmSettings = new();
         private Task _playAnimationTask;
 
-        public LaserShowGeneratorLogic(AudioAnalyser audioAnalyser)
+        public LaserShowGeneratorLogic(AudioAnalyser audioAnalyser, AnimationLogic animationLogic)
         {
             _audioAnalyser = audioAnalyser;
+            _animationLogic = animationLogic;
         }
 
         public void SetSongData(SongData songData)
@@ -93,7 +95,7 @@ namespace LaserAPI.Logic
             if (average > threshold && taskAvailable)
             {
                 AnimationDto animation = GenerateLaserAnimation();
-                _playAnimationTask = new Task(() => PlayerHelper.PlayAnimation(animation).Wait(), TaskCreationOptions.LongRunning);
+                _playAnimationTask = new Task(() => _animationLogic.PlayAnimation(animation).Wait(), TaskCreationOptions.LongRunning);
                 _playAnimationTask.Start();
             }
         }

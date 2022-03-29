@@ -42,7 +42,7 @@ namespace LaserAPI.Controllers
             async Task Action()
             {
                 AnimationDto animationDto = animation.Adapt<AnimationDto>();
-                await PlayerHelper.PlayAnimation(animationDto);
+                await _animationLogic.PlayAnimation(animationDto);
             }
 
             ControllerErrorHandler controllerErrorHandler = new();

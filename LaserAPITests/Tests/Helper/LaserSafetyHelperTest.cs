@@ -1,5 +1,4 @@
-﻿using LaserAPI.Models.Helper;
-using LaserAPI.Models.Helper.Laser;
+﻿using LaserAPI.Models.Helper.Laser;
 using LaserAPITests.MockedModels.LaserMessage;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -13,7 +12,7 @@ namespace LaserAPITests.Tests.Helper
         [TestMethod]
         public void LimitLaserPowerIfNecessaryTest()
         {
-            LaserMessage message = _laserMessage.LaserMessage.DeepClone();
+            LaserMessage message = _laserMessage.LaserMessage;
             for (int i = 0; i < 255; i++)
             {
                 LaserSafetyHelper.LimitLaserPowerIfNecessary(ref message, i);

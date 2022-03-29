@@ -43,7 +43,7 @@ namespace LaserAPI.Logic
 
         public static async Task SendMessage(LaserMessage message)
         {
-            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref message, 20);
+            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref message, 8);
             if (RanByUnitTest)
             {
                 return;
@@ -67,7 +67,6 @@ namespace LaserAPI.Logic
 
                 byte[] bytes = new byte[msg.Length];
                 await _stream.ReadAsync(bytes);
-                string data = utf8.GetString(bytes);
 
                 LastXPosition = message.X;
                 LastYPosition = message.Y;

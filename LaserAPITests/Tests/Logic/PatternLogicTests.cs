@@ -45,7 +45,7 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void AddTestEmptyPoints()
         {
-            Assert.ThrowsException<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_pattern.EmptyPoints));
+            Assert.ThrowsExceptionAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_pattern.EmptyPoints));
         }
 
         [TestMethod]

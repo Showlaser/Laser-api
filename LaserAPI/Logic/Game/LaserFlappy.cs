@@ -10,6 +10,7 @@ namespace LaserAPI.Logic.Game
 {
     public class LaserFlappy : IGame
     {
+        private readonly AnimationLogic _animationLogic;
         private int _score;
         private readonly PreMadeAnimations _preMadeAnimations = new(0);
         private readonly Timer _timer = new();
@@ -22,6 +23,11 @@ namespace LaserAPI.Logic.Game
         private Task _gameTask;
         private bool _obstacleOnTop;
         private bool _gameOver;
+
+        public LaserFlappy(AnimationLogic animationLogic)
+        {
+            _animationLogic = animationLogic;
+        }
 
         private async Task DrawScreen()
         {
@@ -37,7 +43,7 @@ namespace LaserAPI.Logic.Game
             int centerY = -4000 + height + _flappyYPosition;
 
             AnimationDto flappyAnimation = _preMadeAnimations.GetRectangle(width, height, centerX, centerY);
-            await PlayerHelper.PlayAnimation(flappyAnimation);
+            await _animationLogic.PlayAnimation(flappyAnimation);
         }
 
         private async Task DrawObstacle()
@@ -57,7 +63,7 @@ namespace LaserAPI.Logic.Game
 
             AnimationDto obstacleAnimation =
                 _preMadeAnimations.GetRectangle(_obstacleWidth, _obstacleHeight, _obstacleXPosition, centerY);
-            await PlayerHelper.PlayAnimation(obstacleAnimation);
+            await _animationLogic.PlayAnimation(obstacleAnimation);
         }
 
         public string GetName()

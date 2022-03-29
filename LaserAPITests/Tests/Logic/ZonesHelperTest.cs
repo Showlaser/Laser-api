@@ -2,9 +2,8 @@
 using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper.Laser;
 using LaserAPI.Models.Helper.Zones;
-using LaserAPITests.MockedModels.Zones;
+using LaserAPITests.Mock;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -18,10 +17,8 @@ namespace LaserAPITests.Tests.Logic
 
         public ZonesHelperTest()
         {
-            MockedZones mockedZones = new();
-            Mock<IZoneDal> mockedZoneDal = new();
-            mockedZoneDal.Setup(d => d.All()).ReturnsAsync(mockedZones.Zones);
-            List<ZoneDto> zones = mockedZoneDal.Object
+            IZoneDal zoneDal = new MockedZoneDal().ZoneDal;
+            List<ZoneDto> zones = zoneDal
                 .All()
                 .Result;
 
@@ -34,8 +31,6 @@ namespace LaserAPITests.Tests.Logic
                     }).ToList();
 
             _zones = zoneHitDataCollection;
-
-            //TODO move this to different class
         }
 
         [TestMethod]
@@ -70,7 +65,7 @@ namespace LaserAPITests.Tests.Logic
         }
 
         [TestMethod]
-        public void GetZoneWherePositionIsNotInTest()
+        public void GetZoneWherePositionIsInNullTest()
         {
             LaserMessage message = new()
             {
@@ -82,7 +77,7 @@ namespace LaserAPITests.Tests.Logic
             };
 
             ZonesHitDataHelper zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, _zones.Count, message.X, message.Y);
-            Assert.IsNotNull(zone);
+            Assert.IsNull(zone);
         }
 
         [TestMethod]

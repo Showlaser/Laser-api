@@ -15,10 +15,12 @@ namespace LaserAPI.Logic
     public class PatternLogic
     {
         private readonly IPatternDal _patternDal;
+        private readonly LaserLogic _laserLogic;
 
-        public PatternLogic(IPatternDal patternDal)
+        public PatternLogic(IPatternDal patternDal, LaserLogic laserLogic)
         {
             _patternDal = patternDal;
+            _laserLogic = laserLogic;
         }
 
         private static bool ValidatePoints(List<PointDto> points)
@@ -64,7 +66,7 @@ namespace LaserAPI.Logic
                 for (int index = 0; index < pointsLength; index++)
                 {
                     PointDto point = pattern.Points[index];
-                    await LaserConnectionLogic.SendMessage(new LaserMessage
+                    await _laserLogic.SendData(new LaserMessage
                     {
                         RedLaser = point.RedLaserPowerPwm,
                         GreenLaser = point.GreenLaserPowerPwm,

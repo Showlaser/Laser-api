@@ -35,13 +35,14 @@ namespace LaserAPI
 
         private static void AddDependencyInjection(ref IServiceCollection services)
         {
+            services.AddScoped<LaserLogic>();
             services.AddScoped<PatternLogic>();
             services.AddScoped<AnimationLogic>();
             services.AddScoped<ZoneLogic>();
             services.AddScoped<LasershowLogic>();
-            services.AddSingleton<AudioAnalyser>();
-            services.AddSingleton<LaserShowGeneratorLogic>();
-            services.AddSingleton<GameLogic>();
+            services.AddScoped<AudioAnalyser>();
+            services.AddScoped<LaserShowGeneratorLogic>();
+            services.AddScoped<GameLogic>();
             services.AddScoped<IPatternDal, PatterDal>();
             services.AddScoped<IAnimationDal, AnimationDal>();
             services.AddScoped<IZoneDal, ZoneDal>();
