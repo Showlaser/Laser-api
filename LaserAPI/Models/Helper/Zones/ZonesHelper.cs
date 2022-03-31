@@ -1,25 +1,26 @@
 ﻿using LaserAPI.Models.Dto.Zones;
 using System.Collections.Generic;
 using System.Linq;
+using LaserAPI.Logic;
+using LaserAPI.Models.Helper.Laser;
 
 namespace LaserAPI.Models.Helper.Zones
 {
     public static class ZonesHelper
     {
-        public static List<ZonesHitDataHelper> GetZonesInPathOfPosition(List<ZonesHitDataHelper> zones,
-            int previousX, int previousY, int newX, int newY, ref int zonesCrossedDataLength)
+        public static List<ZonesHitData> GetZonesInPathOfPosition(List<ZonesHitData> zones,
+            int previousX, int previousY, int newX, int newY)
         {
             int zonesLength = zones.Count;
-            List<ZonesHitDataHelper> zonesInPath = new();
+            List<ZonesHitData> zonesInPath = new();
 
             for (int i = 0; i < zonesLength; i++)
             {
-                ZonesHitDataHelper zoneHitData = zones[i];
+                ZonesHitData zoneHitData = zones[i];
                 ZoneSidesHitHelper zoneSidesHit = GetZoneSidesHitByPath(zoneHitData.Zone, previousX, previousY, newX, newY);
 
                 if (zoneSidesHit.BottomHit || zoneSidesHit.TopHit || zoneSidesHit.LeftHit || zoneSidesHit.RightHit)
                 {
-                    zonesCrossedDataLength++;
                     zoneHitData.ZoneSidesHit = zoneSidesHit;
                     zonesInPath.Add(zoneHitData);
                 }
@@ -59,19 +60,22 @@ namespace LaserAPI.Models.Helper.Zones
         }
 
         /// <summary>
-        /// Checks if the positions are within a zone
+        /// Checks if the x and y position of the previous point and new point are within a zone
         /// </summary>
-        /// <param name="zones"></param>
-        /// <param name="zonesLength"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        public static ZonesHitDataHelper GetZoneWherePositionIsIn(List<ZonesHitDataHelper> zones, int zonesLength, int x, int y)
+        /// <param name="zones">The active zones</param>
+        /// <param name="zonesLength">The length of the zones</param>
+        /// <param name="x">The new x position</param>
+        /// <param name="y">The new y position</param>
+        /// <returns>The zone where the previous and new x and y positions are in, null if the points are not within the zone</returns>
+        public static ZonesHitData GetZoneWherePathIsInside(List<ZonesHitData> zones, int zonesLength, int x, int y)
         {
+            LaserMessage previousMessage = LaserConnectionLogic.PreviousLaserMessage;
             for (int i = 0; i < zonesLength; i++)
             {
-                ZonesHitDataHelper zoneHitData = zones[i];
-                bool positionIsWithinZone = x.IsBetweenOrEqualTo(zoneHitData.ZoneAbsolutePositions.LeftXAxisInZone, zoneHitData.ZoneAbsolutePositions.RightXAxisInZone) &&
+                ZonesHitData zoneHitData = zones[i];
+                bool positionIsWithinZone = previousMessage.X.IsBetweenOrEqualTo(zoneHitData.ZoneAbsolutePositions.LeftXAxisInZone, zoneHitData.ZoneAbsolutePositions.RightXAxisInZone) &&
+                                            previousMessage.Y.IsBetweenOrEqualTo(zoneHitData.ZoneAbsolutePositions.LowestYAxisInZone, zoneHitData.ZoneAbsolutePositions.HighestYAxisInZone) &&
+                                            x.IsBetweenOrEqualTo(zoneHitData.ZoneAbsolutePositions.LeftXAxisInZone, zoneHitData.ZoneAbsolutePositions.RightXAxisInZone) &&
                                             y.IsBetweenOrEqualTo(zoneHitData.ZoneAbsolutePositions.LowestYAxisInZone, zoneHitData.ZoneAbsolutePositions.HighestYAxisInZone);
 
                 if (positionIsWithinZone)
@@ -83,7 +87,7 @@ namespace LaserAPI.Models.Helper.Zones
             return null;
         }
 
-        public static ZoneDto GetZoneWhereMaxLaserPowerPwmIsHighest(List<ZonesHitDataHelper> zonesHitDataCollection)
+        public static ZoneDto GetZoneWhereMaxLaserPowerPwmIsHighest(List<ZonesHitData> zonesHitDataCollection)
         {
             return zonesHitDataCollection
                 .Select(zone => zone.Zone)

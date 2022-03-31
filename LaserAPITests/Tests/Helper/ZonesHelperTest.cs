@@ -1,19 +1,20 @@
-﻿using LaserAPI.Interfaces.Dal;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper.Laser;
 using LaserAPI.Models.Helper.Zones;
 using LaserAPITests.Mock;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
-namespace LaserAPITests.Tests.Logic
+namespace LaserAPITests.Tests.Helper
 {
     [TestClass]
     public class ZonesHelperTest
     {
-        private readonly List<ZonesHitDataHelper> _zones;
+        private readonly List<ZonesHitData> _zones;
 
         public ZonesHelperTest()
         {
@@ -22,9 +23,9 @@ namespace LaserAPITests.Tests.Logic
                 .All()
                 .Result;
 
-            List<ZonesHitDataHelper> zoneHitDataCollection = zones
+            List<ZonesHitData> zoneHitDataCollection = zones
                 .Select(zone =>
-                    new ZonesHitDataHelper
+                    new ZonesHitData
                     {
                         Zone = zone,
                         ZoneAbsolutePositions = new ZoneAbsolutePositionsHelper(zone)
@@ -34,7 +35,7 @@ namespace LaserAPITests.Tests.Logic
         }
 
         [TestMethod]
-        public void GetZoneWherePositionIsInPerformanceTest()
+        public void GetZoneWherePathIsInsidePerformanceTest()
         {
             LaserMessage message = new()
             {
@@ -48,7 +49,7 @@ namespace LaserAPITests.Tests.Logic
             Stopwatch stopwatch = Stopwatch.StartNew();
             for (int i = 0; i < 2; i++)
             {
-                ZonesHelper.GetZoneWherePositionIsIn(_zones, _zones.Count, message.X, message.Y);
+                ZonesHelper.GetZoneWherePathIsInside(_zones, _zones.Count, message.X, message.Y);
             }
 
             stopwatch.Stop();
@@ -56,16 +57,15 @@ namespace LaserAPITests.Tests.Logic
         }
 
         [TestMethod]
-        public void GetZoneWherePositionIsInTest()
+        public void GetZoneWherePathIsInsideTest()
         {
             LaserMessage message = new(0, 255, 255, 4000, -4000);
-
-            ZonesHitDataHelper zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, _zones.Count, message.X, message.Y);
+            ZonesHitData zone = ZonesHelper.GetZoneWherePathIsInside(_zones, _zones.Count, message.X, message.Y);
             Assert.IsNotNull(zone);
         }
 
         [TestMethod]
-        public void GetZoneWherePositionIsInNullTest()
+        public void GetZoneWherePathIsInsideNullTest()
         {
             LaserMessage message = new()
             {
@@ -76,18 +76,17 @@ namespace LaserAPITests.Tests.Logic
                 Y = 4000
             };
 
-            ZonesHitDataHelper zone = ZonesHelper.GetZoneWherePositionIsIn(_zones, _zones.Count, message.X, message.Y);
+            ZonesHitData zone = ZonesHelper.GetZoneWherePathIsInside(_zones, _zones.Count, message.X, message.Y);
             Assert.IsNull(zone);
         }
 
         [TestMethod]
         public void GetZonesThatCrossesPathPerformanceTest()
         {
-            int length = 0;
             Stopwatch stopwatch = Stopwatch.StartNew();
             for (int i = 0; i < 2; i++)
             {
-                ZonesHelper.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000, ref length);
+                ZonesHelper.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000);
             }
 
             stopwatch.Stop();
@@ -97,13 +96,11 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void GetZonesThatCrossesPathTest()
         {
-            int length = 0;
-
-            List<ZoneDto> zones = ZonesHelper.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000, ref length)
+            List<ZoneDto> zones = ZonesHelper.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000)
                 .Select(z => z.Zone)
                 .ToList();
 
-            List<ZoneDto> zones2 = ZonesHelper.GetZonesInPathOfPosition(_zones, -4000, 0, 4000, 0, ref length)
+            List<ZoneDto> zones2 = ZonesHelper.GetZonesInPathOfPosition(_zones, -4000, 0, 4000, 0)
                 .Select(z => z.Zone)
                 .ToList();
 

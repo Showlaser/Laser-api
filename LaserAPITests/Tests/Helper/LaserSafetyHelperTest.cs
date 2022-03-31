@@ -7,18 +7,40 @@ namespace LaserAPITests.Tests.Helper
     [TestClass]
     public class LaserSafetyHelperTest
     {
-        private readonly MockedLaserMessage _laserMessage = new();
-
         [TestMethod]
         public void LimitLaserPowerIfNecessaryTest()
         {
-            LaserMessage message = _laserMessage.LaserMessage;
             for (int i = 0; i < 255; i++)
             {
-                LaserSafetyHelper.LimitLaserPowerIfNecessary(ref message, i);
+                LaserMessage message = new ()
+                {
+                    RedLaser = 255,
+                    GreenLaser = 255,
+                    BlueLaser = 255
+                };
+
+                LaserSafetyHelper.LimitLaserPowerPerLaserIfNecessary(ref message, i);
                 Assert.IsTrue(message.RedLaser <= i);
                 Assert.IsTrue(message.GreenLaser <= i);
                 Assert.IsTrue(message.BlueLaser <= i);
+            }
+        }
+
+        [TestMethod]
+        public void LimitTotalLaserPowerNecessaryTest()
+        {
+            for (int i = 0; i < 255; i++)
+            {
+                LaserMessage message = new()
+                {
+                    RedLaser = 255,
+                    GreenLaser = 255,
+                    BlueLaser = 255
+                };
+
+                LaserSafetyHelper.LimitTotalLaserPowerNecessary(ref message, i);
+                int totalPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
+                Assert.IsTrue(totalPower <= i);
             }
         }
     }

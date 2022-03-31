@@ -26,7 +26,7 @@ namespace LaserAPI.Models.Helper.Zones
         /// <param name="lastXPosition"></param>
         /// <param name="lastYPosition"></param>
         /// <param name="newMessageCollection"></param>
-        public void GetCoordinateOfZoneCrossing(LaserMessage message, ZonesHitDataHelper crossedZoneData, int lastXPosition, int lastYPosition,
+        public void GetCoordinateOfZoneCrossing(LaserMessage message, ZonesHitData crossedZoneData, int lastXPosition, int lastYPosition,
         ref List<LaserMessage> newMessageCollection)
         {
             ZoneAbsolutePositionsHelper zoneAbsolutePositions = crossedZoneData.ZoneAbsolutePositions;
@@ -49,7 +49,7 @@ namespace LaserAPI.Models.Helper.Zones
             }
         }
 
-        private void HandleRightHit(LaserMessage message, ZonesHitDataHelper crossedZoneData, int lastXPosition,
+        private void HandleRightHit(LaserMessage message, ZonesHitData crossedZoneData, int lastXPosition,
             int lastYPosition, ICollection<LaserMessage> newMessageCollection, ZoneAbsolutePositionsHelper zoneAbsolutePositions)
         {
             int rightXAxis = zoneAbsolutePositions.RightXAxisInZone;
@@ -65,11 +65,11 @@ namespace LaserAPI.Models.Helper.Zones
                 BlueLaser = message.BlueLaser,
             };
 
-            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
+            LaserSafetyHelper.LimitTotalLaserPowerNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
             newMessageCollection.Add(messageOnZoneEdge);
         }
 
-        private void HandleLeftHit(LaserMessage message, ZonesHitDataHelper crossedZoneData, int lastXPosition,
+        private void HandleLeftHit(LaserMessage message, ZonesHitData crossedZoneData, int lastXPosition,
             int lastYPosition, ICollection<LaserMessage> newMessageCollection, ZoneAbsolutePositionsHelper zoneAbsolutePositions)
         {
             int leftXAxis = zoneAbsolutePositions.LeftXAxisInZone;
@@ -85,11 +85,11 @@ namespace LaserAPI.Models.Helper.Zones
                 BlueLaser = message.BlueLaser,
             };
 
-            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
+            LaserSafetyHelper.LimitTotalLaserPowerNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
             newMessageCollection.Add(messageOnZoneEdge);
         }
 
-        private void HandleBottomHit(LaserMessage message, ZonesHitDataHelper crossedZoneData, int lastXPosition,
+        private void HandleBottomHit(LaserMessage message, ZonesHitData crossedZoneData, int lastXPosition,
             int lastYPosition, ICollection<LaserMessage> newMessageCollection, ZoneAbsolutePositionsHelper zoneAbsolutePositions)
         {
             int yAxisHit = zoneAbsolutePositions.LowestYAxisInZone;
@@ -105,11 +105,11 @@ namespace LaserAPI.Models.Helper.Zones
                 BlueLaser = message.BlueLaser,
             };
 
-            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
+            LaserSafetyHelper.LimitTotalLaserPowerNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
             newMessageCollection.Add(messageOnZoneEdge);
         }
 
-        private void HandleTopHit(LaserMessage message, ZonesHitDataHelper crossedZoneData, int lastXPosition,
+        private void HandleTopHit(LaserMessage message, ZonesHitData crossedZoneData, int lastXPosition,
             int lastYPosition, ICollection<LaserMessage> newMessageCollection, ZoneAbsolutePositionsHelper zoneAbsolutePositions)
         {
             int yAxisHit = zoneAbsolutePositions.HighestYAxisInZone;
@@ -125,7 +125,7 @@ namespace LaserAPI.Models.Helper.Zones
                 BlueLaser = message.BlueLaser,
             };
 
-            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
+            LaserSafetyHelper.LimitTotalLaserPowerNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
             newMessageCollection.Add(messageOnZoneEdge);
         }
 

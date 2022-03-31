@@ -2,7 +2,7 @@
 
 namespace LaserAPI.Models.Helper.Zones
 {
-    public class ZonesHitDataHelper
+    public class ZonesHitData
     {
         public ZoneDto Zone { get; set; }
         public ZoneSidesHitHelper ZoneSidesHit { get; set; }

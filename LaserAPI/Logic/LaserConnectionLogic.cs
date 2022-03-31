@@ -10,8 +10,7 @@ namespace LaserAPI.Logic
     public static class LaserConnectionLogic
     {
         public static bool RanByUnitTest { get; set; } = false;
-        public static int LastXPosition { get; private set; }
-        public static int LastYPosition { get; private set; }
+        public static LaserMessage PreviousLaserMessage { get; set; } = new();
         private static TcpListener _server;
         private static NetworkStream _stream;
         private static TcpClient _client;
@@ -43,7 +42,7 @@ namespace LaserAPI.Logic
 
         public static async Task SendMessage(LaserMessage message)
         {
-            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref message, 8);
+            LaserSafetyHelper.LimitLaserPowerPerLaserIfNecessary(ref message, 8);
             if (RanByUnitTest)
             {
                 return;
@@ -68,8 +67,7 @@ namespace LaserAPI.Logic
                 byte[] bytes = new byte[msg.Length];
                 await _stream.ReadAsync(bytes);
 
-                LastXPosition = message.X;
-                LastYPosition = message.Y;
+                PreviousLaserMessage = message;
             }
             catch (Exception e)
             {
