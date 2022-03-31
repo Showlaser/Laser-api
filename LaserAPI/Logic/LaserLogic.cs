@@ -1,6 +1,5 @@
 ﻿using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Zones;
-using LaserAPI.Models.Helper;
 using LaserAPI.Models.Helper.Laser;
 using LaserAPI.Models.Helper.Zones;
 using System.Collections.Generic;
@@ -54,38 +53,57 @@ namespace LaserAPI.Logic
 
             if (positionIsInSafetyZone)
             {
-                LaserSafetyHelper.LimitTotalLaserPowerNecessary(ref newMessage, zoneHitData.Zone.MaxLaserPowerInZonePwm);
+                LaserSafetyHelper.LimitTotalLaserPowerIfNecessary(ref newMessage, zoneHitData.Zone.MaxLaserPowerInZonePwm);
                 await LaserConnectionLogic.SendMessage(newMessage);
                 return;
             }
 
+            IEnumerable<LaserMessage> messagesToSend = GetPathWithSafetyZonePositions(newMessage);
+            foreach (LaserMessage message in messagesToSend)
+            {
+                await LaserConnectionLogic.SendMessage(message);
+            }
+        }
+
+        /// <summary>
+        /// Gets the positions from the edges of the zones that are crossed and the new message position sorted
+        /// </summary>
+        /// <param name="newMessage">The new incoming message</param>
+        /// <returns>A IEnumerable with the new message point and the positions of the zones that are crossed sorted</returns>
+        private IEnumerable<LaserMessage> GetPathWithSafetyZonePositions(LaserMessage newMessage)
+        {
             List<ZonesHitData> zonesCrossedData =
-                    ZonesHelper.GetZonesInPathOfPosition(_zones, LaserConnectionLogic.PreviousLaserMessage.X, LaserConnectionLogic.PreviousLaserMessage.Y,
-                        newMessage.X, newMessage.Y);
+                ZonesHelper.GetZonesInPathOfPosition(_zones, LaserConnectionLogic.PreviousLaserMessage.X,
+                    LaserConnectionLogic.PreviousLaserMessage.Y,
+                    newMessage.X, newMessage.Y);
 
             int zonesCrossedDataCount = zonesCrossedData.Count;
             if (zonesCrossedDataCount != 0)
             {
-                IReadOnlyList<LaserMessage> sortedMessages = GetMessagesOnZonesEdge(newMessage,
+                List<LaserMessage> messagesToSort = GetMessagesOnZonesEdge(newMessage,
                     zonesCrossedData, zonesCrossedDataCount);
 
-                int messagesToSendCount = sortedMessages.Count;
-                for (int i = 0; i < messagesToSendCount; i++)
-                {
-                    LaserMessage messageToSend = sortedMessages[i];
-                    await LaserConnectionLogic.SendMessage(messageToSend);
-                }
-                return;
+                messagesToSort.Add(newMessage);
+                return messagesToSort
+                    .OrderByDescending(m => m.Y)
+                    .ThenByDescending(m => m.X);
             }
 
-            await LaserConnectionLogic.SendMessage(newMessage);
+            return new List<LaserMessage> { newMessage };
         }
 
-        public static IReadOnlyList<LaserMessage> GetMessagesOnZonesEdge(LaserMessage originalMessage,
+        /// <summary>
+        /// Gets all messages at the edge of the zones that are crossed
+        /// </summary>
+        /// <param name="newMessage">The new message</param>
+        /// <param name="zonesCrossedData">The info of the zones that are crossed</param>
+        /// <param name="zonesCrossedCount">The length of the zonesCrossedData list</param>
+        /// <returns>A readonly list with the messages that contain the positions of the edges of the zones that are crossed</returns>
+        public static List<LaserMessage> GetMessagesOnZonesEdge(LaserMessage newMessage,
             List<ZonesHitData> zonesCrossedData, int zonesCrossedCount)
         {
-            int totalLaserPowerPwm = originalMessage.RedLaser + originalMessage.GreenLaser + originalMessage.BlueLaser;
-            List<LaserMessage> newLaserMessageCollection = new();
+            int totalLaserPowerPwm = newMessage.RedLaser + newMessage.GreenLaser + newMessage.BlueLaser;
+            List<LaserMessage> messagesOnZonesEdge = new();
             for (int i = 0; i < zonesCrossedCount; i++)
             {
                 ZonesHitData crossedZoneData = zonesCrossedData[i];
@@ -93,78 +111,13 @@ namespace LaserAPI.Logic
                 {
                     continue; // skip check if power is lower or equal to the max in safety zone
                 }
-                
+
                 zonesCrossedData[i].ZoneAbsolutePositions = new ZoneAbsolutePositionsHelper(crossedZoneData.Zone);
-                crossedZoneData.ZoneSidesHit.GetCoordinateOfZoneCrossing(originalMessage, crossedZoneData, LaserConnectionLogic.PreviousLaserMessage.X,
-                    LaserConnectionLogic.PreviousLaserMessage.Y, ref newLaserMessageCollection);
+                crossedZoneData.ZoneSidesHit.GetMissingXOrYCoordinateOfZoneCrossing(newMessage, crossedZoneData, LaserConnectionLogic.PreviousLaserMessage.X,
+                    LaserConnectionLogic.PreviousLaserMessage.Y, ref messagesOnZonesEdge);
             }
 
-            return SortMessagesFromFurthestToClosestStartPoint(newLaserMessageCollection, originalMessage, newLaserMessageCollection.Count);
-        }
-
-        /// <summary>
-        /// Sorts all messagesToSort from furthest to the closest newMessage to the startpoint
-        /// </summary>
-        /// <param name="messagesToSort">The messagesToSort to sort</param>
-        /// <param name="startPoint"></param>
-        /// <param name="messageCount"></param>
-        /// <returns></returns>
-        public static IReadOnlyList<LaserMessage> SortMessagesFromFurthestToClosestStartPoint(List<LaserMessage> messagesToSort,
-            LaserMessage startPoint, int messageCount)
-        {
-            if (messageCount == 1)
-            {
-                return messagesToSort;
-            }
-
-            int differenceInYAxis = NumberHelper.GetHighestNumber(startPoint.Y, LaserConnectionLogic.PreviousLaserMessage.X) -
-                                    NumberHelper.GetLowestNumber(startPoint.Y, LaserConnectionLogic.PreviousLaserMessage.X);
-            int differenceInXAxis = NumberHelper.GetHighestNumber(startPoint.X, LaserConnectionLogic.PreviousLaserMessage.X) -
-                                    NumberHelper.GetLowestNumber(startPoint.X, LaserConnectionLogic.PreviousLaserMessage.X);
-
-            bool checkByXAxis = differenceInXAxis > differenceInYAxis;
-            List<LaserMessage> sortedMessages = new();
-            for (int i = 0; i < messageCount; i++)
-            {
-                int closestMessageIndex = GetMessageIndexClosestToPoint(messagesToSort, messageCount, checkByXAxis);
-                LaserMessage messageToAdd = messagesToSort[closestMessageIndex];
-                sortedMessages.Add(messageToAdd);
-
-                messagesToSort.RemoveAt(closestMessageIndex);
-                messageCount--;
-            }
-
-            sortedMessages.Add(startPoint);
-            return sortedMessages;
-        }
-
-        /// <summary>
-        /// Gets the index of the messagesToSort that is closest to the to the last point
-        /// </summary>
-        /// <param name="messages"></param>
-        /// <param name="messageLength"></param>
-        /// <param name="checkByXAxis"></param>
-        /// <returns>The index of the closest messagesToSort</returns>
-        public static int GetMessageIndexClosestToPoint(IReadOnlyList<LaserMessage> messages, int messageLength, bool checkByXAxis)
-        {
-            int closestMessageIndex = 0;
-            for (int i = 1; i < messageLength; i++) // start at 1 since first element is already used
-            {
-                LaserMessage message = messages[i];
-                LaserMessage closestMessage = messages[closestMessageIndex];
-
-                bool xAxisClosest = checkByXAxis && LaserConnectionLogic.PreviousLaserMessage.X - message.X <
-                    LaserConnectionLogic.PreviousLaserMessage.X - closestMessage.X;
-                bool yAxisClosest = !checkByXAxis && LaserConnectionLogic.PreviousLaserMessage.Y - message.Y <
-                    LaserConnectionLogic.PreviousLaserMessage.Y - closestMessage.Y;
-
-                if (xAxisClosest || yAxisClosest)
-                {
-                    closestMessageIndex = i;
-                }
-            }
-
-            return closestMessageIndex;
+            return messagesOnZonesEdge;
         }
     }
 }

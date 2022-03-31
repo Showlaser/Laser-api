@@ -30,7 +30,7 @@ namespace LaserAPI.Models.Helper.Laser
         /// </summary>
         /// <param name="message">The message to modify</param>
         /// <param name="maxPowerPwm">The max power allowed</param>
-        public static void LimitTotalLaserPowerNecessary(ref LaserMessage message, int maxPowerPwm)
+        public static void LimitTotalLaserPowerIfNecessary(ref LaserMessage message, int maxPowerPwm)
         {
             int combinedPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
             if (combinedPower > maxPowerPwm)

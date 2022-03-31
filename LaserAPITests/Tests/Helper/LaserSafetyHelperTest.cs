@@ -1,5 +1,4 @@
 ﻿using LaserAPI.Models.Helper.Laser;
-using LaserAPITests.MockedModels.LaserMessage;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace LaserAPITests.Tests.Helper
@@ -12,7 +11,7 @@ namespace LaserAPITests.Tests.Helper
         {
             for (int i = 0; i < 255; i++)
             {
-                LaserMessage message = new ()
+                LaserMessage message = new()
                 {
                     RedLaser = 255,
                     GreenLaser = 255,
@@ -38,7 +37,7 @@ namespace LaserAPITests.Tests.Helper
                     BlueLaser = 255
                 };
 
-                LaserSafetyHelper.LimitTotalLaserPowerNecessary(ref message, i);
+                LaserSafetyHelper.LimitTotalLaserPowerIfNecessary(ref message, i);
                 int totalPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
                 Assert.IsTrue(totalPower <= i);
             }

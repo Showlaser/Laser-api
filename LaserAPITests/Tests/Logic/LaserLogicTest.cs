@@ -1,25 +1,25 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using LaserAPI.Logic;
+﻿using LaserAPI.Logic;
 using LaserAPI.Models.Helper.Laser;
-using LaserAPITests.Mock;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
 using LaserAPI.Models.Helper.Zones;
+using LaserAPITests.Mock;
 using LaserAPITests.MockedModels.Zones;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace LaserAPITests.Tests.Logic
 {
     [TestClass]
     public class LaserLogicTest
     {
-        private static readonly LaserLogic LaserLogic = new MockLaserLogic().LaserLogic;
-        private static readonly List<ZonesHitData> ZonesHitData = new MockedZonesHit().ZonesHit;
+        private readonly LaserLogic _laserLogic = new MockLaserLogic().LaserLogic;
+        private readonly List<ZonesHitData> _zonesHitData = new MockedZonesHit().ZonesHit;
 
         [TestMethod]
         public async Task SendDataTest()
         {
-            await LaserLogic.SendData(new LaserMessage
+            await _laserLogic.SendData(new LaserMessage
             {
                 RedLaser = 255,
                 BlueLaser = 0,
@@ -30,17 +30,27 @@ namespace LaserAPITests.Tests.Logic
         }
 
         [TestMethod]
-        public void GetSortedMessagesToSendOutsideZoneTest()
+        public void GetMessagesOnZoneEdgeTest()
         {
-            IReadOnlyList<LaserMessage> sortedMessages = LaserLogic.GetMessagesOnZonesEdge(new LaserMessage(
-                255, 255, 255, -4000, 4000), ZonesHitData, ZonesHitData.Count);
+            LaserMessage message = new(255, 255, 255, 0, 4000);
+            List<ZonesHitData> zonesHit = _zonesHitData;
+            ZonesHitData zonesHitData = zonesHit[0];
+            zonesHitData.ZoneSidesHit.BottomHit = true;
+            zonesHitData.ZoneSidesHit.TopHit = true;
 
-            LaserMessage message = sortedMessages.First();
-            Assert.IsTrue(message.X == -4000);
-            Assert.IsTrue(message.Y == 4000);
-            Assert.IsTrue(message.RedLaser == 255);
-            Assert.IsTrue(message.GreenLaser == 255);
-            Assert.IsTrue(message.BlueLaser == 255);
+            IReadOnlyList<LaserMessage> messagesOnZonesEdge = LaserLogic.GetMessagesOnZonesEdge(message,
+                zonesHit, _zonesHitData.Count);
+
+            Assert.IsTrue(messagesOnZonesEdge.Any());
+        }
+
+        [TestMethod]
+        public void GetGetMessagesOnZonesEdgeTest()
+        {
+            IReadOnlyList<LaserMessage> messagesOnZonesEdge = LaserLogic.GetMessagesOnZonesEdge(new LaserMessage(
+                255, 255, 255, -4000, 4000), _zonesHitData, _zonesHitData.Count);
+
+            Assert.IsFalse(messagesOnZonesEdge.Any());
         }
     }
 }
