@@ -2,124 +2,148 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LaserAPI.Models.Helper
 {
     public class ControllerErrorHandler
     {
-        public int StatusCode { get; private set; }
-
-        public async Task<T> Execute<T>(Task<T> task)
+        public async Task<ActionResult<T>> Execute<T>(Task<T> task)
         {
-            T result = default;
             try
             {
-                result = await task.WaitAsync(CancellationToken.None);
-                StatusCode = StatusCodes.Status200OK;
+                return await task.WaitAsync(CancellationToken.None);
             }
             catch (InvalidDataException)
             {
-                StatusCode = StatusCodes.Status400BadRequest;
+                return new BadRequestResult();
             }
             catch (KeyNotFoundException)
             {
-                StatusCode = StatusCodes.Status404NotFound;
+                return new NotFoundResult();
             }
             catch (DbUpdateException)
             {
-                StatusCode = StatusCodes.Status304NotModified;
+                return new StatusCodeResult(StatusCodes.Status304NotModified);
+            }
+            catch (DuplicateNameException)
+            {
+                return new ConflictResult();
+            }
+            catch (SecurityException)
+            {
+                return new UnauthorizedResult();
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                StatusCode = StatusCodes.Status500InternalServerError;
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
-
-            return result;
         }
 
-        public async Task Execute(Task task)
+        public async Task<ActionResult> Execute(Task task)
         {
             try
             {
                 await task.WaitAsync(CancellationToken.None);
-                StatusCode = StatusCodes.Status200OK;
+                return new OkResult();
             }
             catch (InvalidDataException)
             {
-                StatusCode = StatusCodes.Status400BadRequest;
+                return new BadRequestResult();
             }
             catch (KeyNotFoundException)
             {
-                StatusCode = StatusCodes.Status404NotFound;
-            }
-            catch (DbUpdateException exception)
-            {
-                Console.WriteLine(exception);
-                StatusCode = StatusCodes.Status304NotModified;
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-                StatusCode = StatusCodes.Status500InternalServerError;
-            }
-        }
-
-        public T Execute<T>(Func<T> task)
-        {
-            T result = default;
-            try
-            {
-                result = task.Invoke();
-                StatusCode = StatusCodes.Status200OK;
-            }
-            catch (InvalidDataException)
-            {
-                StatusCode = StatusCodes.Status400BadRequest;
-            }
-            catch (KeyNotFoundException)
-            {
-                StatusCode = StatusCodes.Status404NotFound;
+                return new NotFoundResult();
             }
             catch (DbUpdateException)
             {
-                StatusCode = StatusCodes.Status304NotModified;
+                return new StatusCodeResult(StatusCodes.Status304NotModified);
+            }
+            catch (DuplicateNameException)
+            {
+                return new ConflictResult();
+            }
+            catch (SecurityException)
+            {
+                return new UnauthorizedResult();
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                StatusCode = StatusCodes.Status500InternalServerError;
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
-
-            return result;
         }
 
-        public void Execute(Action task)
+        public ActionResult Execute(Action action)
         {
             try
             {
-                task.Invoke();
-                StatusCode = StatusCodes.Status200OK;
+                action.Invoke();
+                return new OkResult();
             }
             catch (InvalidDataException)
             {
-                StatusCode = StatusCodes.Status400BadRequest;
+                return new BadRequestResult();
             }
             catch (KeyNotFoundException)
             {
-                StatusCode = StatusCodes.Status404NotFound;
+                return new NotFoundResult();
             }
             catch (DbUpdateException)
             {
-                StatusCode = StatusCodes.Status304NotModified;
+                return new StatusCodeResult(StatusCodes.Status304NotModified);
+            }
+            catch (DuplicateNameException)
+            {
+                return new ConflictResult();
+            }
+            catch (SecurityException)
+            {
+                return new UnauthorizedResult();
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
-                StatusCode = StatusCodes.Status500InternalServerError;
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        public ActionResult<T> Execute<T>(Func<T> action)
+        {
+            try
+            {
+                return action.Invoke();
+            }
+            catch (InvalidDataException)
+            {
+                return new BadRequestResult();
+            }
+            catch (KeyNotFoundException)
+            {
+                return new NotFoundResult();
+            }
+            catch (DbUpdateException)
+            {
+                return new StatusCodeResult(StatusCodes.Status304NotModified);
+            }
+            catch (DuplicateNameException)
+            {
+                return new ConflictResult();
+            }
+            catch (SecurityException)
+            {
+                return new UnauthorizedResult();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
     }

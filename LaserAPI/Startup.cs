@@ -28,6 +28,7 @@ namespace LaserAPI
             string connectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContextPool<DataContext>(
                 dbContextOptions => dbContextOptions
+                    .EnableSensitiveDataLogging()
                     .UseSqlite(connectionString, o =>
                         o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
             AddDependencyInjection(ref services);
@@ -43,7 +44,7 @@ namespace LaserAPI
             services.AddScoped<AudioAnalyser>();
             services.AddScoped<LaserShowGeneratorLogic>();
             services.AddScoped<GameLogic>();
-            services.AddScoped<IPatternDal, PatterDal>();
+            services.AddScoped<IPatternDal, PatternDal>();
             services.AddScoped<IAnimationDal, AnimationDal>();
             services.AddScoped<IZoneDal, ZoneDal>();
             services.AddScoped<ILasershowDal, LasershowDal>();

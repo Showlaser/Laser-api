@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace LaserAPI.Dal
 {
-    public class PatterDal : IPatternDal
+    public class PatternDal : IPatternDal
     {
         private readonly DataContext _context;
 
-        public PatterDal(DataContext context)
+        public PatternDal(DataContext context)
         {
             _context = context;
         }
@@ -37,8 +37,13 @@ namespace LaserAPI.Dal
 
         public async Task Update(PatternDto pattern)
         {
-            await Remove(pattern.Uuid);
-            await Add(pattern);
+            PatternDto patternToUpdate = await _context.Pattern.FindAsync(pattern.Uuid);
+            patternToUpdate.Name = pattern.Name;
+            patternToUpdate.Scale = pattern.Scale;
+            patternToUpdate.Points = pattern.Points;
+
+            _context.Pattern.Update(patternToUpdate);
+            await _context.SaveChangesAsync();
         }
 
         public async Task Remove(Guid uuid)

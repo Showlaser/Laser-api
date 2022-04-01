@@ -20,7 +20,7 @@ namespace LaserAPI.Controllers
         }
 
         [HttpGet("devices")]
-        public IEnumerable<string> GetDevices()
+        public ActionResult<IEnumerable<string>> GetDevices()
         {
             IEnumerable<string> Action()
             {

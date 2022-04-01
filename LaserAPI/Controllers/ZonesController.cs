@@ -32,8 +32,7 @@ namespace LaserAPI.Controllers
             }
 
             ControllerErrorHandler controllerErrorHandler = new();
-            await controllerErrorHandler.Execute(Action());
-            return StatusCode(controllerErrorHandler.StatusCode);
+            return await controllerErrorHandler.Execute(Action());
         }
 
         [HttpGet]
@@ -58,8 +57,7 @@ namespace LaserAPI.Controllers
             }
 
             ControllerErrorHandler controllerErrorHandler = new();
-            await controllerErrorHandler.Execute(Action());
-            return StatusCode(controllerErrorHandler.StatusCode);
+            return await controllerErrorHandler.Execute(Action());
         }
     }
 }

@@ -11,6 +11,7 @@ namespace LaserAPI.Dal
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
         public virtual DbSet<PatternDto> Pattern { get; set; }
         public virtual DbSet<AnimationDto> Animation { get; set; }
+        public virtual DbSet<PatternAnimationDto> PatternAnimation { get; set; }
         public virtual DbSet<ZoneDto> Zone { get; set; }
         public virtual DbSet<LasershowDto> Lasershow { get; set; }
 

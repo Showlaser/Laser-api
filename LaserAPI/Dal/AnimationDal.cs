@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Dal
@@ -58,11 +59,26 @@ namespace LaserAPI.Dal
                 throw new NoNullAllowedException();
             }
 
-            dbAnimation.PatternAnimations = animation.PatternAnimations;
-            dbAnimation.Name = animation.Name;
+            List<PatternAnimationDto> patternAnimationsToAdd = animation.PatternAnimations
+                .Where(pa => dbAnimation.PatternAnimations
+                    .All(pa2 => pa2.Uuid != pa.Uuid))
+                .ToList();
 
-            _context.Animation.Update(animation);
-            await _context.SaveChangesAsync();
+                List<PatternAnimationSettingsDto> dbSettings =
+                dbAnimation.PatternAnimations.SelectMany(pa => pa.AnimationSettings).ToList();
+            List<PatternAnimationSettingsDto> settings =
+                animation.PatternAnimations.SelectMany(pa => pa.AnimationSettings).ToList();
+
+            List<PatternAnimationSettingsDto> settingsToAdd = settings
+                .Where(p => dbSettings
+                    .All(p2 => p2.Uuid != p.Uuid))
+                .ToList();
+
+            if (patternAnimationsToAdd.Any())
+            {
+                await _context.PatternAnimation.AddRangeAsync(patternAnimationsToAdd);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task Remove(Guid uuid)

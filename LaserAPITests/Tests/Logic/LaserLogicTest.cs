@@ -1,10 +1,12 @@
-﻿using LaserAPI.Logic;
+﻿using System;
+using LaserAPI.Logic;
 using LaserAPI.Models.Helper.Laser;
 using LaserAPI.Models.Helper.Zones;
 using LaserAPITests.Mock;
 using LaserAPITests.MockedModels.Zones;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,6 +17,12 @@ namespace LaserAPITests.Tests.Logic
     {
         private readonly LaserLogic _laserLogic = new MockLaserLogic().LaserLogic;
         private readonly List<ZonesHitData> _zonesHitData = new MockedZonesHit().ZonesHit;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            LaserConnectionLogic.RanByUnitTest = true;
+        }
 
         [TestMethod]
         public async Task SendDataTest()
@@ -27,6 +35,30 @@ namespace LaserAPITests.Tests.Logic
                 X = 0,
                 Y = 4000
             });
+        }
+
+        [TestMethod]
+        public async Task SendDataPerformanceTest()
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            int iterations = 0;
+
+            while (stopwatch.ElapsedMilliseconds < 1000)
+            {
+                await _laserLogic.SendData(new LaserMessage
+                {
+                    RedLaser = 255,
+                    BlueLaser = 0,
+                    GreenLaser = 100,
+                    X = Convert.ToInt32(stopwatch.ElapsedMilliseconds),
+                    Y = Convert.ToInt32(stopwatch.ElapsedMilliseconds)
+                });
+
+                iterations++;
+            }
+
+            stopwatch.Stop();
+            Assert.IsTrue(iterations > 25000); // 25000 is for 
         }
 
         [TestMethod]
