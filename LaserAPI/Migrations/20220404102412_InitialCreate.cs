@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using System;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -59,7 +59,7 @@ namespace LaserAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PatternAnimationDto",
+                name: "PatternAnimation",
                 columns: table => new
                 {
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -71,9 +71,9 @@ namespace LaserAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PatternAnimationDto", x => x.Uuid);
+                    table.PrimaryKey("PK_PatternAnimation", x => x.Uuid);
                     table.ForeignKey(
-                        name: "FK_PatternAnimationDto_Animation_AnimationDtoUuid",
+                        name: "FK_PatternAnimation_Animation_AnimationDtoUuid",
                         column: x => x.AnimationDtoUuid,
                         principalTable: "Animation",
                         principalColumn: "Uuid");
@@ -150,7 +150,7 @@ namespace LaserAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PatternAnimationSettingsDto",
+                name: "PatternAnimationSetting",
                 columns: table => new
                 {
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -164,16 +164,16 @@ namespace LaserAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PatternAnimationSettingsDto", x => x.Uuid);
+                    table.PrimaryKey("PK_PatternAnimationSetting", x => x.Uuid);
                     table.ForeignKey(
-                        name: "FK_PatternAnimationSettingsDto_PatternAnimationDto_PatternAnimationDtoUuid",
+                        name: "FK_PatternAnimationSetting_PatternAnimation_PatternAnimationDtoUuid",
                         column: x => x.PatternAnimationDtoUuid,
-                        principalTable: "PatternAnimationDto",
+                        principalTable: "PatternAnimation",
                         principalColumn: "Uuid");
                 });
 
             migrationBuilder.CreateTable(
-                name: "AnimationPointDto",
+                name: "AnimationPoint",
                 columns: table => new
                 {
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -188,17 +188,17 @@ namespace LaserAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AnimationPointDto", x => x.Uuid);
+                    table.PrimaryKey("PK_AnimationPoint", x => x.Uuid);
                     table.ForeignKey(
-                        name: "FK_AnimationPointDto_PatternAnimationSettingsDto_PatternAnimationSettingsDtoUuid",
+                        name: "FK_AnimationPoint_PatternAnimationSetting_PatternAnimationSettingsDtoUuid",
                         column: x => x.PatternAnimationSettingsDtoUuid,
-                        principalTable: "PatternAnimationSettingsDto",
+                        principalTable: "PatternAnimationSetting",
                         principalColumn: "Uuid");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AnimationPointDto_PatternAnimationSettingsDtoUuid",
-                table: "AnimationPointDto",
+                name: "IX_AnimationPoint_PatternAnimationSettingsDtoUuid",
+                table: "AnimationPoint",
                 column: "PatternAnimationSettingsDtoUuid");
 
             migrationBuilder.CreateIndex(
@@ -212,13 +212,13 @@ namespace LaserAPI.Migrations
                 column: "LasershowDtoUuid");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PatternAnimationDto_AnimationDtoUuid",
-                table: "PatternAnimationDto",
+                name: "IX_PatternAnimation_AnimationDtoUuid",
+                table: "PatternAnimation",
                 column: "AnimationDtoUuid");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PatternAnimationSettingsDto_PatternAnimationDtoUuid",
-                table: "PatternAnimationSettingsDto",
+                name: "IX_PatternAnimationSetting_PatternAnimationDtoUuid",
+                table: "PatternAnimationSetting",
                 column: "PatternAnimationDtoUuid");
 
             migrationBuilder.CreateIndex(
@@ -235,7 +235,7 @@ namespace LaserAPI.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AnimationPointDto");
+                name: "AnimationPoint");
 
             migrationBuilder.DropTable(
                 name: "LasershowAnimationDto");
@@ -247,7 +247,7 @@ namespace LaserAPI.Migrations
                 name: "ZonesPositionDto");
 
             migrationBuilder.DropTable(
-                name: "PatternAnimationSettingsDto");
+                name: "PatternAnimationSetting");
 
             migrationBuilder.DropTable(
                 name: "Lasershow");
@@ -259,7 +259,7 @@ namespace LaserAPI.Migrations
                 name: "Zone");
 
             migrationBuilder.DropTable(
-                name: "PatternAnimationDto");
+                name: "PatternAnimation");
 
             migrationBuilder.DropTable(
                 name: "Animation");

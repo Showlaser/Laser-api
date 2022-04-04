@@ -40,7 +40,8 @@ namespace LaserAPI.Logic
 
         public async Task<List<AnimationDto>> All()
         {
-            return await _animationDal.All();
+            List<AnimationDto> data = await _animationDal.All();
+            return data;
         }
 
         public async Task Remove(Guid uuid)

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LaserAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220317131131_Initial-Create")]
+    [Migration("20220404102412_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -67,7 +67,7 @@ namespace LaserAPI.Migrations
 
                     b.HasIndex("PatternAnimationSettingsDtoUuid");
 
-                    b.ToTable("AnimationPointDto");
+                    b.ToTable("AnimationPoint");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.PatternAnimationDto", b =>
@@ -95,7 +95,7 @@ namespace LaserAPI.Migrations
 
                     b.HasIndex("AnimationDtoUuid");
 
-                    b.ToTable("PatternAnimationDto");
+                    b.ToTable("PatternAnimation");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.PatternAnimationSettingsDto", b =>
@@ -129,7 +129,7 @@ namespace LaserAPI.Migrations
 
                     b.HasIndex("PatternAnimationDtoUuid");
 
-                    b.ToTable("PatternAnimationSettingsDto");
+                    b.ToTable("PatternAnimationSetting");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Lasershow.LasershowAnimationDto", b =>

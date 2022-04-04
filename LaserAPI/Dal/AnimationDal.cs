@@ -1,6 +1,7 @@
 ﻿using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Animations;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -52,6 +53,7 @@ namespace LaserAPI.Dal
             AnimationDto dbAnimation = await _context.Animation.Include(a => a.PatternAnimations)
                 .ThenInclude(pa => pa.AnimationSettings)
                 .ThenInclude(ast => ast.Points)
+                .AsNoTrackingWithIdentityResolution()
                 .SingleOrDefaultAsync(a => a.Uuid == animation.Uuid);
 
             if (dbAnimation == null)
@@ -59,25 +61,29 @@ namespace LaserAPI.Dal
                 throw new NoNullAllowedException();
             }
 
-            List<PatternAnimationDto> patternAnimationsToAdd = animation.PatternAnimations
-                .Where(pa => dbAnimation.PatternAnimations
-                    .All(pa2 => pa2.Uuid != pa.Uuid))
-                .ToList();
+            dbAnimation.Name = animation.Name;
+            _context.Animation.Update(dbAnimation);
 
-                List<PatternAnimationSettingsDto> dbSettings =
-                dbAnimation.PatternAnimations.SelectMany(pa => pa.AnimationSettings).ToList();
-            List<PatternAnimationSettingsDto> settings =
-                animation.PatternAnimations.SelectMany(pa => pa.AnimationSettings).ToList();
+            _context.PatternAnimation.RemoveRange(dbAnimation.PatternAnimations);
+            await _context.PatternAnimation.AddRangeAsync(animation.PatternAnimations);
+            await _context.SaveChangesAsync();
+        }
 
-            List<PatternAnimationSettingsDto> settingsToAdd = settings
-                .Where(p => dbSettings
-                    .All(p2 => p2.Uuid != p.Uuid))
-                .ToList();
+        private async Task AddOrUpdateAnimationSettingsIfNeeded(AnimationDto animation, AnimationDto dbAnimation)
+        {
+            List<PatternAnimationSettingsDto> dbAnimationSettings = dbAnimation.PatternAnimations
+                .SelectMany(pa => pa.AnimationSettings).ToList();
 
-            if (patternAnimationsToAdd.Any())
+            List<PatternAnimationSettingsDto> animationSettings = animation.PatternAnimations
+                .SelectMany(pa => pa.AnimationSettings).ToList();
+
+            bool settingsUpdated = JsonConvert.SerializeObject(animationSettings) !=
+                                 JsonConvert.SerializeObject(dbAnimationSettings);
+
+            if (settingsUpdated)
             {
-                await _context.PatternAnimation.AddRangeAsync(patternAnimationsToAdd);
-                await _context.SaveChangesAsync();
+                List<PatternAnimationSettingsDto> settingsToAdd = animationSettings.Where(ast => dbAnimationSettings
+                    .All(dast => !dast.Equals(ast))).ToList();
             }
         }
 
