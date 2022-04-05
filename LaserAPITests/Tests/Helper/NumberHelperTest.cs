@@ -5,7 +5,7 @@ using System.Data;
 namespace LaserAPITests.Tests.Helper
 {
     [TestClass]
-    internal class NumberHelperTest
+    public class NumberHelperTest
     {
         [TestMethod]
         public void DoubleIsBetweenOrEqualToTest()

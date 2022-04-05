@@ -130,25 +130,25 @@ namespace LaserAPI.Migrations
                     b.Property<Guid?>("AnimationUuid")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("LasershowDtoUuid")
+                    b.Property<Guid>("LasershowUuid")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("StartTime")
+                    b.Property<int>("StartTimeOffset")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("TimelineId")
+                    b.Property<int>("TimeLineId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Uuid");
 
                     b.HasIndex("AnimationUuid");
 
-                    b.HasIndex("LasershowDtoUuid");
+                    b.HasIndex("LasershowUuid");
 
-                    b.ToTable("LasershowAnimationDto");
+                    b.ToTable("LasershowAnimation");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Lasershow.LasershowDto", b =>
@@ -293,7 +293,9 @@ namespace LaserAPI.Migrations
 
                     b.HasOne("LaserAPI.Models.Dto.Lasershow.LasershowDto", null)
                         .WithMany("Animations")
-                        .HasForeignKey("LasershowDtoUuid");
+                        .HasForeignKey("LasershowUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Animation");
                 });

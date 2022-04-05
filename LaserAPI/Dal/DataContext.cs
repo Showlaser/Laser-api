@@ -16,12 +16,21 @@ namespace LaserAPI.Dal
         public virtual DbSet<PatternDto> Pattern { get; set; }
         public virtual DbSet<ZoneDto> Zone { get; set; }
         public virtual DbSet<LasershowDto> Lasershow { get; set; }
+        public virtual DbSet<LasershowAnimationDto> LasershowAnimation { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<LasershowDto>(e =>
             {
-                e.HasKey(p => p.Uuid);
+                e.HasKey(l => l.Uuid);
+                e.HasMany(l => l.Animations)
+                    .WithOne()
+                    .HasForeignKey(a => a.LasershowUuid);
+            });
+
+            builder.Entity<LasershowAnimationDto>(e =>
+            {
+                e.HasKey(l => l.Uuid);
             });
 
             builder.Entity<LasershowAnimationDto>(e =>

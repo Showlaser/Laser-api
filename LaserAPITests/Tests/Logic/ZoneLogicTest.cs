@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace LaserAPITests.Tests.Helper
+namespace LaserAPITests.Tests.Logic
 {
     [TestClass]
     public class ZoneLogicTest

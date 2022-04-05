@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace LaserAPITests.Tests.Helper
 {
     [TestClass]
-    internal class ZonesAbsolutePathTest
+    public class ZonesAbsolutePathTest
     {
         [TestMethod]
         public void GetAbsoluteValuesTest()

@@ -28,7 +28,6 @@ namespace LaserAPI
             string connectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContextPool<DataContext>(
                 dbContextOptions => dbContextOptions
-                    .EnableSensitiveDataLogging()
                     .UseSqlite(connectionString, o =>
                         o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
             AddDependencyInjection(ref services);
