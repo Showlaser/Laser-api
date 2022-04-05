@@ -1,6 +1,7 @@
 ﻿using LaserAPI.Interfaces.Dal;
+using LaserAPI.Logic;
 using LaserAPI.Models.Dto.Zones;
-using LaserAPI.Models.Helper.Laser;
+using LaserAPI.Models.Helper;
 using LaserAPI.Models.Helper.Zones;
 using LaserAPITests.Mock;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,11 +12,11 @@ using System.Linq;
 namespace LaserAPITests.Tests.Helper
 {
     [TestClass]
-    public class ZonesHelperTest
+    public class ZoneLogicTest
     {
         private readonly List<ZonesHitData> _zones;
 
-        public ZonesHelperTest()
+        public ZoneLogicTest()
         {
             IZoneDal zoneDal = new MockedZoneDal().ZoneDal;
             List<ZoneDto> zones = zoneDal
@@ -48,7 +49,7 @@ namespace LaserAPITests.Tests.Helper
             Stopwatch stopwatch = Stopwatch.StartNew();
             for (int i = 0; i < 2; i++)
             {
-                ZonesHelper.GetZoneWherePathIsInside(_zones, _zones.Count, message.X, message.Y);
+                ZoneLogic.GetZoneWherePathIsInside(_zones, _zones.Count, message.X, message.Y);
             }
 
             stopwatch.Stop();
@@ -59,7 +60,7 @@ namespace LaserAPITests.Tests.Helper
         public void GetZoneWherePathIsInsideTest()
         {
             LaserMessage message = new(0, 255, 255, 4000, -4000);
-            ZonesHitData zone = ZonesHelper.GetZoneWherePathIsInside(_zones, _zones.Count, message.X, message.Y);
+            ZonesHitData zone = ZoneLogic.GetZoneWherePathIsInside(_zones, _zones.Count, message.X, message.Y);
             Assert.IsNotNull(zone);
         }
 
@@ -75,7 +76,7 @@ namespace LaserAPITests.Tests.Helper
                 Y = 4000
             };
 
-            ZonesHitData zone = ZonesHelper.GetZoneWherePathIsInside(_zones, _zones.Count, message.X, message.Y);
+            ZonesHitData zone = ZoneLogic.GetZoneWherePathIsInside(_zones, _zones.Count, message.X, message.Y);
             Assert.IsNull(zone);
         }
 
@@ -85,7 +86,7 @@ namespace LaserAPITests.Tests.Helper
             Stopwatch stopwatch = Stopwatch.StartNew();
             for (int i = 0; i < 2; i++)
             {
-                ZonesHelper.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000);
+                ZoneLogic.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000);
             }
 
             stopwatch.Stop();
@@ -95,11 +96,11 @@ namespace LaserAPITests.Tests.Helper
         [TestMethod]
         public void GetZonesThatCrossesPathTest()
         {
-            List<ZoneDto> zones = ZonesHelper.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000)
+            List<ZoneDto> zones = ZoneLogic.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000)
                 .Select(z => z.Zone)
                 .ToList();
 
-            List<ZoneDto> zones2 = ZonesHelper.GetZonesInPathOfPosition(_zones, -4000, 0, 4000, 0)
+            List<ZoneDto> zones2 = ZoneLogic.GetZonesInPathOfPosition(_zones, -4000, 0, 4000, 0)
                 .Select(z => z.Zone)
                 .ToList();
 

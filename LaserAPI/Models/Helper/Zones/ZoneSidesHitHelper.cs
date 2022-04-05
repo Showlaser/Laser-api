@@ -1,4 +1,4 @@
-﻿using LaserAPI.Models.Helper.Laser;
+﻿using LaserAPI.Logic;
 using System.Collections.Generic;
 
 namespace LaserAPI.Models.Helper.Zones
@@ -65,7 +65,7 @@ namespace LaserAPI.Models.Helper.Zones
                 BlueLaser = message.BlueLaser,
             };
 
-            LaserSafetyHelper.LimitTotalLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
+            LaserLogic.LimitTotalLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
             newMessageCollection.Add(messageOnZoneEdge);
         }
 
@@ -85,7 +85,7 @@ namespace LaserAPI.Models.Helper.Zones
                 BlueLaser = message.BlueLaser,
             };
 
-            LaserSafetyHelper.LimitTotalLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
+            LaserLogic.LimitTotalLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
             newMessageCollection.Add(messageOnZoneEdge);
         }
 
@@ -105,7 +105,7 @@ namespace LaserAPI.Models.Helper.Zones
                 BlueLaser = message.BlueLaser,
             };
 
-            LaserSafetyHelper.LimitTotalLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
+            LaserLogic.LimitTotalLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
             newMessageCollection.Add(messageOnZoneEdge);
         }
 
@@ -125,7 +125,7 @@ namespace LaserAPI.Models.Helper.Zones
                 BlueLaser = message.BlueLaser,
             };
 
-            LaserSafetyHelper.LimitTotalLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
+            LaserLogic.LimitTotalLaserPowerIfNecessary(ref messageOnZoneEdge, crossedZoneData.Zone.MaxLaserPowerInZonePwm);
             newMessageCollection.Add(messageOnZoneEdge);
         }
 

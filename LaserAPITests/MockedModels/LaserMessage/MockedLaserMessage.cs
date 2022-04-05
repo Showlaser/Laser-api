@@ -2,7 +2,7 @@
 {
     public class MockedLaserMessage
     {
-        public readonly LaserAPI.Models.Helper.Laser.LaserMessage LaserMessage = new()
+        public readonly LaserAPI.Models.Helper.LaserMessage LaserMessage = new()
         {
             RedLaser = 255,
             GreenLaser = 255,

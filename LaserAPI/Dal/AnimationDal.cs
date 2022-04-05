@@ -1,11 +1,9 @@
 ﻿using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Animations;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Dal
@@ -67,24 +65,6 @@ namespace LaserAPI.Dal
             _context.PatternAnimation.RemoveRange(dbAnimation.PatternAnimations);
             await _context.PatternAnimation.AddRangeAsync(animation.PatternAnimations);
             await _context.SaveChangesAsync();
-        }
-
-        private async Task AddOrUpdateAnimationSettingsIfNeeded(AnimationDto animation, AnimationDto dbAnimation)
-        {
-            List<PatternAnimationSettingsDto> dbAnimationSettings = dbAnimation.PatternAnimations
-                .SelectMany(pa => pa.AnimationSettings).ToList();
-
-            List<PatternAnimationSettingsDto> animationSettings = animation.PatternAnimations
-                .SelectMany(pa => pa.AnimationSettings).ToList();
-
-            bool settingsUpdated = JsonConvert.SerializeObject(animationSettings) !=
-                                 JsonConvert.SerializeObject(dbAnimationSettings);
-
-            if (settingsUpdated)
-            {
-                List<PatternAnimationSettingsDto> settingsToAdd = animationSettings.Where(ast => dbAnimationSettings
-                    .All(dast => !dast.Equals(ast))).ToList();
-            }
         }
 
         public async Task Remove(Guid uuid)

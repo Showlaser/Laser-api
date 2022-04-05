@@ -1,10 +1,10 @@
-﻿using System;
-using LaserAPI.Logic;
-using LaserAPI.Models.Helper.Laser;
+﻿using LaserAPI.Logic;
+using LaserAPI.Models.Helper;
 using LaserAPI.Models.Helper.Zones;
 using LaserAPITests.Mock;
 using LaserAPITests.MockedModels.Zones;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -83,6 +83,43 @@ namespace LaserAPITests.Tests.Logic
                 255, 255, 255, -4000, 4000), _zonesHitData, _zonesHitData.Count);
 
             Assert.IsFalse(messagesOnZonesEdge.Any());
+        }
+
+        [TestMethod]
+        public void LimitLaserPowerIfNecessaryTest()
+        {
+            for (int i = 0; i < 255; i++)
+            {
+                LaserMessage message = new()
+                {
+                    RedLaser = 255,
+                    GreenLaser = 255,
+                    BlueLaser = 255
+                };
+
+                LaserLogic.LimitLaserPowerPerLaserIfNecessary(ref message, i);
+                Assert.IsTrue(message.RedLaser <= i);
+                Assert.IsTrue(message.GreenLaser <= i);
+                Assert.IsTrue(message.BlueLaser <= i);
+            }
+        }
+
+        [TestMethod]
+        public void LimitTotalLaserPowerNecessaryTest()
+        {
+            for (int i = 0; i < 255; i++)
+            {
+                LaserMessage message = new()
+                {
+                    RedLaser = 255,
+                    GreenLaser = 255,
+                    BlueLaser = 255
+                };
+
+                LaserLogic.LimitTotalLaserPowerIfNecessary(ref message, i);
+                int totalPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
+                Assert.IsTrue(totalPower <= i);
+            }
         }
     }
 }

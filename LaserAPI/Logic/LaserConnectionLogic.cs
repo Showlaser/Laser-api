@@ -1,4 +1,4 @@
-﻿using LaserAPI.Models.Helper.Laser;
+﻿using LaserAPI.Models.Helper;
 using System;
 using System.Net;
 using System.Net.Sockets;

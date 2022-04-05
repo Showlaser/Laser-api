@@ -1,7 +1,6 @@
 ﻿using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Patterns;
 using LaserAPI.Models.Helper;
-using LaserAPI.Models.Helper.Laser;
 using System;
 using System.Collections.Generic;
 using System.Data;

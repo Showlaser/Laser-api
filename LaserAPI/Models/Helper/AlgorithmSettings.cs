@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LaserAPI.Models.Helper.FftHelper
+namespace LaserAPI.Models.Helper
 {
     public class AlgorithmSettings
     {

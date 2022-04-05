@@ -1,7 +1,8 @@
 ﻿using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Zones;
-using LaserAPI.Models.Helper.Laser;
+using LaserAPI.Models.Helper;
 using LaserAPI.Models.Helper.Zones;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,7 +34,7 @@ namespace LaserAPI.Logic
             _zones = zonesHitDataCollection;
             _safetyZonesNotActive = !zones.Any();
             _zonesLength = _zones.Count;
-            _zoneWithHighestLaserPowerPwm = ZonesHelper.GetZoneWhereMaxLaserPowerPwmIsHighest(_zones.ToList());
+            _zoneWithHighestLaserPowerPwm = ZoneLogic.GetZoneWhereMaxLaserPowerPwmIsHighest(_zones.ToList());
         }
 
         public async Task SendData(LaserMessage newMessage)
@@ -48,12 +49,12 @@ namespace LaserAPI.Logic
                 return;
             }
 
-            ZonesHitData zoneHitData = ZonesHelper.GetZoneWherePathIsInside(_zones, _zonesLength, newMessage.X, newMessage.Y);
+            ZonesHitData zoneHitData = ZoneLogic.GetZoneWherePathIsInside(_zones, _zonesLength, newMessage.X, newMessage.Y);
             bool positionIsInSafetyZone = zoneHitData != null;
 
             if (positionIsInSafetyZone)
             {
-                LaserSafetyHelper.LimitTotalLaserPowerIfNecessary(ref newMessage, zoneHitData.Zone.MaxLaserPowerInZonePwm);
+                LaserLogic.LimitTotalLaserPowerIfNecessary(ref newMessage, zoneHitData.Zone.MaxLaserPowerInZonePwm);
                 await LaserConnectionLogic.SendMessage(newMessage);
                 return;
             }
@@ -73,7 +74,7 @@ namespace LaserAPI.Logic
         private IEnumerable<LaserMessage> GetPathWithSafetyZonePositions(LaserMessage newMessage)
         {
             List<ZonesHitData> zonesCrossedData =
-                ZonesHelper.GetZonesInPathOfPosition(_zones, LaserConnectionLogic.PreviousLaserMessage.X,
+                ZoneLogic.GetZonesInPathOfPosition(_zones, LaserConnectionLogic.PreviousLaserMessage.X,
                     LaserConnectionLogic.PreviousLaserMessage.Y,
                     newMessage.X, newMessage.Y);
 
@@ -118,6 +119,45 @@ namespace LaserAPI.Logic
             }
 
             return messagesOnZonesEdge;
+        }
+
+        /// <summary>
+        /// Limits the pwm laser power per laser color if the value is greater than the max power per laser color
+        /// </summary>
+        /// <param name="message">The message to modify</param>
+        /// <param name="maxPowerPwmPerLaserColor">The max power allowed in PWM value per laser</param>
+        public static void LimitLaserPowerPerLaserIfNecessary(ref LaserMessage message, int maxPowerPwmPerLaserColor)
+        {
+            if (message.RedLaser > maxPowerPwmPerLaserColor)
+            {
+                message.RedLaser = NumberHelper.Map(message.RedLaser, 0, 255, 0, maxPowerPwmPerLaserColor);
+            }
+            if (message.GreenLaser > maxPowerPwmPerLaserColor)
+            {
+                message.GreenLaser = NumberHelper.Map(message.GreenLaser, 0, 255, 0, maxPowerPwmPerLaserColor);
+            }
+            if (message.BlueLaser > maxPowerPwmPerLaserColor)
+            {
+                message.BlueLaser = NumberHelper.Map(message.BlueLaser, 0, 255, 0, maxPowerPwmPerLaserColor);
+            }
+        }
+
+        /// <summary>
+        /// Limits the pwm laser power if the value is greater than the max power
+        /// </summary>
+        /// <param name="message">The message to modify</param>
+        /// <param name="maxPowerPwm">The max power allowed</param>
+        public static void LimitTotalLaserPowerIfNecessary(ref LaserMessage message, int maxPowerPwm)
+        {
+            int combinedPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
+            if (combinedPower > maxPowerPwm)
+            {
+                // ReSharper disable once PossibleLossOfFraction
+                double maxPowerPerColor = NumberHelper.Map(combinedPower, 0, 765, 0, maxPowerPwm) / 3;
+                message.RedLaser = NumberHelper.Map(message.RedLaser, 0, 255, 0, Convert.ToInt32(maxPowerPerColor));
+                message.GreenLaser = NumberHelper.Map(message.GreenLaser, 0, 255, 0, Convert.ToInt32(maxPowerPerColor));
+                message.BlueLaser = NumberHelper.Map(message.BlueLaser, 0, 255, 0, Convert.ToInt32(maxPowerPerColor));
+            }
         }
     }
 }

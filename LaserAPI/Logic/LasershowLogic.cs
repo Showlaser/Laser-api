@@ -1,9 +1,11 @@
 ﻿using LaserAPI.Interfaces.Dal;
+using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.Dto.Lasershow;
 using LaserAPI.Models.Helper;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
@@ -21,7 +23,7 @@ namespace LaserAPI.Logic
 
         public async Task AddOrUpdate(LasershowDto lasershow)
         {
-            LasershowHelper.LasershowValid(lasershow);
+            LasershowValid(lasershow);
             if (await _lasershowDal.Exists(lasershow))
             {
                 await _lasershowDal.Update(lasershow);
@@ -43,12 +45,12 @@ namespace LaserAPI.Logic
 
         public async Task PlayLasershow(LasershowDto lasershow)
         {
-            int lasershowDuration = LasershowHelper.GetLasershowDuration(lasershow);
+            int lasershowDuration = GetLasershowDuration(lasershow);
             Stopwatch stopwatch = Stopwatch.StartNew();
             while (stopwatch.ElapsedMilliseconds < lasershowDuration)
             {
                 List<LasershowAnimationDto> lasershowAnimationsToPlay =
-                    LasershowHelper.GetLasershowAnimationBetweenTimeMs(lasershow, stopwatch.ElapsedMilliseconds,
+                    GetLasershowAnimationBetweenTimeMs(lasershow, stopwatch.ElapsedMilliseconds,
                         lasershowDuration);
                 if (lasershowAnimationsToPlay == null)
                 {
@@ -62,6 +64,32 @@ namespace LaserAPI.Logic
                     await _animationLogic.PlayAnimation(lasershowAnimation.Animation);
                 }
             }
+        }
+
+        public static bool LasershowValid(LasershowDto lasershow)
+        {
+            return !string.IsNullOrEmpty(lasershow.Name) && lasershow.Animations.TrueForAll(a =>
+                a.StartTime >= 0 &&
+                !string.IsNullOrEmpty(a.Name) &&
+                a.TimelineId.IsBetweenOrEqualTo(0, 3) &&
+                AnimationLogic.AnimationValid(a.Animation));
+        }
+
+        public static int GetLasershowDuration(LasershowDto lasershow)
+        {
+            PatternAnimationDto maxStartTime = lasershow.Animations.MaxBy(a => a.StartTime).Animation
+                .PatternAnimations.MaxBy(pa => pa.StartTimeOffset);
+
+            return maxStartTime.AnimationSettings.MaxBy(ast => ast.StartTime).StartTime +
+                   maxStartTime.StartTimeOffset;
+        }
+
+        public static List<LasershowAnimationDto> GetLasershowAnimationBetweenTimeMs(LasershowDto lasershow, long timeMs, int lasershowLength)
+        {
+            return lasershow.Animations.FindAll(a =>
+                    timeMs.IsBetweenOrEqualTo(timeMs, lasershowLength))
+                .OrderBy(ls => ls.StartTime)
+                .ToList();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using LaserAPI.Models.Helper.Laser;
+﻿using LaserAPI.Models.Helper;
 using LaserAPI.Models.Helper.Zones;
 using LaserAPITests.MockedModels.Zones;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

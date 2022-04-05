@@ -1,12 +1,13 @@
 ﻿using LaserAPI.Enums;
-using LaserAPI.Models.Helper.MusicGenre;
+using LaserAPI.Logic;
+using LaserAPI.Models.Helper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 
 namespace LaserAPITests.Tests.Helper
 {
     [TestClass]
-    public class MusicGenreHelperTest
+    public class LasershowGeneratorLogicTest
     {
         [TestMethod]
         public void GetMusicGenreFromSpotifyGenreTest()
@@ -21,10 +22,19 @@ namespace LaserAPITests.Tests.Helper
 
             foreach (string? genre in genres)
             {
-                MusicGenre value = MusicGenreHelper.GetMusicGenreFromSpotifyGenre(new List<string> { genre });
+                MusicGenre value = LaserShowGeneratorLogic.GetMusicGenreFromSpotifyGenre(new List<string> { genre });
                 Assert.IsNotNull(value);
                 Assert.IsTrue(value.ToString().Length > 2);
             }
+        }
+
+        [TestMethod]
+        public void GetFftFrequencyRangeByGenreTest()
+        {
+            AlgorithmSettings settings = LaserShowGeneratorLogic.GetAlgorithmSettingsByGenre(MusicGenre.Hardcore);
+            Assert.IsNotNull(settings);
+            Assert.IsTrue(settings.FrequencyRange.Start.Value == 2);
+            Assert.IsTrue(settings.FrequencyRange.End.Value == 3);
         }
     }
 }
