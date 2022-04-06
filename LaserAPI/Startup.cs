@@ -43,6 +43,7 @@ namespace LaserAPI
             services.AddScoped<AudioAnalyser>();
             services.AddScoped<LaserShowGeneratorLogic>();
             services.AddScoped<GameLogic>();
+            services.AddSingleton<GameStateLogic>();
             services.AddScoped<IPatternDal, PatternDal>();
             services.AddScoped<IAnimationDal, AnimationDal>();
             services.AddScoped<IZoneDal, ZoneDal>();

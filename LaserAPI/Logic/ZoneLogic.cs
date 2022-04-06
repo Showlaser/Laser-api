@@ -4,6 +4,7 @@ using LaserAPI.Models.Helper;
 using LaserAPI.Models.Helper.Zones;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -25,6 +26,10 @@ namespace LaserAPI.Logic
 
         public async Task AddOrUpdate(ZoneDto zone)
         {
+            if (zone.Positions.Count != 4)
+            {
+                throw new InvalidDataException();
+            }
             if (await _zoneDal.Exists(zone.Uuid))
             {
                 await _zoneDal.Update(zone);
@@ -39,16 +44,20 @@ namespace LaserAPI.Logic
             await _zoneDal.Remove(uuid);
         }
 
-        public static List<ZonesHitData> GetZonesInPathOfPosition(List<ZonesHitData> zones,
-            int previousX, int previousY, int newX, int newY)
+        public static List<ZonesHitData> GetZonesInPathOfPosition(List<ZonesHitData> zones, LaserMessage newMessage)
         {
+            int previousX = LaserConnectionLogic.PreviousLaserMessage.X;
+            int previousY = LaserConnectionLogic.PreviousLaserMessage.Y;
+            int newX = newMessage.X;
+            int newY = newMessage.Y;
+            
             int zonesLength = zones.Count;
             List<ZonesHitData> zonesInPath = new();
 
             for (int i = 0; i < zonesLength; i++)
             {
                 ZonesHitData zoneHitData = zones[i];
-                ZoneSidesHitHelper zoneSidesHit = GetZoneSidesHitByPath(zoneHitData.Zone, previousX, previousY, newX, newY);
+                ZoneSidesHitHelper zoneSidesHit = GetZoneSidesHitByPath(zoneHitData.Zone, newX, newY);
 
                 if (zoneSidesHit.BottomHit || zoneSidesHit.TopHit || zoneSidesHit.LeftHit || zoneSidesHit.RightHit)
                 {
@@ -64,30 +73,134 @@ namespace LaserAPI.Logic
         /// Checks if the path of the previous position and the new position crosses a zone
         /// </summary>
         /// <param name="zone"></param>
-        /// <param name="previousX"></param>
-        /// <param name="previousY"></param>
         /// <param name="newX"></param>
         /// <param name="newY"></param>
         /// <returns>The zones that are crossed</returns>
-        private static ZoneSidesHitHelper GetZoneSidesHitByPath(ZoneDto zone, int previousX, int previousY, int newX,
+        private static ZoneSidesHitHelper GetZoneSidesHitByPath(ZoneDto zone, int newX,
             int newY)
         {
+            int previousX = LaserConnectionLogic.PreviousLaserMessage.X;
+            int previousY = LaserConnectionLogic.PreviousLaserMessage.Y;
+
             ZoneAbsolutePositionsHelper absolutePositionsHelper = new(zone);
             return new ZoneSidesHitHelper
             {
-                LeftHit = absolutePositionsHelper.LeftXAxisInZone.IsBetweenOrEqualTo(
-                    NumberHelper.GetLowestNumber(previousX, newX),
-                    NumberHelper.GetHighestNumber(previousX, newX)),
-                RightHit = absolutePositionsHelper.RightXAxisInZone.IsBetweenOrEqualTo(
-                    NumberHelper.GetLowestNumber(previousX, newX),
-                    NumberHelper.GetHighestNumber(previousX, newX)),
-                BottomHit = absolutePositionsHelper.LowestYAxisInZone.IsBetweenOrEqualTo(
-                    NumberHelper.GetLowestNumber(previousY, newY),
-                    NumberHelper.GetHighestNumber(previousY, newY)),
-                TopHit = absolutePositionsHelper.HighestYAxisInZone.IsBetweenOrEqualTo(
-                    NumberHelper.GetLowestNumber(previousY, newY),
-                    NumberHelper.GetHighestNumber(previousY, newY))
+                LeftHit = LeftHit(absolutePositionsHelper, newX, newY, previousX, previousY),
+                RightHit = RightHit(absolutePositionsHelper, newX, newY, previousX, previousY),
+                BottomHit = BottomHit(absolutePositionsHelper, newX, newY, previousX, previousY),
+                TopHit = TopHit(absolutePositionsHelper, newX, newY, previousX, previousY)
             };
+        }
+
+        private static bool LeftHit(ZoneAbsolutePositionsHelper absolutePositions, int newX, int newY, int previousX, int previousY)
+        {
+            bool isBetweenLowestAndHighestPosition =
+                newY.IsBetweenOrEqualToWithMinMaxCheck(absolutePositions.LowestYAxisInZone,
+                    absolutePositions.HighestYAxisInZone) || previousY.IsBetweenOrEqualToWithMinMaxCheck(absolutePositions.LowestYAxisInZone,
+                    absolutePositions.HighestYAxisInZone);
+
+            return absolutePositions.LeftXAxisInZone.IsBetweenOrEqualToWithMinMaxCheck(previousX, newX) &&
+                   isBetweenLowestAndHighestPosition;
+
+        }
+
+        private static bool RightHit(ZoneAbsolutePositionsHelper absolutePositions, int newX, int newY, int previousX, int previousY)
+        {
+            bool isBetweenLowestAndHighestPosition =
+                newY.IsBetweenOrEqualToWithMinMaxCheck(absolutePositions.LowestYAxisInZone,
+                    absolutePositions.HighestYAxisInZone) || previousY.IsBetweenOrEqualToWithMinMaxCheck(absolutePositions.LowestYAxisInZone,
+                    absolutePositions.HighestYAxisInZone);
+
+            return absolutePositions.RightXAxisInZone.IsBetweenOrEqualToWithMinMaxCheck(previousX, newX) &&
+                   isBetweenLowestAndHighestPosition;
+        }
+
+        private static bool TopHit(ZoneAbsolutePositionsHelper absolutePositions, int newX, int newY, int previousX, int previousY)
+        {
+            bool isBetweenLeftAndRight =
+                newX.IsBetweenOrEqualToWithMinMaxCheck(absolutePositions.LeftXAxisInZone,
+                    absolutePositions.RightXAxisInZone) || previousX.IsBetweenOrEqualToWithMinMaxCheck(absolutePositions.LeftXAxisInZone,
+                    absolutePositions.RightXAxisInZone);
+
+            return absolutePositions.HighestYAxisInZone.IsBetweenOrEqualToWithMinMaxCheck(previousY, newY) &&
+                   isBetweenLeftAndRight;
+        }
+
+        private static bool BottomHit(ZoneAbsolutePositionsHelper absolutePositions, int newX, int newY, int previousX, int previousY)
+        {
+            bool isBetweenLeftAndRight =
+                newX.IsBetweenOrEqualToWithMinMaxCheck(absolutePositions.LeftXAxisInZone,
+                    absolutePositions.RightXAxisInZone) || previousX.IsBetweenOrEqualToWithMinMaxCheck(absolutePositions.LeftXAxisInZone,
+                    absolutePositions.RightXAxisInZone);
+
+            return absolutePositions.LowestYAxisInZone.IsBetweenOrEqualToWithMinMaxCheck(previousY, newY) &&
+                   isBetweenLeftAndRight;
+        }
+
+        public static ZonesHitData GetZoneClosestToMessage(LaserMessage message, List<ZonesHitData> zones, int zonesLength)
+        {
+            ClosestPosition closestZonePosition = new();
+            for (int i = 0; i < zonesLength; i++)
+            {
+                ZonesHitData zoneHitData = zones[i];
+                ZoneDto zone = zoneHitData.Zone;
+                int difference = GetXAndYDifferenceBetweenClosestPositionToMessage(zone, message);
+
+                if (difference < closestZonePosition.XAndYPositionCombined)
+                {
+                    closestZonePosition.XAndYPositionCombined = difference;
+                    closestZonePosition.Index = i;
+                }
+            }
+
+            return zones[closestZonePosition.Index];
+        }
+
+        public static LaserMessage PositionMessageIntoZone(LaserMessage message, ZonesHitData zoneHitData)
+        {
+            ZoneAbsolutePositionsHelper absolutePositions = zoneHitData.ZoneAbsolutePositions;
+            if (!message.X.IsBetweenOrEqualTo(absolutePositions.LeftXAxisInZone, absolutePositions.RightXAxisInZone))
+            {
+                message.X = NumberHelper.Map(message.X, -4000, 4000, zoneHitData.ZoneAbsolutePositions.LeftXAxisInZone,
+                    zoneHitData.ZoneAbsolutePositions.RightXAxisInZone);
+            }
+            if (!message.Y.IsBetweenOrEqualTo(absolutePositions.LowestYAxisInZone, absolutePositions.HighestYAxisInZone))
+            {
+                message.Y = NumberHelper.Map(message.Y, -4000, 4000, zoneHitData.ZoneAbsolutePositions.LowestYAxisInZone,
+                    zoneHitData.ZoneAbsolutePositions.HighestYAxisInZone);
+            }
+
+            return message;
+        }
+
+        /// <summary>
+        /// Find the difference between the message positions and the zone positions. The difference of the closest position to the zone will be returned
+        /// </summary>
+        /// <param name="zone">The zone to search into</param>
+        /// <param name="message">The message send by the user</param>
+        /// <returns>The difference between the closest position to the message and the difference between the x and y position added</returns>
+        private static int GetXAndYDifferenceBetweenClosestPositionToMessage(ZoneDto zone, LaserMessage message)
+        {
+            ClosestPosition closestZonePositionToMessage = new() {
+                Index = 0,
+                XAndYPositionCombined = 8000
+            };
+
+            for (int j = 0; j < 4; j++)
+            {
+                ZonesPositionDto zonePosition = zone.Positions[j];
+                int xDifference = NumberHelper.GetDifferenceBetweenTwoNumbers(zonePosition.X, message.X);
+                int yDifference = NumberHelper.GetDifferenceBetweenTwoNumbers(zonePosition.Y, message.Y);
+                int totalDifference = xDifference + yDifference;
+
+                if (closestZonePositionToMessage.XAndYPositionCombined > totalDifference)
+                {
+                    closestZonePositionToMessage.XAndYPositionCombined = totalDifference;
+                    closestZonePositionToMessage.Index = j;
+                }
+            }
+
+            return closestZonePositionToMessage.XAndYPositionCombined;
         }
 
         /// <summary>

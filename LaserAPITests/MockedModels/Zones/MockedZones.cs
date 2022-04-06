@@ -46,8 +46,45 @@ namespace LaserAPITests.MockedModels.Zones
                     },
                 }
             };
+            ZoneDto zone2 = new()
+            {
+                MaxLaserPowerInZonePwm = 40,
+                Uuid = Guid.Parse("c9ba9637-96c6-455d-be72-849ce86438a8"),
+                Positions = new List<ZonesPositionDto>
+                {
+                    new()
+                    {
+                        ZoneUuid = Guid.Parse("c9ba9637-96c6-455d-be72-849ce86438a8"),
+                        Uuid = Guid.Parse("b75f2e15-b005-4626-b71d-fc353959cd7f"),
+                        X = -400,
+                        Y = 100
+                    },
+                    new()
+                    {
+                        ZoneUuid = Guid.Parse("c9ba9637-96c6-455d-be72-849ce86438a8"),
+                        Uuid = Guid.Parse("1829d10c-7c1d-42d7-ace2-7f78cdfd2448"),
+                        X = -400,
+                        Y = 100
+                    },
+                    new()
+                    {
+                        ZoneUuid = Guid.Parse("c9ba9637-96c6-455d-be72-849ce86438a8"),
+                        Uuid = Guid.Parse("16fb7dfb-7a12-4d7e-a5ca-938389c99b08"),
+                        X = 400,
+                        Y = 4000
+                    },
+                    new()
+                    {
+                        ZoneUuid = Guid.Parse("c9ba9637-96c6-455d-be72-849ce86438a8"),
+                        Uuid = Guid.Parse("2cb0839b-a7eb-4a4c-8237-cda10660bce8"),
+                        X = 400,
+                        Y = 4000
+                    },
+                }
+            };
 
-            Zones.Add(zone1);
+            //Zones.Add(zone1); TODO add
+            Zones.Add(zone2);
         }
     }
 }

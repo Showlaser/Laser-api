@@ -42,8 +42,8 @@ namespace LaserAPI.Models.Helper
             return new AnimationPointDto
             {
                 RedLaserPowerPwm = 8,//new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
-                GreenLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
-                BlueLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
+                GreenLaserPowerPwm = 0, //new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
+                BlueLaserPowerPwm = 0, //new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
                 X = randomX,
                 Y = randomY
             };
@@ -54,8 +54,8 @@ namespace LaserAPI.Models.Helper
             return new AnimationPointDto
             {
                 RedLaserPowerPwm = 8, //new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
-                GreenLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
-                BlueLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
+                GreenLaserPowerPwm = 0, //new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
+                BlueLaserPowerPwm = 0, //new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
                 X = x,
                 Y = y,
             };

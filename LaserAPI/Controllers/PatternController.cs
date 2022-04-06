@@ -1,4 +1,5 @@
-﻿using LaserAPI.Logic;
+﻿
+using LaserAPI.Logic;
 using LaserAPI.Models.Dto.Patterns;
 using LaserAPI.Models.FromFrontend.Patterns;
 using LaserAPI.Models.Helper;

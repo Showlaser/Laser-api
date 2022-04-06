@@ -20,11 +20,14 @@ namespace LaserAPI.Dal
         public async Task Add(ZoneDto zone)
         {
             await _context.Zone.AddAsync(zone);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<ZoneDto>> All()
         {
-            return await _context.Zone.ToListAsync();
+            return await _context.Zone
+                .Include(e => e.Positions)
+                .ToListAsync();
         }
 
         public async Task Update(ZoneDto zone)
@@ -62,6 +65,7 @@ namespace LaserAPI.Dal
             }
 
             _context.Zone.Remove(zoneToUpdate);
+            await _context.SaveChangesAsync();
         }
     }
 }

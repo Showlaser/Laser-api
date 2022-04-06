@@ -3,22 +3,25 @@ using LaserAPI.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LaserAPI.Interfaces.Dal;
 
 namespace LaserAPI.Logic.Game
 {
     public class GameLogic
     {
+        private readonly GameStateLogic _gameStateLogic;
         private readonly List<IGame> _playableGames = new();
-        private IGame _selectedGame;
 
-        public GameLogic()
+        public GameLogic(AnimationLogic animationLogic, GameStateLogic gameStateLogic)
         {
+            _gameStateLogic = gameStateLogic;
             List<Type> types = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(e => e.GetTypes())
                 .Where(e => typeof(IGame).IsAssignableFrom(e) && e.IsClass)
                 .ToList();
-
-            _playableGames.AddRange(types.Select(t => (IGame)Activator.CreateInstance(t)));
+                
+            List<object> paramArray = new() { animationLogic };
+            _playableGames.AddRange(types.Select(t => (IGame)Activator.CreateInstance(t, paramArray.ToArray())));
         }
 
         public List<string> GetGameNames()
@@ -29,29 +32,29 @@ namespace LaserAPI.Logic.Game
 
         public void Start(string gameName)
         {
-            if (_selectedGame != null && !_selectedGame.GameOver())
+            if (_gameStateLogic.SelectedGame != null && !_gameStateLogic.SelectedGame.GameOver())
             {
                 throw new InvalidOperationException("The game was not stopped before calling start");
             }
 
-            _selectedGame = _playableGames.FirstOrDefault(pg => pg.GetName() == gameName);
-            if (_selectedGame == null)
+            _gameStateLogic.SelectedGame = _playableGames.FirstOrDefault(pg => pg.GetName() == gameName);
+            if (_gameStateLogic.SelectedGame == null)
             {
                 throw new KeyNotFoundException();
             }
 
-            _selectedGame.Start();
+            _gameStateLogic.SelectedGame.Start();
         }
 
         public void Stop()
         {
-            _selectedGame.Stop();
-            _selectedGame = null;
+            _gameStateLogic.SelectedGame.Stop();
+            _gameStateLogic.SelectedGame = null;
         }
 
         public void Move(GameMovement movement)
         {
-            _selectedGame.Move(movement);
+            _gameStateLogic.SelectedGame.Move(movement);
         }
     }
 }

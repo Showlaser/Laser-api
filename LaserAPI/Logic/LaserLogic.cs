@@ -11,10 +11,10 @@ namespace LaserAPI.Logic
 {
     public class LaserLogic
     {
-        private readonly List<ZonesHitData> _zones;
-        private readonly int _zonesLength;
-        private readonly bool _safetyZonesNotActive;
-        private readonly ZoneDto _zoneWithHighestLaserPowerPwm;
+        private static List<ZonesHitData> _zones;
+        private static int _zonesLength;
+        private static bool _projectionZonesNotActive;
+        private static ZoneDto _zoneWithHighestLaserPowerPwm;
 
         public LaserLogic(IZoneDal zoneDal)
         {
@@ -32,7 +32,7 @@ namespace LaserAPI.Logic
                 });
             }
             _zones = zonesHitDataCollection;
-            _safetyZonesNotActive = !zones.Any();
+            _projectionZonesNotActive = !zones.Any();
             _zonesLength = _zones.Count;
             _zoneWithHighestLaserPowerPwm = ZoneLogic.GetZoneWhereMaxLaserPowerPwmIsHighest(_zones.ToList());
         }
@@ -40,57 +40,54 @@ namespace LaserAPI.Logic
         public async Task SendData(LaserMessage newMessage)
         {
             int totalLaserPowerPwm = newMessage.RedLaser + newMessage.GreenLaser + newMessage.BlueLaser;
-            bool skipSafetyZoneCheck = _safetyZonesNotActive || totalLaserPowerPwm == 0 ||
-                                       _zoneWithHighestLaserPowerPwm.MaxLaserPowerInZonePwm >= totalLaserPowerPwm;
+            bool skipProjectionZoneCheck = _projectionZonesNotActive || totalLaserPowerPwm == 0;
 
-            if (skipSafetyZoneCheck)
+            if (skipProjectionZoneCheck)
             {
                 await LaserConnectionLogic.SendMessage(newMessage);
                 return;
             }
 
             ZonesHitData zoneHitData = ZoneLogic.GetZoneWherePathIsInside(_zones, _zonesLength, newMessage.X, newMessage.Y);
-            bool positionIsInSafetyZone = zoneHitData != null;
+            bool positionIsInProjectionZone = zoneHitData != null;
 
-            if (positionIsInSafetyZone)
+            if (positionIsInProjectionZone)
             {
-                LaserLogic.LimitTotalLaserPowerIfNecessary(ref newMessage, zoneHitData.Zone.MaxLaserPowerInZonePwm);
+                LimitTotalLaserPowerIfNecessary(ref newMessage, zoneHitData.Zone.MaxLaserPowerInZonePwm);
                 await LaserConnectionLogic.SendMessage(newMessage);
                 return;
             }
 
-            IEnumerable<LaserMessage> messagesToSend = GetPathWithSafetyZonePositions(newMessage);
-            foreach (LaserMessage message in messagesToSend)
+            List<LaserMessage> messagesToSend = GetMessagesToSend(newMessage);
+            int messagesToSendLength = messagesToSend.Count;
+            for (int i = 0; i < messagesToSendLength; i++)
             {
+                LaserMessage message = messagesToSend[i];
                 await LaserConnectionLogic.SendMessage(message);
             }
         }
 
-        /// <summary>
-        /// Gets the positions from the edges of the zones that are crossed and the new message position sorted
-        /// </summary>
-        /// <param name="newMessage">The new incoming message</param>
-        /// <returns>A IEnumerable with the new message point and the positions of the zones that are crossed sorted</returns>
-        private IEnumerable<LaserMessage> GetPathWithSafetyZonePositions(LaserMessage newMessage)
+        private static List<LaserMessage> GetMessagesToSend(LaserMessage newMessage)
         {
-            List<ZonesHitData> zonesCrossedData =
-                ZoneLogic.GetZonesInPathOfPosition(_zones, LaserConnectionLogic.PreviousLaserMessage.X,
-                    LaserConnectionLogic.PreviousLaserMessage.Y,
-                    newMessage.X, newMessage.Y);
+            List<ZonesHitData> zonesCrossedData = ZoneLogic.GetZonesInPathOfPosition(_zones, newMessage);
+            int zonesCrossedDataLength = zonesCrossedData.Count;
+            List<LaserMessage> messagesToSend = new();
 
-            int zonesCrossedDataCount = zonesCrossedData.Count;
-            if (zonesCrossedDataCount != 0)
+            for (int i = 0; i < zonesCrossedDataLength; i++)
             {
-                List<LaserMessage> messagesToSort = GetMessagesOnZonesEdge(newMessage,
-                    zonesCrossedData, zonesCrossedDataCount);
+                ZonesHitData zoneHit = zonesCrossedData[i];
+                LaserMessage previousMessage =
+                    ZoneLogic.PositionMessageIntoZone(LaserConnectionLogic.PreviousLaserMessage, zoneHit);
+                LaserMessage message = ZoneLogic.PositionMessageIntoZone(newMessage, zoneHit);
 
-                messagesToSort.Add(newMessage);
-                return messagesToSort
-                    .OrderByDescending(m => m.Y)
-                    .ThenByDescending(m => m.X);
+                LimitTotalLaserPowerIfNecessary(ref previousMessage, zoneHit.Zone.MaxLaserPowerInZonePwm);
+                LimitTotalLaserPowerIfNecessary(ref message, zoneHit.Zone.MaxLaserPowerInZonePwm);
+
+                messagesToSend.Add(previousMessage);
+                messagesToSend.Add(message);
             }
 
-            return new List<LaserMessage> { newMessage };
+            return messagesToSend;
         }
 
         /// <summary>

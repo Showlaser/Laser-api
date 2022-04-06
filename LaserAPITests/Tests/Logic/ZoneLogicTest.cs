@@ -83,10 +83,11 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void GetZonesThatCrossesPathPerformanceTest()
         {
+            LaserMessage message = new(0, 0, 4000, 0, -4000);
             Stopwatch stopwatch = Stopwatch.StartNew();
             for (int i = 0; i < 2; i++)
             {
-                ZoneLogic.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000);
+                ZoneLogic.GetZonesInPathOfPosition(_zones, message);
             }
 
             stopwatch.Stop();
@@ -96,15 +97,34 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void GetZonesThatCrossesPathTest()
         {
-            List<ZoneDto> zones = ZoneLogic.GetZonesInPathOfPosition(_zones, 0, 4000, 0, -4000)
+            LaserMessage message = new(0, 0, 4000, 0, -4000);
+            LaserMessage message2 = new(0, 0, 12, 4000, -4000);
+            List<ZoneDto> zones = ZoneLogic.GetZonesInPathOfPosition(_zones, message)
                 .Select(z => z.Zone)
                 .ToList();
 
-            List<ZoneDto> zones2 = ZoneLogic.GetZonesInPathOfPosition(_zones, -4000, 0, 4000, 0)
+            List<ZoneDto> zones2 = ZoneLogic.GetZonesInPathOfPosition(_zones, message2)
                 .Select(z => z.Zone)
                 .ToList();
 
             Assert.IsTrue(zones.Any() && zones2.Any());
+        }
+
+        [TestMethod]
+        public void GetZoneClosestToMessageTest()
+        {
+            LaserMessage message = new(255, 25, 255, -4000, 0);
+            ZonesHitData zone = ZoneLogic.GetZoneClosestToMessage(message, _zones, _zones.Count);
+            Assert.IsNotNull(zone);
+        }
+
+        [TestMethod]
+        public void PositionMessageInZoneTest()
+        {
+            LaserMessage message = new(255, 25, 255, -4000, -100);
+            ZonesHitData zone = _zones[1];
+            LaserMessage newMessage = ZoneLogic.PositionMessageIntoZone(message, zone);
+            Assert.IsTrue(newMessage.X == -400 && newMessage.Y == 100);
         }
     }
 }
