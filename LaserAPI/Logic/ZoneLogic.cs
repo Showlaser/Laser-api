@@ -46,8 +46,6 @@ namespace LaserAPI.Logic
 
         public static List<ZonesHitData> GetZonesInPathOfPosition(List<ZonesHitData> zones, LaserMessage newMessage)
         {
-            int previousX = LaserConnectionLogic.PreviousLaserMessage.X;
-            int previousY = LaserConnectionLogic.PreviousLaserMessage.Y;
             int newX = newMessage.X;
             int newY = newMessage.Y;
             

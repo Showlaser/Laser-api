@@ -58,6 +58,8 @@ namespace LaserAPI.Logic
                 return;
             }
 
+            //Todo sort list from low to high
+
             List<LaserMessage> messagesToSend = GetMessagesToSend(newMessage);
             int messagesToSendLength = messagesToSend.Count;
             for (int i = 0; i < messagesToSendLength; i++)

@@ -83,7 +83,7 @@ namespace LaserAPITests.MockedModels.Zones
                 }
             };
 
-            //Zones.Add(zone1); TODO add
+            Zones.Add(zone1);
             Zones.Add(zone2);
         }
     }
