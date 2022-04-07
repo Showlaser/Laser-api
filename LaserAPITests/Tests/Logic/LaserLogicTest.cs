@@ -27,14 +27,14 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public async Task SendDataTest()
         {
-            LaserConnectionLogic.PreviousLaserMessage = new LaserMessage(0, 0, 0, -4000, 1000);
+            LaserConnectionLogic.PreviousLaserMessage = new LaserMessage(0, 0, 0, -4000, 4000);
             await _laserLogic.SendData(new LaserMessage
             {
                 RedLaser = 255,
                 BlueLaser = 0,
                 GreenLaser = 100,
                 X = 4000,
-                Y = 1000
+                Y = 0
             });
         }
 

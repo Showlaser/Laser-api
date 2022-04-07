@@ -131,18 +131,20 @@ namespace LaserAPI.Models.Helper.Zones
 
         private static int CalculateSideXAxis(LaserMessage message, int yAxisHit, int lastXPosition, int lastYPosition)
         {
-            return NumberHelper.Map(yAxisHit, NumberHelper.GetLowestNumber(message.X, lastYPosition),
-                NumberHelper.GetHighestNumber(message.Y, lastYPosition),
-                NumberHelper.GetLowestNumber(message.X, lastXPosition),
-                NumberHelper.GetHighestNumber(message.X, lastXPosition));
+            return 0;
+            /* return NumberHelper.Map(yAxisHit, NumberHelper.GetLowestNumber(message.X, lastYPosition),
+                 NumberHelper.GetHighestNumber(message.Y, lastYPosition),
+                 NumberHelper.GetLowestNumber(message.X, lastXPosition),
+                 NumberHelper.GetHighestNumber(message.X, lastXPosition)); todo uncomment */
         }
 
         private static int CalculateSideYAxis(LaserMessage message, int leftXAxis, int lastXPosition, int lastYPosition)
         {
-            return NumberHelper.Map(leftXAxis, NumberHelper.GetLowestNumber(message.X, lastXPosition),
+            return 0;
+            /*return NumberHelper.Map(leftXAxis, NumberHelper.GetLowestNumber(message.X, lastXPosition),
                 NumberHelper.GetHighestNumber(message.X, lastXPosition),
                 NumberHelper.GetLowestNumber(message.Y, lastYPosition),
-                NumberHelper.GetHighestNumber(message.Y, lastYPosition));
+                NumberHelper.GetHighestNumber(message.Y, lastYPosition));todo uncomment */
         }
     }
 }

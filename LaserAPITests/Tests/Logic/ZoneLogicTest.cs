@@ -126,5 +126,21 @@ namespace LaserAPITests.Tests.Logic
             LaserMessage newMessage = ZoneLogic.PositionMessageIntoZone(message, zone);
             Assert.IsTrue(newMessage.X == -400 && newMessage.Y == 100);
         }
+
+        [TestMethod]
+        public void CalculateYAxisTest()
+        {
+            LaserConnectionLogic.PreviousLaserMessage.X = -4000;
+            LaserConnectionLogic.PreviousLaserMessage.Y = 4000;
+            int yAxis = ZoneLogic.CalculateSideYAxis(new LaserMessage(0, 0, 0, 4000, 0), -1000);
+        }
+
+        [TestMethod]
+        public void CalculateYAxisTest2()
+        {
+            LaserConnectionLogic.PreviousLaserMessage.X = -4000;
+            LaserConnectionLogic.PreviousLaserMessage.Y = 4000;
+            int yAxis = ZoneLogic.CalculateSideYAxis(new LaserMessage(0, 0, 0, 4000, 2000), 0);
+        }
     }
 }

@@ -21,7 +21,7 @@ namespace LaserAPITests.MockedModels.Zones
                         ZoneUuid = Guid.Parse("fc220bc5-68ff-45d8-8e51-d884687e324b"),
                         Uuid = Guid.Parse("9df6bd3a-db73-475f-beaa-09f3c5f1ee9f"),
                         X = -4000,
-                        Y = -4000
+                        Y = -400
                     },
                     new()
                     {
@@ -42,7 +42,7 @@ namespace LaserAPITests.MockedModels.Zones
                         ZoneUuid = Guid.Parse("fc220bc5-68ff-45d8-8e51-d884687e324b"),
                         Uuid = Guid.Parse("432acb83-4638-493f-b469-f42dae78eb9b"),
                         X = 4000,
-                        Y = -4000
+                        Y = -400
                     },
                 }
             };

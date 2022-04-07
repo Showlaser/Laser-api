@@ -36,13 +36,9 @@ namespace LaserAPI.Models.Helper
             return nr1 < nr2 ? nr1 : nr2;
         }
 
-        public static int Map(int value, int fromLow, int fromHigh, int toLow, int toHigh)
+        public static int Map(int value, int inMin, int inMax, int outMin, int outMax)
         {
-            if (value == 0 && fromLow == 0 && fromHigh == 0 && toLow == 0 && toHigh == 0)
-            {
-                return 0;
-            }
-            return (value - fromLow) / (fromHigh - fromLow) * (toHigh - toLow) + toLow;
+            return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
         }
 
         public static int GetDifferenceBetweenTwoNumbers(int nr1, int nr2)
