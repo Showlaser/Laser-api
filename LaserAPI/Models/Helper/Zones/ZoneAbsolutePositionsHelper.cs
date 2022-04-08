@@ -23,8 +23,8 @@ namespace LaserAPI.Models.Helper.Zones
         {
             LeftXAxisInZone = zone.Positions.GroupBy(z => z.X).First().Key;
             RightXAxisInZone = zone.Positions.GroupBy(z => z.X).Last().Key;
-            LowestYAxisInZone = zone.Positions.GroupBy(z => z.Y).First().Key;
-            HighestYAxisInZone = zone.Positions.GroupBy(z => z.Y).Last().Key;
+            LowestYAxisInZone = zone.Positions.GroupBy(z => z.Y).Last().Key;
+            HighestYAxisInZone = zone.Positions.GroupBy(z => z.Y).First().Key;
         }
     }
 }

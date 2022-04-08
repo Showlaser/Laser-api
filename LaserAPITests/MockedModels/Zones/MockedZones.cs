@@ -20,29 +20,29 @@ namespace LaserAPITests.MockedModels.Zones
                     {
                         ZoneUuid = Guid.Parse("fc220bc5-68ff-45d8-8e51-d884687e324b"),
                         Uuid = Guid.Parse("9df6bd3a-db73-475f-beaa-09f3c5f1ee9f"),
-                        X = -4000,
-                        Y = -400
+                        X = -1000,
+                        Y = 3000
                     },
                     new()
                     {
                         ZoneUuid = Guid.Parse("fc220bc5-68ff-45d8-8e51-d884687e324b"),
                         Uuid = Guid.Parse("18fcaa8c-7a3c-4505-961a-d9aa403eb225"),
-                        X = -4000,
+                        X = -1000,
                         Y = 0
                     },
                     new()
                     {
                         ZoneUuid = Guid.Parse("fc220bc5-68ff-45d8-8e51-d884687e324b"),
                         Uuid = Guid.Parse("5e87ee08-5212-43a4-aa30-1231330669f2"),
-                        X = 4000,
+                        X = 1000,
                         Y = 0
                     },
                     new()
                     {
                         ZoneUuid = Guid.Parse("fc220bc5-68ff-45d8-8e51-d884687e324b"),
                         Uuid = Guid.Parse("432acb83-4638-493f-b469-f42dae78eb9b"),
-                        X = 4000,
-                        Y = -400
+                        X = 1000,
+                        Y = 3000
                     },
                 }
             };
@@ -84,7 +84,7 @@ namespace LaserAPITests.MockedModels.Zones
             };
 
             Zones.Add(zone1);
-            Zones.Add(zone2);
+            //Zones.Add(zone2); todo uncomment
         }
     }
 }

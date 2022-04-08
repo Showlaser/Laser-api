@@ -4,6 +4,7 @@ using LaserAPI.Models.Helper;
 using LaserAPI.Models.Helper.Zones;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -190,8 +191,8 @@ namespace LaserAPI.Logic
             for (int j = 0; j < 4; j++)
             {
                 ZonesPositionDto zonePosition = zoneHitData.Zone.Positions[j];
-                int xDifference = NumberHelper.GetDifferenceBetweenTwoNumbers(zonePosition.X, message.X);
-                int yDifference = NumberHelper.GetDifferenceBetweenTwoNumbers(zonePosition.Y, message.Y);
+                int xDifference = NumberHelper.CalculateDifference(zonePosition.X, message.X);
+                int yDifference = NumberHelper.CalculateDifference(zonePosition.Y, message.Y);
                 int totalDifference = xDifference + yDifference;
 
                 if (closestZonePositionToMessage.XAndYPositionCombined > totalDifference)
@@ -250,19 +251,31 @@ namespace LaserAPI.Logic
                 NumberHelper.GetHighestNumber(message.X, lastXPosition)); TODO uncomment*/
         }
 
-        public static int CalculateSideYAxis(LaserMessage newMessage, int knownXAxisPosition)
+        /// <summary>
+        /// This method calculates the crossing x and y point with two lines
+        /// </summary>
+        /// <param name="newMessage">The new position</param>
+        /// <param name="point1">The first point of the line</param>
+        /// <param name="point2">The second point of the line</param>
+        /// <returns></returns>
+        public static Point CalculateCrossingPointOfTwoLines(LaserMessage newMessage, Point point1, Point point2)
         {
             int currentXPosition = LaserConnectionLogic.PreviousLaserMessage.X;
             int currentYPosition = LaserConnectionLogic.PreviousLaserMessage.Y;
 
-            double slope = Convert.ToDouble(newMessage.Y - currentYPosition) / Convert.ToDouble(newMessage.X - currentXPosition);
-            double value = knownXAxisPosition
+            Point lowestPoint = point1.Y < point2.Y ? point1 : point2;
 
-
-            return 0;
-
-            // TODO uncomment return knownXAxisPosition.Map(NumberHelper.GetLowestNumber(currentXPosition, newMessage.X), NumberHelper.GetHighestNumber(currentXPosition, newMessage.X),
-            //    NumberHelper.GetLowestNumber(currentYPosition, newMessage.Y), NumberHelper.GetHighestNumber(currentYPosition, newMessage.Y));
+            double yDifferenceCurrentAndNew = NumberHelper.CalculateDifference(currentYPosition, newMessage.Y);
+            double xDifferenceCurrentAndNew = NumberHelper.CalculateDifference(currentXPosition, newMessage.X);
+            double c1 = yDifferenceCurrentAndNew * newMessage.X + xDifferenceCurrentAndNew * newMessage.Y;
+            double a2 = NumberHelper.CalculateDifference(point1.Y, point2.Y);
+            double crossedLineLengthDifference = NumberHelper.CalculateDifference(point1.X, point2.X);
+            double c2 = a2 * lowestPoint.X + crossedLineLengthDifference * lowestPoint.Y;
+            double determinant = yDifferenceCurrentAndNew * crossedLineLengthDifference - a2 * xDifferenceCurrentAndNew;
+            
+            double x = (crossedLineLengthDifference * c1 - xDifferenceCurrentAndNew * c2) / determinant;
+            double y = (yDifferenceCurrentAndNew * c2 - a2 * c1) / determinant;
+            return new Point(x.ToInt(), y.ToInt());
         }
     }
 }

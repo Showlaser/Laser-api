@@ -88,7 +88,7 @@ namespace LaserAPITests.Tests.Helper
                 int number1 = numbers[i];
                 int number2 = numbers[i + 1];
                 int answer = numbers[i + 2];
-                int difference = NumberHelper.GetDifferenceBetweenTwoNumbers(number1, number2);
+                int difference = NumberHelper.CalculateDifference(number1, number2);
                 Assert.IsTrue(difference == answer);
             }
         }
