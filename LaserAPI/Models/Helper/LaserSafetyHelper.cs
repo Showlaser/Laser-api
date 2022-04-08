@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace LaserAPI.Models.Helper
+﻿namespace LaserAPI.Models.Helper
 {
     public static class LaserSafetyHelper
     {
-        
+
     }
 }

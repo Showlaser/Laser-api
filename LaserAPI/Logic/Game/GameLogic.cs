@@ -3,7 +3,6 @@ using LaserAPI.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using LaserAPI.Interfaces.Dal;
 
 namespace LaserAPI.Logic.Game
 {
@@ -19,7 +18,7 @@ namespace LaserAPI.Logic.Game
                 .SelectMany(e => e.GetTypes())
                 .Where(e => typeof(IGame).IsAssignableFrom(e) && e.IsClass)
                 .ToList();
-                
+
             List<object> paramArray = new() { animationLogic };
             _playableGames.AddRange(types.Select(t => (IGame)Activator.CreateInstance(t, paramArray.ToArray())));
         }

@@ -84,7 +84,7 @@ namespace LaserAPITests.MockedModels.Zones
             };
 
             Zones.Add(zone1);
-            //Zones.Add(zone2); todo uncomment
+            Zones.Add(zone2);
         }
     }
 }

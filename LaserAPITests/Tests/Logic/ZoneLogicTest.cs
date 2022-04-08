@@ -1,15 +1,11 @@
-﻿using System;
-using LaserAPI.Interfaces.Dal;
+﻿using LaserAPI.Interfaces.Dal;
 using LaserAPI.Logic;
 using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper;
-using LaserAPI.Models.Helper.Zones;
 using LaserAPITests.Mock;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 
 namespace LaserAPITests.Tests.Logic
 {
@@ -57,6 +53,47 @@ namespace LaserAPITests.Tests.Logic
                 new Point(-4000, -4000), new Point(4000, 4000));
 
             Assert.IsTrue(crossingPoint.X == 0 && crossingPoint.Y == 0);
+        }
+
+        [TestMethod]
+        public void CalculateCrossingPointBetweenTwoLinesTest4()
+        {
+            LaserConnectionLogic.PreviousLaserMessage.X = -4000;
+            LaserConnectionLogic.PreviousLaserMessage.Y = 4000;
+            Point crossingPoint = ZoneLogic.CalculateCrossingPointOfTwoLines(new LaserMessage(0, 0, 0, 4000, 0),
+                new Point(-4000, 0), new Point(4000, 4000));
+
+            Assert.IsTrue(crossingPoint.X == 0 && crossingPoint.Y == 2000);
+        }
+
+        [TestMethod]
+        public void CalculateCrossingPointBetweenTwoLinesLineDoesNotCrossTest()
+        {
+            LaserConnectionLogic.PreviousLaserMessage.X = -4000;
+            LaserConnectionLogic.PreviousLaserMessage.Y = 4000;
+            Point crossingPoint = ZoneLogic.CalculateCrossingPointOfTwoLines(new LaserMessage(0, 0, 0, -4000, 0),
+                new Point(4000, 0), new Point(4000, 4000));
+
+            Assert.IsTrue(crossingPoint.X == -4001 && crossingPoint.Y == -4001);
+        }
+
+        [TestMethod]
+        public void CalculateCrossingPointBetweenTwoLinesLineDoesNotCrossTest2()
+        {
+            LaserConnectionLogic.PreviousLaserMessage.X = -4000;
+            LaserConnectionLogic.PreviousLaserMessage.Y = 4000;
+            Point crossingPoint = ZoneLogic.CalculateCrossingPointOfTwoLines(new LaserMessage(0, 0, 0, 4000, 4000),
+                new Point(-4000, 0), new Point(4000, 0));
+
+            Assert.IsTrue(crossingPoint.X == -4001 && crossingPoint.Y == -4001);
+        }
+
+        [TestMethod]
+        public void GetLineHitByPathTest()
+        {
+            LaserConnectionLogic.PreviousLaserMessage.X = -4000;
+            LaserConnectionLogic.PreviousLaserMessage.Y = 3999;
+            List<ZoneLine> zonesHit = ZoneLogic.GetLineHitByPath(_zones[1], new LaserMessage(0, 0, 0, 4000, 3999));
         }
     }
 }

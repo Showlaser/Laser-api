@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using LaserAPI.Interfaces;
+﻿using LaserAPI.Interfaces;
 
 namespace LaserAPI.Logic.Game
 {

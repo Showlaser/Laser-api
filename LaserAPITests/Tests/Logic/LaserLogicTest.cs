@@ -1,15 +1,10 @@
 ﻿using LaserAPI.Logic;
 using LaserAPI.Models.Helper;
-using LaserAPI.Models.Helper.Zones;
 using LaserAPITests.Mock;
-using LaserAPITests.MockedModels.Zones;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
-using LaserAPI.Models.Dto.Zones;
 
 namespace LaserAPITests.Tests.Logic
 {
@@ -62,7 +57,7 @@ namespace LaserAPITests.Tests.Logic
             Assert.IsTrue(iterations > 25000); // 25000 is for 
         }
 
-        
+
         [TestMethod]
         public void LimitLaserPowerIfNecessaryTest()
         {

@@ -24,16 +24,16 @@ namespace LaserAPI.Models.Helper
 
         public static int ToInt(this double source) => Convert.ToInt32(source);
 
-        public static int GetHighestNumber(int nr1, int nr2) => 
+        public static int GetHighestNumber(int nr1, int nr2) =>
             nr1 > nr2 ? nr1 : nr2;
 
         public static int GetLowestNumber(int nr1, int nr2) =>
             nr1 < nr2 ? nr1 : nr2;
-        
+
         public static int Map(int value, int inMin, int inMax, int outMin, int outMax) =>
             (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 
-        public static int CalculateDifference(int nr1, int nr2) => 
+        public static int CalculateDifference(int nr1, int nr2) =>
             GetHighestNumber(nr1, nr2) - GetLowestNumber(nr1, nr2);
     }
 }

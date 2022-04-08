@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using LaserAPI.Models.Helper;
+﻿using LaserAPI.Models.Helper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 using System.Data;
 
 namespace LaserAPITests.Tests.Helper
@@ -81,9 +81,9 @@ namespace LaserAPITests.Tests.Helper
         [TestMethod]
         public void GetDifferenceBetweenTwoNumbersTest()
         {
-            List<int> numbers = new() { -400, 400, 800, -4000, 4000, 8000, 4000, 4000, 0, 0, 0, 0 }; 
+            List<int> numbers = new() { -400, 400, 800, -4000, 4000, 8000, 4000, 4000, 0, 0, 0, 0 };
             // first and second number are the numbers to check difference the third number is the difference between the two numbers
-            for (int i = 0; i < 12; i+=3)
+            for (int i = 0; i < 12; i += 3)
             {
                 int number1 = numbers[i];
                 int number2 = numbers[i + 1];
