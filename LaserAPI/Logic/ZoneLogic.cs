@@ -13,10 +13,26 @@ namespace LaserAPI.Logic
     public class ZoneLogic
     {
         private readonly IZoneDal _zoneDal;
+        private readonly List<ZoneDto> _zones;
+        private readonly bool _projectionZonesNotActive;
+        private readonly int _zonesLength;
+        private readonly ZoneDto _zoneWithHighestLaserPowerPwm;
 
         public ZoneLogic(IZoneDal zoneDal)
         {
             _zoneDal = zoneDal;
+            _zones = zoneDal
+                .All()
+                .Result;
+
+            _zones.ForEach(zone =>
+            {
+                zone.Positions = zone.Positions.OrderBy(p => p.OrderNr).ToList();
+            });
+
+            _projectionZonesNotActive = !_zones.Any();
+            _zonesLength = _zones.Count;
+            _zoneWithHighestLaserPowerPwm = GetZoneWhereMaxLaserPowerPwmIsHighest(_zones.ToList());
         }
 
         public async Task<List<ZoneDto>> All()
@@ -45,44 +61,83 @@ namespace LaserAPI.Logic
         }
 
         /// <summary>
-        /// Checks if the path of the previous position and the new position crosses a zoneHitData
+        /// Gets all the points of the lines that form a zone that are hit with the laser path, points are not sorted from closest to previous location
         /// </summary>
-        /// <param name="zone"></param>
-        /// <returns>The zones that are crossed</returns>
-        public static List<ZoneLine> GetLineHitByPath(ZoneDto zone, LaserMessage message)
+        /// <param name="message">The new location for the laser to go to</param>
+        /// <returns>The points of the lines that form a zone that are hit with the laser path</returns>
+        public List<Point> GetPointsOfZoneLinesHitByPath(LaserMessage message)
         {
-            List<ZoneLine> points = new();
-
-            for (int i = 0; i < 4; i++)
+            List<Point> crossingPoints = new();
+            for (int i = 0; i < _zonesLength; i++)
             {
-                ZonesPositionDto position = zone.Positions[i];
-                Point zonePoint1 = new(position.X, position.Y);
+                ZoneDto zone = _zones[i];
+                List<ZoneLine> zoneLinesHit = GetZoneLineHitByPath(zone, message);
 
-                for (int j = 0; j < 4; j++)
+                int zoneLinesHitLength = zoneLinesHit.Count;
+                for (int j = 0; j < zoneLinesHitLength; j++)
                 {
-                    if (i == j)
-                    {
-                        continue;
-                    }
-
-                    ZonesPositionDto secondPosition = zone.Positions[j];
-                    Point zonePoint2 = new(secondPosition.X, secondPosition.Y);
-
-                    Point crossedPoint = CalculateCrossingPointOfTwoLines(message, zonePoint1, zonePoint2);
-                    if (crossedPoint.X != -4001 && crossedPoint.Y != -4001)
-                    {
-                        points.Add(new ZoneLine
-                        {
-                            Point1 = zonePoint1,
-                            Point2 = zonePoint2,
-                            CrossedPoint = crossedPoint
-                        });
-                    }
+                    Point point = zoneLinesHit[j].CrossedPoint;
+                    crossingPoints.Add(point);
                 }
             }
 
-            var list = points.DistinctBy(p => p.CrossedPoint).ToList();
-            return list;
+            return SortPointsFromClosestToPreviousSendMessageToFarthest(crossingPoints);
+        }
+
+        /// <summary>
+        /// Checks if the path of the previous position and the new position crosses a zone and returns the data of the crossed zone line
+        /// </summary>
+        /// <param name="zone">The zone to check</param>
+        /// <param name="message">The new location for the laser</param>
+        /// <returns>The zones that are crossed</returns>
+        public static List<ZoneLine> GetZoneLineHitByPath(ZoneDto zone, LaserMessage message)
+        {
+            List<ZoneLine> points = new();
+            for (int i = 0; i < 4; i++)
+            {
+                // these two positions form a connected line
+                ZonesPositionDto position = zone.Positions[i];
+                int secondZoneIndex = i == 3 ? 0 : i + 1;
+                ZonesPositionDto secondPosition = zone.Positions[secondZoneIndex];
+
+                Point zonePoint1 = new(position.X, position.Y);
+                Point zonePoint2 = new(secondPosition.X, secondPosition.Y);
+
+                Point crossedPoint = CalculateCrossingPointOfZoneLineAndLaserPath(message, zonePoint1, zonePoint2);
+                if (crossedPoint.X != -4001 && crossedPoint.Y != -4001)
+                {
+                    points.Add(new ZoneLine
+                    {
+                        Point1 = zonePoint1,
+                        Point2 = zonePoint2,
+                        CrossedPoint = crossedPoint
+                    });
+                }
+            }
+
+            return points.DistinctBy(p => p.CrossedPoint).ToList();
+        }
+
+        /// <summary>
+        /// Sorts the points from closest to farthest away from the previous point 
+        /// </summary>
+        /// <param name="points">The points to sort</param>
+        /// <returns>The given points sorted from closest to farthest away from the previous send point</returns>
+        public static List<Point> SortPointsFromClosestToPreviousSendMessageToFarthest(List<Point> points)
+        {
+            LaserMessage message = LaserConnectionLogic.PreviousLaserMessage;
+            DistanceSorterHelper[] distances = new DistanceSorterHelper[points.Count];
+            int pointsLength = points.Count;
+            for (int i = 0; i < pointsLength; i++)
+            {
+                Point point = points[i];
+                double distance = Math.Sqrt((Math.Pow(message.X - point.X, 2) + Math.Pow(message.Y - point.Y, 2)));
+                distances[i] = new DistanceSorterHelper(point, distance);
+            }
+
+            return distances.OrderBy(d => d.Distance)
+                .Select(d => d.Point)
+                .ToList();
         }
 
         public static ZoneDto GetZoneWhereMaxLaserPowerPwmIsHighest(List<ZoneDto> zones)
@@ -90,25 +145,97 @@ namespace LaserAPI.Logic
             return zones.MaxBy(zone => zone.MaxLaserPowerInZonePwm);
         }
 
+        // Given three collinear points p, q, r, the function checks if
+        // point q lies on line segment 'pr'
+        private static bool OnSegment(Point p, Point q, Point r) =>
+            q.X <= Math.Max(p.X, r.X) && q.X >= Math.Min(p.X, r.X) && q.Y <= Math.Max(p.Y, r.Y) && q.Y >= Math.Min(p.Y, r.Y);
+
+
+        // To find orientation of ordered triplet (p, q, r).
+        // The function returns following values
+        // 0 --> p, q and r are collinear
+        // 1 --> Clockwise
+        // 2 --> Counterclockwise
+        private static int Orientation(Point p, Point q, Point r)
+        {
+            // See https://www.geeksforgeeks.org/orientation-3-ordered-points/
+            // for details of below formula.
+            int val = (q.Y - p.Y) * (r.X - q.X) - (q.X - p.X) * (r.Y - q.Y);
+            if (val == 0)
+            {
+                return 0; // collinear
+            }
+
+            return val > 0 ? 1 : 2; // clock or counter clock wise
+        }
+
+        // The main function that returns true if line segment 'p1q1'
+        // and 'p2q2' intersect.
+        private static bool DoIntersect(Point p1, Point q1, Point p2, Point q2)
+        {
+            // Find the four orientations needed for general and
+            // special cases
+            int o1 = Orientation(p1, q1, p2);
+            int o2 = Orientation(p1, q1, q2);
+            int o3 = Orientation(p2, q2, p1);
+            int o4 = Orientation(p2, q2, q1);
+
+            // General case
+            if (o1 != o2 && o3 != o4)
+            {
+                return true;
+            }
+            // Special Cases
+            // p1, q1 and p2 are collinear and p2 lies on segment p1q1
+            if (o1 == 0 && OnSegment(p1, p2, q1))
+            {
+                return true;
+            }
+            // p1, q1 and q2 are collinear and q2 lies on segment p1q1
+            if (o2 == 0 && OnSegment(p1, q2, q1))
+            {
+                return true;
+            }
+            // p2, q2 and p1 are collinear and p1 lies on segment p2q2
+            if (o3 == 0 && OnSegment(p2, p1, q2))
+            {
+                return true;
+            }
+            // p2, q2 and q1 are collinear and q1 lies on segment p2q2
+            if (o4 == 0 && OnSegment(p2, q1, q2))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// This method calculates the crossing x and y point with two lines
         /// </summary>
         /// <param name="newMessage">The new position</param>
-        /// <param name="point1">The first point of the line</param>
-        /// <param name="point2">The second point of the line</param>
+        /// <param name="line2Point1">The first point of the line</param>
+        /// <param name="line2Point2">The second point of the line</param>
         /// <returns>A new point with the x and y position of the crossing point if the lines do not cross a point with the values -4001, -4001 is returned</returns>
-        public static Point CalculateCrossingPointOfTwoLines(LaserMessage newMessage, Point point1, Point point2)
+        public static Point CalculateCrossingPointOfZoneLineAndLaserPath(LaserMessage newMessage, Point line2Point1, Point line2Point2)
         {
             int currentXPosition = LaserConnectionLogic.PreviousLaserMessage.X;
             int currentYPosition = LaserConnectionLogic.PreviousLaserMessage.Y;
+            bool linesDoNotCross = !DoIntersect(new Point(newMessage.X, newMessage.Y),
+                new Point(currentXPosition, currentYPosition), line2Point1, line2Point2);
 
-            Point lowestPoint = point1.Y < point2.Y ? point1 : point2;
+            if (linesDoNotCross)
+            {
+                return new Point(-4001, -4001);
+            }
+
+            Point lowestPoint = line2Point1.Y < line2Point2.Y ? line2Point1 : line2Point2;
 
             double yDifferenceCurrentAndNew = currentYPosition - newMessage.Y;
             double xDifferenceCurrentAndNew = newMessage.X - currentXPosition;
             double c1 = yDifferenceCurrentAndNew * newMessage.X + xDifferenceCurrentAndNew * newMessage.Y;
-            double a2 = point2.Y - point1.Y;
-            double crossedLineLengthDifference = point1.X - point2.X;
+            double a2 = line2Point2.Y - line2Point1.Y;
+            double crossedLineLengthDifference = line2Point1.X - line2Point2.X;
             double c2 = a2 * lowestPoint.X + crossedLineLengthDifference * lowestPoint.Y;
             double determinant = yDifferenceCurrentAndNew * crossedLineLengthDifference - a2 * xDifferenceCurrentAndNew;
             if (determinant == 0)

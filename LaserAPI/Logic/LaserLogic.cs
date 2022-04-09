@@ -1,60 +1,40 @@
-﻿using LaserAPI.Interfaces.Dal;
-using LaserAPI.Models.Dto.Zones;
-using LaserAPI.Models.Helper;
+﻿using LaserAPI.Models.Helper;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
     public class LaserLogic
     {
-        private static List<ZoneDto> _zones;
-        private static int _zonesLength;
-        private static bool _projectionZonesNotActive;
-        private static ZoneDto _zoneWithHighestLaserPowerPwm;
-
-        public LaserLogic(IZoneDal zoneDal)
-        {
-            _zones = zoneDal
-                .All()
-                .Result;
-
-            _projectionZonesNotActive = !_zones.Any();
-            _zonesLength = _zones.Count;
-            _zoneWithHighestLaserPowerPwm = ZoneLogic.GetZoneWhereMaxLaserPowerPwmIsHighest(_zones.ToList());
-        }
-
         public async Task SendData(LaserMessage newMessage)
         {
             int totalLaserPowerPwm = newMessage.RedLaser + newMessage.GreenLaser + newMessage.BlueLaser;
-            bool skipProjectionZoneCheck = _projectionZonesNotActive || totalLaserPowerPwm == 0;
+            /* bool skipProjectionZoneCheck = _projectionZonesNotActive || totalLaserPowerPwm == 0;
 
-            if (skipProjectionZoneCheck)
-            {
-                await LaserConnectionLogic.SendMessage(newMessage);
-                return;
-            }
+             if (skipProjectionZoneCheck)
+             {
+                 await LaserConnectionLogic.SendMessage(newMessage);
+                 return;
+             }
 
-            /*ZonesHitData zoneHitData = ZoneLogic.GetZoneWherePathIsInside(_zones, _zonesLength, newMessage.X, newMessage.Y);
-            bool positionIsInProjectionZone = zoneHitData != null;
+             /*ZonesHitData zoneHitData = ZoneLogic.GetZoneWherePathIsInside(_zones, _zonesLength, newMessage.X, newMessage.Y);
+             bool positionIsInProjectionZone = zoneHitData != null;
 
-            if (positionIsInProjectionZone)
-            {
-                LimitTotalLaserPowerIfNecessary(ref newMessage, zoneHitData.Zone.MaxLaserPowerInZonePwm);
-                await LaserConnectionLogic.SendMessage(newMessage);
-                return;
-            }
-            //Todo sort list from low to high
+             if (positionIsInProjectionZone)
+             {
+                 LimitTotalLaserPowerIfNecessary(ref newMessage, zoneHitData.Zone.MaxLaserPowerInZonePwm);
+                 await LaserConnectionLogic.SendMessage(newMessage);
+                 return;
+             }
+             //Todo sort list from low to high
 
-            List<LaserMessage> messagesToSend = GetMessagesToSend(newMessage);
-            int messagesToSendLength = messagesToSend.Count;
-            for (int i = 0; i < messagesToSendLength; i++)
-            {
-                LaserMessage message = messagesToSend[i];
-                await LaserConnectionLogic.SendMessage(message);
-            }            */
+             List<LaserMessage> messagesToSend = GetMessagesToSend(newMessage);
+             int messagesToSendLength = messagesToSend.Count;
+             for (int i = 0; i < messagesToSendLength; i++)
+             {
+                 LaserMessage message = messagesToSend[i];
+                 await LaserConnectionLogic.SendMessage(message);
+             }            */
 
         }
 
