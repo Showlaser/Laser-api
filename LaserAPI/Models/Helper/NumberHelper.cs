@@ -24,6 +24,8 @@ namespace LaserAPI.Models.Helper
 
         public static int ToInt(this double source) => Convert.ToInt32(source);
 
+        public static double ToDouble(this int source) => Convert.ToDouble(source);
+
         public static int GetHighestNumber(int nr1, int nr2) =>
             nr1 > nr2 ? nr1 : nr2;
 

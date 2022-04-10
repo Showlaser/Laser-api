@@ -107,6 +107,10 @@ namespace LaserAPI.Logic
                     LaserMessage messageToAdd = new(message.RedLaser, message.GreenLaser, message.BlueLaser, point.X, point.Y);
                     LaserLogic.LimitTotalLaserPowerIfNecessary(ref messageToAdd, zone.MaxLaserPowerInZonePwm);
                     crossingPoints.Add(messageToAdd);
+                    if (j == 0 || j + 1 == zoneLinesHitLength)
+                    {
+                        crossingPoints.Add(new LaserMessage(0, 0, 0, point.X, point.Y));
+                    }
                 }
             }
 

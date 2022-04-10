@@ -19,7 +19,7 @@ namespace LaserAPI.Logic
         {
             try
             {
-                IPAddress localAddress = IPAddress.Parse("172.25.189.18");
+                IPAddress localAddress = IPAddress.Parse("192.168.1.31");
                 _server = new TcpListener(localAddress, 50000)
                 {
                     Server =

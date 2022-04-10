@@ -1,6 +1,5 @@
 ﻿using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -67,11 +66,10 @@ namespace LaserAPI.Logic
             int combinedPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
             if (combinedPower > maxPowerPwm)
             {
-                // ReSharper disable once PossibleLossOfFraction
-                double maxPowerPerColor = NumberHelper.Map(combinedPower, 0, 765, 0, maxPowerPwm) / 3;
-                message.RedLaser = NumberHelper.Map(message.RedLaser, 0, 255, 0, Convert.ToInt32(maxPowerPerColor));
-                message.GreenLaser = NumberHelper.Map(message.GreenLaser, 0, 255, 0, Convert.ToInt32(maxPowerPerColor));
-                message.BlueLaser = NumberHelper.Map(message.BlueLaser, 0, 255, 0, Convert.ToInt32(maxPowerPerColor));
+                double divideFactor = combinedPower.ToDouble() / maxPowerPwm.ToDouble();
+                message.RedLaser = (message.RedLaser / divideFactor).ToInt();
+                message.GreenLaser = (message.GreenLaser / divideFactor).ToInt();
+                message.BlueLaser = (message.BlueLaser / divideFactor).ToInt();
             }
         }
     }
