@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using LaserAPI.CustomExceptions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -38,6 +39,10 @@ namespace LaserAPI.Models.Helper
             catch (SecurityException)
             {
                 return new UnauthorizedResult();
+            }
+            catch (NoProjectionZonesSetException)
+            {
+                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
             catch (Exception exception)
             {

@@ -4,6 +4,7 @@ using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper;
 using LaserAPITests.Mock;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -120,6 +121,16 @@ namespace LaserAPITests.Tests.Logic
         }
 
         [TestMethod]
+        public void GetLineHitByPath6PointZoneTest()
+        {
+            LaserConnectionLogic.PreviousLaserMessage.X = -3000;
+            LaserConnectionLogic.PreviousLaserMessage.Y = -1000;
+            List<ZoneLine> zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[3], new LaserMessage(0, 0, 0, 3000, -1000));
+
+            Assert.IsTrue(zoneLinesHit.Count == 3);
+        }
+
+        [TestMethod]
         public void GetLineHitByPathPerformanceTest()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -138,24 +149,26 @@ namespace LaserAPITests.Tests.Logic
         public void GetPointsClosestToPreviousSendMessageTest()
         {
             LaserConnectionLogic.PreviousLaserMessage = new LaserMessage(0, 0, 0, -4000, 4000);
-            List<Point> pointsToSort = new()
+            List<LaserMessage> pointsToSort = new()
             {
-                new Point(-400, 4000),
-                new Point(-4000, 4000),
-                new Point(400, 4000)
+                new LaserMessage(0, 0, 0, -400, 4000),
+                new LaserMessage(0, 0, 0, -4000, 4000),
+                new LaserMessage(0, 0, 0, 400, 4000),
             };
-            List<Point> expectedOrder = new()
+            List<LaserMessage> expectedOrder = new()
             {
-                new Point(-4000, 4000),
-                new Point(-400, 4000),
-                new Point(400, 4000)
+                new LaserMessage(0, 0, 0, -4000, 4000),
+                new LaserMessage(0, 0, 0, -400, 4000),
+                new LaserMessage(0, 0, 0, 400, 4000),
             };
 
-            List<Point> sortedPoints = ZoneLogic.SortPointsFromClosestToPreviousSendMessageToFarthest(pointsToSort);
+            List<LaserMessage> sortedPoints = ZoneLogic.SortPointsFromClosestToPreviousSendMessageToFarthest(pointsToSort);
             for (int i = 0; i < sortedPoints.Count; i++)
             {
-                Point sortedPoint = sortedPoints[i];
-                Point expectedPoint = expectedOrder[i];
+                LaserMessage message = sortedPoints[i];
+                LaserMessage expectedMessage = expectedOrder[i];
+                Point sortedPoint = new(message.X, message.Y);
+                Point expectedPoint = new(expectedMessage.X, expectedMessage.Y);
                 Assert.IsTrue(sortedPoint.X == expectedPoint.X && sortedPoint.Y == expectedPoint.Y);
             }
         }
@@ -164,8 +177,61 @@ namespace LaserAPITests.Tests.Logic
         public void GetPointsOfZoneLinesHitByPathTest()
         {
             LaserConnectionLogic.PreviousLaserMessage = new LaserMessage(0, 0, 0, -4000, 4000);
-            List<Point> points = _zoneLogic.GetPointsOfZoneLinesHitByPath(new LaserMessage(0, 0, 0, 4000, -4000));
-            Assert.IsNotNull(points);
+            List<LaserMessage> messages = _zoneLogic.GetPointsOfZoneLinesHitByPath(new LaserMessage(0, 0, 0, 4000, -4000));
+            Assert.IsNotNull(messages);
+        }
+
+        [TestMethod]
+        public void IsInsidePolygonTest()
+        {
+            Point[] polygon = {
+                new(-3500, 0),
+                new(3500, 0),
+                new(4000, -4000),
+                new (-4000, -4000)
+            };
+
+            bool positionIsInsidePolygon = ZoneLogic.IsInsidePolygon(polygon, new Point(0, 0));
+            Assert.IsTrue(positionIsInsidePolygon);
+        }
+
+        [TestMethod]
+        public void IsNotInsidePolygonTest()
+        {
+            Point[] polygon = {
+                new(-3500, 0),
+                new(3500, 0),
+                new(4000, -4000),
+                new (-4000, -4000)
+            };
+
+            bool positionIsInsidePolygon = ZoneLogic.IsInsidePolygon(polygon, new Point(0, 4000));
+            Assert.IsFalse(positionIsInsidePolygon);
+        }
+
+        [TestMethod]
+        public void IsInsidePolygon6PointsTest()
+        {
+            Point[] polygon = {
+                new(-3500, 0),
+                new(0, 1000),
+                new(3500, 0),
+                new(4000, -4000),
+                new(0, -3500),
+                new (-4000, -4000)
+            };
+
+            bool positionIsInsidePolygon = ZoneLogic.IsInsidePolygon(polygon, new Point(0, -1000));
+            Assert.IsTrue(positionIsInsidePolygon);
+        }
+
+        [TestMethod]
+        public void GetZoneWherePathIsInsideTest()
+        {
+            LaserConnectionLogic.PreviousLaserMessage.X = 500;
+            LaserConnectionLogic.PreviousLaserMessage.Y = 0;
+            ZoneDto zone = _zoneLogic.GetZoneWherePathIsInside(new LaserMessage(0, 0, 0, 500, 0));
+            Assert.IsTrue(zone.Uuid == Guid.Parse("fc220bc5-68ff-45d8-8e51-d884687e324b"));
         }
     }
 }

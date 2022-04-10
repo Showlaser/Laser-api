@@ -130,10 +130,67 @@ namespace LaserAPITests.MockedModels.Zones
                     },
                 }
             };
+            ZoneDto zone4 = new()
+            {
+                MaxLaserPowerInZonePwm = 40,
+                Uuid = Guid.Parse("e4c8cea7-9722-4f1f-bbd1-9c64f7da7e2e"),
+                Positions = new List<ZonesPositionDto>
+                {
+                    new()
+                    {
+                        ZoneUuid = Guid.Parse("e4c8cea7-9722-4f1f-bbd1-9c64f7da7e2e"),
+                        Uuid = Guid.Parse("5c7adca6-cff7-41b8-aabb-8d7c97a86818"),
+                        X = -2000,
+                        Y = 1000,
+                        OrderNr = 0
+                    },
+                    new()
+                    {
+                        ZoneUuid = Guid.Parse("e4c8cea7-9722-4f1f-bbd1-9c64f7da7e2e"),
+                        Uuid = Guid.Parse("f5966b78-cba2-417b-b622-ad843ddffe2d"),
+                        X = 0,
+                        Y = 0,
+                        OrderNr = 1
+                    },
+                    new()
+                    {
+                        ZoneUuid = Guid.Parse("e4c8cea7-9722-4f1f-bbd1-9c64f7da7e2e"),
+                        Uuid = Guid.Parse("9084bf4f-9b32-47dd-bc68-33ac644de270"),
+                        X = 2000,
+                        Y = 1000,
+                        OrderNr = 2
+                    },
+                    new()
+                    {
+                        ZoneUuid = Guid.Parse("e4c8cea7-9722-4f1f-bbd1-9c64f7da7e2e"),
+                        Uuid = Guid.Parse("ee695f9e-418f-44e5-a0a6-735060953ca7"),
+                        X = 2000,
+                        Y = -2000,
+                        OrderNr = 3
+                    },
+                    new()
+                    {
+                        ZoneUuid = Guid.Parse("e4c8cea7-9722-4f1f-bbd1-9c64f7da7e2e"),
+                        Uuid = Guid.Parse("5fbf7c5c-2cf8-4500-8c53-541c8a67e776"),
+                        X = 0,
+                        Y = -1000,
+                        OrderNr = 4
+                    },
+                    new()
+                    {
+                        ZoneUuid = Guid.Parse("e4c8cea7-9722-4f1f-bbd1-9c64f7da7e2e"),
+                        Uuid = Guid.Parse("91043eda-ecee-42c7-af32-260222d2cdde"),
+                        X = -2000,
+                        Y = -1000,
+                        OrderNr = 5
+                    },
+                }
+            };
 
             Zones.Add(zone1);
             Zones.Add(zone2);
             Zones.Add(zone3);
+            Zones.Add(zone4);
         }
     }
 }

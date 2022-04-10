@@ -1,15 +1,13 @@
-﻿using System.Drawing;
-
-namespace LaserAPI.Models.Helper
+﻿namespace LaserAPI.Models.Helper
 {
     public class DistanceSorterHelper
     {
-        public Point Point { get; set; }
+        public LaserMessage Message { get; set; }
         public double Distance { get; set; }
 
-        public DistanceSorterHelper(Point point, double distance)
+        public DistanceSorterHelper(LaserMessage message, double distance)
         {
-            Point = point;
+            Message = message;
             Distance = distance;
         }
     }

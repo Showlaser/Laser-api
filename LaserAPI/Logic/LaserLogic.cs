@@ -1,41 +1,39 @@
-﻿using LaserAPI.Models.Helper;
+﻿using LaserAPI.Models.Dto.Zones;
+using LaserAPI.Models.Helper;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
     public class LaserLogic
     {
+        private readonly ZoneLogic _zoneLogic;
+
+        public LaserLogic(ZoneLogic zoneLogic)
+        {
+            _zoneLogic = zoneLogic;
+        }
+
         public async Task SendData(LaserMessage newMessage)
         {
-            int totalLaserPowerPwm = newMessage.RedLaser + newMessage.GreenLaser + newMessage.BlueLaser;
-            /* bool skipProjectionZoneCheck = _projectionZonesNotActive || totalLaserPowerPwm == 0;
+            ZoneDto zoneWherePathIsInside = _zoneLogic.GetZoneWherePathIsInside(newMessage);
+            bool positionIsInProjectionZone = zoneWherePathIsInside != null;
 
-             if (skipProjectionZoneCheck)
-             {
-                 await LaserConnectionLogic.SendMessage(newMessage);
-                 return;
-             }
+            if (positionIsInProjectionZone)
+            {
+                LimitTotalLaserPowerIfNecessary(ref newMessage, zoneWherePathIsInside.MaxLaserPowerInZonePwm);
+                await LaserConnectionLogic.SendMessage(newMessage);
+                return;
+            }
 
-             /*ZonesHitData zoneHitData = ZoneLogic.GetZoneWherePathIsInside(_zones, _zonesLength, newMessage.X, newMessage.Y);
-             bool positionIsInProjectionZone = zoneHitData != null;
-
-             if (positionIsInProjectionZone)
-             {
-                 LimitTotalLaserPowerIfNecessary(ref newMessage, zoneHitData.Zone.MaxLaserPowerInZonePwm);
-                 await LaserConnectionLogic.SendMessage(newMessage);
-                 return;
-             }
-             //Todo sort list from low to high
-
-             List<LaserMessage> messagesToSend = GetMessagesToSend(newMessage);
-             int messagesToSendLength = messagesToSend.Count;
-             for (int i = 0; i < messagesToSendLength; i++)
-             {
-                 LaserMessage message = messagesToSend[i];
-                 await LaserConnectionLogic.SendMessage(message);
-             }            */
-
+            List<LaserMessage> messagesToSend = _zoneLogic.GetPointsOfZoneLinesHitByPath(newMessage);
+            int messagesToSendLength = messagesToSend.Count;
+            for (int i = 0; i < messagesToSendLength; i++)
+            {
+                LaserMessage message = messagesToSend[i];
+                await LaserConnectionLogic.SendMessage(message);
+            }
         }
 
         /// <summary>

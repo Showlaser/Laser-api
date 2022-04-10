@@ -8,7 +8,8 @@ namespace LaserAPITests.Mock
 
         public MockLaserLogic()
         {
-            LaserLogic mockedLaserLogic = new LaserLogic();
+            MockedZoneLogic mockedZoneLogic = new();
+            LaserLogic mockedLaserLogic = new(mockedZoneLogic.ZoneLogic);
             LaserConnectionLogic.RanByUnitTest = true;
 
             LaserLogic = mockedLaserLogic;
