@@ -28,8 +28,8 @@ namespace LaserAPI.Controllers
                 return devices.Select(d => d.FriendlyName);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            return controllerErrorHandler.Execute(Action);
+            ControllerResultHandler controllerResultHandler = new();
+            return controllerResultHandler.Execute(Action);
         }
 
         [HttpPost("start")]
@@ -41,22 +41,22 @@ namespace LaserAPI.Controllers
                 _laserShowGeneratorLogic.Start(deviceName);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            controllerErrorHandler.Execute(Action);
+            ControllerResultHandler controllerResultHandler = new();
+            controllerResultHandler.Execute(Action);
         }
 
         [HttpPost("stop")]
         public void Stop()
         {
-            ControllerErrorHandler controllerErrorHandler = new();
-            controllerErrorHandler.Execute(_laserShowGeneratorLogic.Stop);
+            ControllerResultHandler controllerResultHandler = new();
+            controllerResultHandler.Execute(_laserShowGeneratorLogic.Stop);
         }
 
         [HttpPost("data")]
         public void SetSongData([FromBody] SongData songData)
         {
-            ControllerErrorHandler controllerErrorHandler = new();
-            controllerErrorHandler.Execute(() => _laserShowGeneratorLogic.SetSongData(songData));
+            ControllerResultHandler controllerResultHandler = new();
+            controllerResultHandler.Execute(() => _laserShowGeneratorLogic.SetSongData(songData));
         }
     }
 }

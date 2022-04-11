@@ -201,14 +201,14 @@ namespace LaserAPI.Logic
         public static List<LaserMessage> SortPointsFromClosestToPreviousSendMessageToFarthest(List<LaserMessage> points)
         {
             LaserMessage previousLaserMessage = LaserConnectionLogic.PreviousLaserMessage;
-            DistanceSorterHelper[] distances = new DistanceSorterHelper[points.Count];
+            DistanceSorter[] distances = new DistanceSorter[points.Count];
             int pointsLength = points.Count;
             for (int i = 0; i < pointsLength; i++)
             {
                 LaserMessage message = points[i];
                 int totalLaserPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
-                double distance = Math.Sqrt((Math.Pow(previousLaserMessage.X - message.X, 2) + Math.Pow(previousLaserMessage.Y - message.Y, 2)));
-                distances[i] = new DistanceSorterHelper(message, distance, totalLaserPower);
+                double distance = Math.Sqrt(Math.Pow(previousLaserMessage.X - message.X, 2) + Math.Pow(previousLaserMessage.Y - message.Y, 2));
+                distances[i] = new DistanceSorter(message, distance, totalLaserPower);
             }
 
             return distances.OrderBy(d => d.Distance)

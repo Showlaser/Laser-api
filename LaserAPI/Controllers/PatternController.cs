@@ -32,8 +32,8 @@ namespace LaserAPI.Controllers
                 await _patternLogic.PlayPattern(patternDto);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            return await controllerErrorHandler.Execute(Action());
+            ControllerResultHandler controllerResultHandler = new();
+            return await controllerResultHandler.Execute(Action());
         }
 
         [HttpPost]
@@ -45,8 +45,8 @@ namespace LaserAPI.Controllers
                 await _patternLogic.AddOrUpdate(patternDto);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            return await controllerErrorHandler.Execute(Action());
+            ControllerResultHandler controllerResultHandler = new();
+            return await controllerResultHandler.Execute(Action());
         }
 
         [HttpGet]
@@ -58,8 +58,8 @@ namespace LaserAPI.Controllers
                 return patterns.Adapt<List<PatternViewmodel>>();
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            return await controllerErrorHandler.Execute(Action());
+            ControllerResultHandler controllerResultHandler = new();
+            return await controllerResultHandler.Execute(Action());
         }
 
         [HttpDelete("{uuid}")]
@@ -70,8 +70,8 @@ namespace LaserAPI.Controllers
                 await _patternLogic.Remove(uuid);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            return await controllerErrorHandler.Execute(Action());
+            ControllerResultHandler controllerResultHandler = new();
+            return await controllerResultHandler.Execute(Action());
         }
     }
 }

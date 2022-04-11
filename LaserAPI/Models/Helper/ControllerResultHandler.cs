@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace LaserAPI.Models.Helper
 {
-    public class ControllerErrorHandler
+    public class ControllerResultHandler
     {
         public async Task<ActionResult<T>> Execute<T>(Task<T> task)
         {
@@ -58,9 +58,8 @@ namespace LaserAPI.Models.Helper
                 await task.WaitAsync(CancellationToken.None);
                 return new OkResult();
             }
-            catch (InvalidDataException e)
+            catch (InvalidDataException)
             {
-                Console.WriteLine(e.Message);
                 return new BadRequestResult();
             }
             catch (KeyNotFoundException)

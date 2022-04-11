@@ -78,6 +78,7 @@ namespace LaserAPITests.Tests.Helper
             Assert.IsTrue(highestNumberReverseOrder > -4000);
         }
 
+        // todo parameterized test https://stackoverflow.com/questions/2367033/mstest-equivalent-for-nunits-parameterized-tests
         [TestMethod]
         public void GetDifferenceBetweenTwoNumbersTest()
         {

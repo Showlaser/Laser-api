@@ -25,29 +25,29 @@ namespace LaserAPI.Controllers
                 _gameLogic.Start(gameName);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            return controllerErrorHandler.Execute(Action);
+            ControllerResultHandler controllerResultHandler = new(); // todo dp injection
+            return controllerResultHandler.Execute(Action);
         }
 
         [HttpPost("stop")]
         public ActionResult Stop()
         {
-            ControllerErrorHandler controllerErrorHandler = new();
-            return controllerErrorHandler.Execute(() => _gameLogic.Stop());
+            ControllerResultHandler controllerResultHandler = new();
+            return controllerResultHandler.Execute(() => _gameLogic.Stop());
         }
 
         [HttpPost("move")]
         public ActionResult Move([FromQuery] GameMovement movement)
         {
-            ControllerErrorHandler controllerErrorHandler = new();
-            return controllerErrorHandler.Execute(() => _gameLogic.Move(movement));
+            ControllerResultHandler controllerResultHandler = new();
+            return controllerResultHandler.Execute(() => _gameLogic.Move(movement));
         }
 
         [HttpGet]
         public ActionResult<List<string>> GetNames()
         {
-            ControllerErrorHandler controllerErrorHandler = new();
-            return controllerErrorHandler.Execute(() => _gameLogic.GetGameNames());
+            ControllerResultHandler controllerResultHandler = new();
+            return controllerResultHandler.Execute(() => _gameLogic.GetGameNames());
         }
     }
 }

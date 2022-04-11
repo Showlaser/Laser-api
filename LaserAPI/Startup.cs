@@ -40,7 +40,6 @@ namespace LaserAPI
             services.AddScoped<PatternLogic>();
             services.AddScoped<AnimationLogic>();
             services.AddScoped<ZoneLogic>();
-            services.AddScoped<LasershowLogic>();
             services.AddScoped<AudioAnalyser>();
             services.AddScoped<LaserShowGeneratorLogic>();
             services.AddScoped<GameLogic>();
@@ -48,7 +47,6 @@ namespace LaserAPI
             services.AddScoped<IPatternDal, PatternDal>();
             services.AddScoped<IAnimationDal, AnimationDal>();
             services.AddScoped<IZoneDal, ZoneDal>();
-            services.AddScoped<ILasershowDal, LasershowDal>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

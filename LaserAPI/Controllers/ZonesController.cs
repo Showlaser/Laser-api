@@ -31,8 +31,8 @@ namespace LaserAPI.Controllers
                 await _zoneLogic.AddOrUpdate(zoneDto);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            return await controllerErrorHandler.Execute(Action());
+            ControllerResultHandler controllerResultHandler = new();
+            return await controllerResultHandler.Execute(Action());
         }
 
         [HttpPost("play")]
@@ -44,8 +44,8 @@ namespace LaserAPI.Controllers
                 await _zoneLogic.Play(zoneDto);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            return await controllerErrorHandler.Execute(Action());
+            ControllerResultHandler controllerResultHandler = new();
+            return await controllerResultHandler.Execute(Action());
         }
 
         [HttpGet]
@@ -57,8 +57,8 @@ namespace LaserAPI.Controllers
                 return zones.Adapt<List<ZoneViewmodel>>();
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            return await controllerErrorHandler.Execute(Action());
+            ControllerResultHandler controllerResultHandler = new();
+            return await controllerResultHandler.Execute(Action());
         }
 
         [HttpDelete("{uuid}")]
@@ -69,8 +69,8 @@ namespace LaserAPI.Controllers
                 await _zoneLogic.Remove(uuid);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            return await controllerErrorHandler.Execute(Action());
+            ControllerResultHandler controllerResultHandler = new();
+            return await controllerResultHandler.Execute(Action());
         }
     }
 }
