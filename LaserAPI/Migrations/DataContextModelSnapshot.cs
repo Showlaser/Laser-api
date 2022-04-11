@@ -228,6 +228,9 @@ namespace LaserAPI.Migrations
                     b.Property<int>("MaxLaserPowerInZonePwm")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Uuid");
 
                     b.ToTable("Zone");
@@ -239,7 +242,7 @@ namespace LaserAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("OrderNr")
+                    b.Property<int>("Order")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("X")
@@ -248,17 +251,14 @@ namespace LaserAPI.Migrations
                     b.Property<int>("Y")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("ZoneDtoUuid")
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid>("ZoneUuid")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Uuid");
 
-                    b.HasIndex("ZoneDtoUuid");
+                    b.HasIndex("ZoneUuid");
 
-                    b.ToTable("ZonesPositionDto");
+                    b.ToTable("ZonePosition");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.AnimationPointDto", b =>
@@ -313,8 +313,10 @@ namespace LaserAPI.Migrations
             modelBuilder.Entity("LaserAPI.Models.Dto.Zones.ZonesPositionDto", b =>
                 {
                     b.HasOne("LaserAPI.Models.Dto.Zones.ZoneDto", null)
-                        .WithMany("Positions")
-                        .HasForeignKey("ZoneDtoUuid");
+                        .WithMany("Points")
+                        .HasForeignKey("ZoneUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.AnimationDto", b =>
@@ -344,7 +346,7 @@ namespace LaserAPI.Migrations
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Zones.ZoneDto", b =>
                 {
-                    b.Navigation("Positions");
+                    b.Navigation("Points");
                 });
 #pragma warning restore 612, 618
         }

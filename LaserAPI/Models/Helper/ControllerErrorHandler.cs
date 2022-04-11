@@ -58,8 +58,9 @@ namespace LaserAPI.Models.Helper
                 await task.WaitAsync(CancellationToken.None);
                 return new OkResult();
             }
-            catch (InvalidDataException)
+            catch (InvalidDataException e)
             {
+                Console.WriteLine(e.Message);
                 return new BadRequestResult();
             }
             catch (KeyNotFoundException)

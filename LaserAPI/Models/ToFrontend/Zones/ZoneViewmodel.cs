@@ -6,11 +6,12 @@ namespace LaserAPI.Models.ToFrontend.Zones
     public class ZoneViewmodel
     {
         public Guid Uuid { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// All positions in the zone
         /// </summary>
-        public List<ZonesPositionViewmodel> Positions { get; set; }
+        public List<ZonesPositionViewmodel> Points { get; set; }
 
         /// <summary>
         /// The maximum allowed laser power in a zone in PWM value

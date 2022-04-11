@@ -15,6 +15,7 @@ namespace LaserAPI.Dal
         public virtual DbSet<AnimationPointDto> AnimationPoint { get; set; }
         public virtual DbSet<PatternDto> Pattern { get; set; }
         public virtual DbSet<ZoneDto> Zone { get; set; }
+        public virtual DbSet<ZonesPositionDto> ZonePosition { get; set; }
         public virtual DbSet<LasershowDto> Lasershow { get; set; }
         public virtual DbSet<LasershowAnimationDto> LasershowAnimation { get; set; }
 
@@ -80,6 +81,9 @@ namespace LaserAPI.Dal
             builder.Entity<ZoneDto>(e =>
             {
                 e.HasKey(z => z.Uuid);
+                e.HasMany(z => z.Points)
+                    .WithOne()
+                    .HasForeignKey(p => p.ZoneUuid);
             });
 
             builder.Entity<ZonesPositionDto>(e =>

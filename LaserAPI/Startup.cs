@@ -29,7 +29,8 @@ namespace LaserAPI
             services.AddDbContextPool<DataContext>(
                 dbContextOptions => dbContextOptions
                     .UseSqlite(connectionString, o =>
-                        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
+                        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+                    .EnableSensitiveDataLogging());
             AddDependencyInjection(ref services);
         }
 

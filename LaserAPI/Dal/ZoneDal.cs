@@ -26,24 +26,20 @@ namespace LaserAPI.Dal
         public async Task<List<ZoneDto>> All()
         {
             return await _context.Zone
-                .Include(e => e.Positions)
+                .Include(e => e.Points)
                 .ToListAsync();
         }
 
         public async Task Update(ZoneDto zone)
         {
             ZoneDto zoneToUpdate = await _context.Zone
-                .Where(z => z.Uuid == zone.Uuid)
-                .Include(z => z.Positions)
-                .FirstOrDefaultAsync();
+                .Include(z => z.Points)
+                .SingleOrDefaultAsync(z => z.Uuid == zone.Uuid);
 
-            if (zoneToUpdate == null)
-            {
-                throw new KeyNotFoundException();
-            }
-
-            _context.Zone.Remove(zoneToUpdate);
-            await _context.Zone.AddAsync(zone);
+            zoneToUpdate.Name = zone.Name;
+            zoneToUpdate.MaxLaserPowerInZonePwm = zone.MaxLaserPowerInZonePwm;
+            zoneToUpdate.Points = zone.Points;
+            _context.Zone.Update(zoneToUpdate);
             await _context.SaveChangesAsync();
         }
 
@@ -56,7 +52,7 @@ namespace LaserAPI.Dal
         {
             ZoneDto zoneToUpdate = await _context.Zone
                 .Where(z => z.Uuid == uuid)
-                .Include(z => z.Positions)
+                .Include(z => z.Points)
                 .FirstOrDefaultAsync();
 
             if (zoneToUpdate == null)

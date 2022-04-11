@@ -4,8 +4,8 @@ using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,20 +14,25 @@ namespace LaserAPI.Logic
     public class ZoneLogic
     {
         private readonly IZoneDal _zoneDal;
-        private readonly List<ZoneDto> _zones;
-        public int ZonesLength { get; }
-        public ZoneDto ZoneWithLowestLaserPowerPwm { get; }
+        private List<ZoneDto> _zones;
+        public int ZonesLength { get; private set; }
+        public ZoneDto ZoneWithLowestLaserPowerPwm { get; private set; }
 
         public ZoneLogic(IZoneDal zoneDal)
         {
             _zoneDal = zoneDal;
-            _zones = zoneDal
+            UpdateZones();
+        }
+
+        private void UpdateZones()
+        {
+            _zones = _zoneDal
                 .All()
                 .Result;
 
             _zones.ForEach(zone =>
             {
-                zone.Positions = zone.Positions.OrderBy(p => p.OrderNr).ToList();
+                zone.Points = zone.Points.OrderBy(p => p.Order).ToList();
             });
 
             ZonesLength = _zones.Count;
@@ -39,24 +44,59 @@ namespace LaserAPI.Logic
             return await _zoneDal.All();
         }
 
+        private static void ValidateZone(ZoneDto zone)
+        {
+            bool zonePointsValid = zone.Points.TrueForAll(p => p.X.IsBetweenOrEqualTo(-4000, 4000) &&
+                                                               p.Y.IsBetweenOrEqualTo(-4000, 4000) &&
+                                                               p.Uuid != Guid.Empty
+                                                               && p.ZoneUuid == zone.Uuid) && zone.Points.Any();
+
+            bool zoneValid = zone.Uuid != Guid.Empty && !string.IsNullOrEmpty(zone.Name) &&
+                zone.MaxLaserPowerInZonePwm.IsBetweenOrEqualTo(0, 255) && zonePointsValid;
+
+            if (!zoneValid)
+            {
+                throw new InvalidOperationException();
+            }
+        }
+
         public async Task AddOrUpdate(ZoneDto zone)
         {
-            if (zone.Positions.Count != 4)
-            {
-                throw new InvalidDataException();
-            }
+            ValidateZone(zone);
             if (await _zoneDal.Exists(zone.Uuid))
             {
                 await _zoneDal.Update(zone);
+                UpdateZones();
                 return;
             }
 
             await _zoneDal.Add(zone);
+            UpdateZones();
+        }
+
+        public async Task Play(ZoneDto zone)
+        {
+            ValidateZone(zone);
+            int zonePointsCount = zone.Points.Count;
+            zone.Points = zone.Points.OrderBy(p => p.Order).ToList();
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            while (stopwatch.ElapsedMilliseconds < 1000)
+            {
+                for (int i = 0; i < zonePointsCount; i++)
+                {
+                    ZonesPositionDto zonePosition = zone.Points[i];
+                    await LaserConnectionLogic.SendMessage(new LaserMessage(zone.MaxLaserPowerInZonePwm, 0, 0, zonePosition.X, zonePosition.Y));
+                }
+            }
+
+            stopwatch.Stop();
         }
 
         public async Task Remove(Guid uuid)
         {
             await _zoneDal.Remove(uuid);
+            UpdateZones();
         }
 
         /// <summary>
@@ -71,7 +111,7 @@ namespace LaserAPI.Logic
             for (int i = 0; i < zonesLength; i++)
             {
                 ZoneDto zone = _zones[i];
-                List<Point> zonePoints = zone.Positions.Select(pos => new Point(pos.X, pos.Y)).ToList();
+                List<Point> zonePoints = zone.Points.Select(pos => new Point(pos.X, pos.Y)).ToList();
                 if (IsInsidePolygon(zonePoints, new Point(previousMessage.X, previousMessage.Y)) &&
                     IsInsidePolygon(zonePoints, new Point(message.X, message.Y)))
                 {
@@ -107,7 +147,7 @@ namespace LaserAPI.Logic
                     LaserMessage messageToAdd = new(message.RedLaser, message.GreenLaser, message.BlueLaser, point.X, point.Y);
                     LaserLogic.LimitTotalLaserPowerIfNecessary(ref messageToAdd, zone.MaxLaserPowerInZonePwm);
                     crossingPoints.Add(messageToAdd);
-                    if (j == 0 || j + 1 == zoneLinesHitLength)
+                    if (j == 0)
                     {
                         crossingPoints.Add(new LaserMessage(0, 0, 0, point.X, point.Y));
                     }
@@ -126,14 +166,14 @@ namespace LaserAPI.Logic
         public static List<ZoneLine> GetZoneLineHitByPath(ZoneDto zone, LaserMessage message)
         {
             List<ZoneLine> points = new();
-            int zonePositionsLength = zone.Positions.Count;
+            int zonePositionsLength = zone.Points.Count;
 
             for (int i = 0; i < zonePositionsLength; i++)
             {
                 // these two positions form a connected line
-                ZonesPositionDto position = zone.Positions[i];
+                ZonesPositionDto position = zone.Points[i];
                 int secondZoneIndex = i == zonePositionsLength - 1 ? 0 : i + 1;
-                ZonesPositionDto secondPosition = zone.Positions[secondZoneIndex];
+                ZonesPositionDto secondPosition = zone.Points[secondZoneIndex];
 
                 Point zonePoint1 = new(position.X, position.Y);
                 Point zonePoint2 = new(secondPosition.X, secondPosition.Y);
@@ -166,11 +206,13 @@ namespace LaserAPI.Logic
             for (int i = 0; i < pointsLength; i++)
             {
                 LaserMessage message = points[i];
+                int totalLaserPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
                 double distance = Math.Sqrt((Math.Pow(previousLaserMessage.X - message.X, 2) + Math.Pow(previousLaserMessage.Y - message.Y, 2)));
-                distances[i] = new DistanceSorterHelper(message, distance);
+                distances[i] = new DistanceSorterHelper(message, distance, totalLaserPower);
             }
 
             return distances.OrderBy(d => d.Distance)
+                .ThenByDescending(d => d.TotalLaserPower)
                 .Select(d => d.Message)
                 .ToList();
         }
