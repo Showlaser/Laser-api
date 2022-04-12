@@ -16,10 +16,12 @@ namespace LaserAPI.Controllers
     public class AnimationController : ControllerBase
     {
         private readonly AnimationLogic _animationLogic;
+        private readonly ControllerResultHandler _controllerResultHandler;
 
-        public AnimationController(AnimationLogic animationLogic)
+        public AnimationController(AnimationLogic animationLogic, ControllerResultHandler controllerResultHandler)
         {
             _animationLogic = animationLogic;
+            _controllerResultHandler = controllerResultHandler;
         }
 
         [HttpPost]
@@ -31,8 +33,7 @@ namespace LaserAPI.Controllers
                 await _animationLogic.AddOrUpdate(animationDto);
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpPost("play")]
@@ -44,8 +45,7 @@ namespace LaserAPI.Controllers
                 await _animationLogic.PlayAnimation(animationDto);
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpGet]
@@ -57,8 +57,7 @@ namespace LaserAPI.Controllers
                 return animations.Adapt<List<AnimationViewModel>>();
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpDelete("{uuid}")]
@@ -69,8 +68,7 @@ namespace LaserAPI.Controllers
                 await _animationLogic.Remove(uuid);
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
     }
 }

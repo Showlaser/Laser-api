@@ -17,10 +17,12 @@ namespace LaserAPI.Controllers
     public class PatternController : ControllerBase
     {
         private readonly PatternLogic _patternLogic;
+        private readonly ControllerResultHandler _controllerResultHandler;
 
-        public PatternController(PatternLogic patternLogic)
+        public PatternController(PatternLogic patternLogic, ControllerResultHandler controllerResultHandler)
         {
             _patternLogic = patternLogic;
+            _controllerResultHandler = controllerResultHandler;
         }
 
         [HttpPost("play")]
@@ -32,8 +34,7 @@ namespace LaserAPI.Controllers
                 await _patternLogic.PlayPattern(patternDto);
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpPost]
@@ -45,8 +46,7 @@ namespace LaserAPI.Controllers
                 await _patternLogic.AddOrUpdate(patternDto);
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpGet]
@@ -58,8 +58,7 @@ namespace LaserAPI.Controllers
                 return patterns.Adapt<List<PatternViewmodel>>();
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpDelete("{uuid}")]
@@ -70,8 +69,7 @@ namespace LaserAPI.Controllers
                 await _patternLogic.Remove(uuid);
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
     }
 }

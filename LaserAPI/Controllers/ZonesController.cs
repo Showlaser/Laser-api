@@ -16,10 +16,12 @@ namespace LaserAPI.Controllers
     public class ZonesController : ControllerBase
     {
         private readonly ZoneLogic _zoneLogic;
+        private readonly ControllerResultHandler _controllerResultHandler;
 
-        public ZonesController(ZoneLogic zonesLogic)
+        public ZonesController(ZoneLogic zonesLogic, ControllerResultHandler controllerResultHandler)
         {
             _zoneLogic = zonesLogic;
+            _controllerResultHandler = controllerResultHandler;
         }
 
         [HttpPost]
@@ -31,8 +33,7 @@ namespace LaserAPI.Controllers
                 await _zoneLogic.AddOrUpdate(zoneDto);
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpPost("play")]
@@ -44,8 +45,7 @@ namespace LaserAPI.Controllers
                 await _zoneLogic.Play(zoneDto);
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpGet]
@@ -57,8 +57,7 @@ namespace LaserAPI.Controllers
                 return zones.Adapt<List<ZoneViewmodel>>();
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpDelete("{uuid}")]
@@ -69,8 +68,7 @@ namespace LaserAPI.Controllers
                 await _zoneLogic.Remove(uuid);
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
     }
 }

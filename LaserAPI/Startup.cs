@@ -3,12 +3,14 @@ using LaserAPI.Interfaces.Dal;
 using LaserAPI.Logic;
 using LaserAPI.Logic.Fft_algorithm;
 using LaserAPI.Logic.Game;
+using LaserAPI.Models.Helper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Text.Json.Serialization;
 
 namespace LaserAPI
 {
@@ -31,6 +33,13 @@ namespace LaserAPI
                     .UseSqlite(connectionString, o =>
                         o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
                     .EnableSensitiveDataLogging());
+            services
+                .AddControllers()
+                .AddJsonOptions(opts =>
+                {
+                    JsonStringEnumConverter enumConverter = new JsonStringEnumConverter();
+                    opts.JsonSerializerOptions.Converters.Add(enumConverter);
+                });
             AddDependencyInjection(ref services);
         }
 
@@ -43,6 +52,7 @@ namespace LaserAPI
             services.AddScoped<AudioAnalyser>();
             services.AddScoped<LaserShowGeneratorLogic>();
             services.AddScoped<GameLogic>();
+            services.AddTransient<ControllerResultHandler>();
             services.AddSingleton<GameStateLogic>();
             services.AddScoped<IPatternDal, PatternDal>();
             services.AddScoped<IAnimationDal, AnimationDal>();

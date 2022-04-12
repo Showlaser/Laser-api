@@ -11,6 +11,7 @@ namespace LaserAPI.Logic
     {
         public static bool RanByUnitTest { get; set; } = false;
         public static LaserMessage PreviousLaserMessage { get; set; } = new();
+        public static bool Connected { get; private set; }
         private static TcpListener _server;
         private static NetworkStream _stream;
         private static TcpClient _client;
@@ -47,7 +48,8 @@ namespace LaserAPI.Logic
                 return;
             }
 
-            if (_client == null || !_client.Connected)
+            Connected = _client != null && _client.Connected;
+            if (!Connected)
             {
                 Connect();
             }

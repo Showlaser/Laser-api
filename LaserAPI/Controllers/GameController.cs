@@ -11,10 +11,12 @@ namespace LaserAPI.Controllers
     public class GameController : ControllerBase
     {
         private readonly GameLogic _gameLogic;
+        private readonly ControllerResultHandler _controllerResultHandler;
 
-        public GameController(GameLogic gameLogic)
+        public GameController(GameLogic gameLogic, ControllerResultHandler controllerResultHandler)
         {
             _gameLogic = gameLogic;
+            _controllerResultHandler = controllerResultHandler;
         }
 
         [HttpPost("start")]
@@ -25,8 +27,7 @@ namespace LaserAPI.Controllers
                 _gameLogic.Start(gameName);
             }
 
-            ControllerResultHandler controllerResultHandler = new(); // todo dp injection
-            return controllerResultHandler.Execute(Action);
+            return _controllerResultHandler.Execute(Action);
         }
 
         [HttpPost("stop")]
@@ -39,15 +40,13 @@ namespace LaserAPI.Controllers
         [HttpPost("move")]
         public ActionResult Move([FromQuery] GameMovement movement)
         {
-            ControllerResultHandler controllerResultHandler = new();
-            return controllerResultHandler.Execute(() => _gameLogic.Move(movement));
+            return _controllerResultHandler.Execute(() => _gameLogic.Move(movement));
         }
 
         [HttpGet]
         public ActionResult<List<string>> GetNames()
         {
-            ControllerResultHandler controllerResultHandler = new();
-            return controllerResultHandler.Execute(() => _gameLogic.GetGameNames());
+            return _controllerResultHandler.Execute(() => _gameLogic.GetGameNames());
         }
     }
 }

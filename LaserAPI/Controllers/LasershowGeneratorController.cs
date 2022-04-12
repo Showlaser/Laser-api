@@ -13,10 +13,12 @@ namespace LaserAPI.Controllers
     public class LasershowGeneratorController : ControllerBase
     {
         private readonly LaserShowGeneratorLogic _laserShowGeneratorLogic;
+        private readonly ControllerResultHandler _controllerResultHandler;
 
-        public LasershowGeneratorController(LaserShowGeneratorLogic laserShowGeneratorLogic)
+        public LasershowGeneratorController(LaserShowGeneratorLogic laserShowGeneratorLogic, ControllerResultHandler controllerResultHandler)
         {
             _laserShowGeneratorLogic = laserShowGeneratorLogic;
+            _controllerResultHandler = controllerResultHandler;
         }
 
         [HttpGet("devices")]
@@ -28,8 +30,7 @@ namespace LaserAPI.Controllers
                 return devices.Select(d => d.FriendlyName);
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            return controllerResultHandler.Execute(Action);
+            return _controllerResultHandler.Execute(Action);
         }
 
         [HttpPost("start")]
@@ -41,22 +42,19 @@ namespace LaserAPI.Controllers
                 _laserShowGeneratorLogic.Start(deviceName);
             }
 
-            ControllerResultHandler controllerResultHandler = new();
-            controllerResultHandler.Execute(Action);
+            _controllerResultHandler.Execute(Action);
         }
 
         [HttpPost("stop")]
         public void Stop()
         {
-            ControllerResultHandler controllerResultHandler = new();
-            controllerResultHandler.Execute(_laserShowGeneratorLogic.Stop);
+            _controllerResultHandler.Execute(_laserShowGeneratorLogic.Stop);
         }
 
         [HttpPost("data")]
         public void SetSongData([FromBody] SongData songData)
         {
-            ControllerResultHandler controllerResultHandler = new();
-            controllerResultHandler.Execute(() => _laserShowGeneratorLogic.SetSongData(songData));
+            _controllerResultHandler.Execute(() => _laserShowGeneratorLogic.SetSongData(songData));
         }
     }
 }
