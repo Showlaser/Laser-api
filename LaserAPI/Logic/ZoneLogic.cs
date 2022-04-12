@@ -77,17 +77,16 @@ namespace LaserAPI.Logic
         public async Task Play(ZoneDto zone)
         {
             ValidateZone(zone);
-            int zonePointsCount = zone.Points.Count;
             zone.Points = zone.Points.OrderBy(p => p.Order).ToList();
             Stopwatch stopwatch = Stopwatch.StartNew();
 
             while (stopwatch.ElapsedMilliseconds < 1000)
             {
-                for (int i = 0; i < zonePointsCount; i++)
-                {
-                    ZonesPositionDto zonePosition = zone.Points[i];
-                    await LaserConnectionLogic.SendMessage(new LaserMessage(zone.MaxLaserPowerInZonePwm, 0, 0, zonePosition.X, zonePosition.Y));
-                }
+                List<LaserMessage> messages = zone.Points
+                    .Select(p => new LaserMessage(zone.MaxLaserPowerInZonePwm, 0, 0, p.X, p.Y))
+                    .ToList();
+                messages.Add(messages.First());
+                await LaserConnectionLogic.SendMessages(messages);
             }
 
             stopwatch.Stop();

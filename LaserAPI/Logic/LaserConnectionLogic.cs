@@ -1,5 +1,7 @@
 ﻿using LaserAPI.Models.Helper;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -41,7 +43,7 @@ namespace LaserAPI.Logic
             }
         }
 
-        public static async Task SendMessage(LaserMessage message)
+        public static async Task SendMessages(List<LaserMessage> messages)
         {
             if (RanByUnitTest)
             {
@@ -56,10 +58,26 @@ namespace LaserAPI.Logic
 
             try
             {
-                int[] value = { message.RedLaser, message.GreenLaser, message.BlueLaser, message.X, message.Y };
-                string result = string.Join(",", value);
-                string json = @"{""d"":[" + result + "]}";
+                if (!messages.Any())
+                {
+                    return;
+                }
 
+                string json = "[";
+                int messageLength = messages.Count;
+                for (int i = 0; i < messageLength; i++)
+                {
+                    LaserMessage message = messages[i];
+                    string jsonMessage = "{\"r\":" + message.RedLaser + ",\"g\":" + message.GreenLaser + ",\"b\":" + message.BlueLaser + ",\"x\":" + message.X + ",\"y\":" + message.Y + "}";
+                    if (i + 1 != messageLength)
+                    {
+                        jsonMessage += ",";
+                    }
+
+                    json += jsonMessage;
+                }
+
+                json += "]";
                 UTF8Encoding utf8 = new();
 
                 byte[] msg = utf8.GetBytes(json);
@@ -68,7 +86,7 @@ namespace LaserAPI.Logic
                 byte[] bytes = new byte[msg.Length];
                 await _stream.ReadAsync(bytes);
 
-                PreviousLaserMessage = message;
+                PreviousLaserMessage = messages.Last();
             }
             catch (Exception e)
             {

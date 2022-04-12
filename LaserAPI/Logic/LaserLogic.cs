@@ -22,17 +22,12 @@ namespace LaserAPI.Logic
             if (positionIsInProjectionZone)
             {
                 LimitTotalLaserPowerIfNecessary(ref newMessage, zoneWherePathIsInside.MaxLaserPowerInZonePwm);
-                await LaserConnectionLogic.SendMessage(newMessage);
+                await LaserConnectionLogic.SendMessages(new List<LaserMessage> { newMessage });
                 return;
             }
 
             List<LaserMessage> messagesToSend = _zoneLogic.GetPointsOfZoneLinesHitByPath(newMessage);
-            int messagesToSendLength = messagesToSend.Count;
-            for (int i = 0; i < messagesToSendLength; i++)
-            {
-                LaserMessage message = messagesToSend[i];
-                await LaserConnectionLogic.SendMessage(message);
-            }
+            await LaserConnectionLogic.SendMessages(messagesToSend);
         }
 
         /// <summary>

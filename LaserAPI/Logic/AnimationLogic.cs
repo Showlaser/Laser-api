@@ -56,6 +56,7 @@ namespace LaserAPI.Logic
         {
             int animationDuration = GetAnimationDuration(animation);
             Stopwatch stopwatch = Stopwatch.StartNew();
+
             while (stopwatch.ElapsedMilliseconds < animationDuration)
             {
                 List<PatternAnimationDto> patternAnimationsToPlay = GetPatternAnimationsBetweenTimeMs(animation, stopwatch.ElapsedMilliseconds);
@@ -76,45 +77,63 @@ namespace LaserAPI.Logic
                     continue;
                 }
 
-                int settingsToPlayLength = settingsToPlay.Count;
-                for (int i = 0; i < settingsToPlayLength; i++)
-                {
-                    PatternAnimationSettingsDto settingToPlay = settingsToPlay[i];
-                    settingToPlay.Points = settingToPlay.Points.OrderBy(p => p.Order).ToList();
-                    await PlayAnimationPoints(settingToPlay);
-                }
+                List<LaserMessage> messagesToPlay = GetAnimationPointsToPlay(settingsToPlay);
+                await LaserConnectionLogic.SendMessages(messagesToPlay);
             }
         }
 
-        private async Task PlayAnimationPoints(PatternAnimationSettingsDto settingToPlay)
+        private static List<LaserMessage> GetAnimationPointsToPlay(IReadOnlyList<PatternAnimationSettingsDto> settingsToPlay)
         {
-            int pointsCount = settingToPlay.Points.Count;
-            for (int k = 0; k < pointsCount; k++)
+            List<LaserMessage> messagesToPlay = new();
+            int settingsToPlayLength = settingsToPlay.Count;
+
+            for (int i = 0; i < settingsToPlayLength; i++)
             {
-                AnimationPointDto point = settingToPlay.Points[k];
-                AnimationPointDto rotatedPoint = RotatePoint(point, settingToPlay);
+                PatternAnimationSettingsDto settingToPlay = settingsToPlay[i];
+                settingToPlay.Points = settingToPlay.Points.OrderBy(p => p.Order).ToList();
 
-                await _laserLogic.SendData(new LaserMessage
+                int pointsCount = settingToPlay.Points.Count;
+                for (int k = 0; k < pointsCount; k++)
                 {
-                    X = rotatedPoint.X,
-                    Y = rotatedPoint.Y,
-                    RedLaser = rotatedPoint.RedLaserPowerPwm,
-                    GreenLaser = rotatedPoint.GreenLaserPowerPwm,
-                    BlueLaser = rotatedPoint.BlueLaserPowerPwm,
-                });
+                    AnimationPointDto point = settingToPlay.Points[k];
+                    AnimationPointDto rotatedPoint = RotatePoint(point, settingToPlay);
 
-                if (k == pointsCount - 1)
-                {
-                    await _laserLogic.SendData(new LaserMessage
+                    if (i == 0)
+                    {
+                        messagesToPlay.Add(new LaserMessage
+                        {
+                            X = rotatedPoint.X,
+                            Y = rotatedPoint.Y,
+                            RedLaser = 0,
+                            GreenLaser = 0,
+                            BlueLaser = 0,
+                        });
+                    }
+
+                    messagesToPlay.Add(new LaserMessage
                     {
                         X = rotatedPoint.X,
                         Y = rotatedPoint.Y,
-                        RedLaser = 0,
-                        GreenLaser = 0,
-                        BlueLaser = 0,
+                        RedLaser = rotatedPoint.RedLaserPowerPwm,
+                        GreenLaser = rotatedPoint.GreenLaserPowerPwm,
+                        BlueLaser = rotatedPoint.BlueLaserPowerPwm,
                     });
+
+                    if (k + 1 == pointsCount)
+                    {
+                        messagesToPlay.Add(new LaserMessage
+                        {
+                            X = rotatedPoint.X,
+                            Y = rotatedPoint.Y,
+                            RedLaser = 0,
+                            GreenLaser = 0,
+                            BlueLaser = 0,
+                        });
+                    }
                 }
             }
+
+            return messagesToPlay;
         }
 
         private static void GetPatternAnimationSettingsToPlay(int patternAnimationsLength, IReadOnlyList<PatternAnimationDto> patternAnimationsToPlay,

@@ -37,7 +37,7 @@ namespace LaserAPI
                 .AddControllers()
                 .AddJsonOptions(opts =>
                 {
-                    JsonStringEnumConverter enumConverter = new JsonStringEnumConverter();
+                    JsonStringEnumConverter enumConverter = new();
                     opts.JsonSerializerOptions.Converters.Add(enumConverter);
                 });
             AddDependencyInjection(ref services);
