@@ -3,6 +3,7 @@ using LaserAPI.Models.Helper;
 using LaserAPITests.Mock;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -22,15 +23,15 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public async Task SendDataTest()
         {
-            LaserConnectionLogic.PreviousLaserMessage = new LaserMessage(0, 0, 0, -4000, 4000);
-            await _laserLogic.SendData(new LaserMessage
+            LaserConnectionLogic.PreviousMessage = new LaserMessage(0, 0, 0, -4000, 4000);
+            await _laserLogic.SendData(new List<LaserMessage> { new LaserMessage
             {
                 RedLaser = 255,
                 BlueLaser = 0,
                 GreenLaser = 100,
                 X = 4000,
                 Y = 0
-            });
+            }});
         }
 
         [TestMethod]
@@ -41,14 +42,14 @@ namespace LaserAPITests.Tests.Logic
 
             while (stopwatch.ElapsedMilliseconds < 1000)
             {
-                await _laserLogic.SendData(new LaserMessage
+                await _laserLogic.SendData(new List<LaserMessage>() {new LaserMessage
                 {
                     RedLaser = 255,
                     BlueLaser = 0,
                     GreenLaser = 100,
                     X = Convert.ToInt32(stopwatch.ElapsedMilliseconds),
                     Y = Convert.ToInt32(stopwatch.ElapsedMilliseconds)
-                });
+                }});
 
                 iterations++;
             }
@@ -91,8 +92,21 @@ namespace LaserAPITests.Tests.Logic
 
                 LaserLogic.LimitTotalLaserPowerIfNecessary(ref message, i);
                 int totalPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
-                Assert.IsTrue(totalPower <= i);
+                Assert.IsTrue(totalPower <= i && totalPower >= i - 3);
             }
+        }
+
+        [TestMethod]
+        public void LimitTotalLaserPowerNecessaryTest2()
+        {
+            LaserMessage message = new()
+            {
+                RedLaser = 8,
+                GreenLaser = 0,
+                BlueLaser = 0
+            };
+
+            LaserLogic.LimitTotalLaserPowerIfNecessary(ref message, 6);
         }
     }
 }

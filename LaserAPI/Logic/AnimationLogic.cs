@@ -78,7 +78,7 @@ namespace LaserAPI.Logic
                 }
 
                 List<LaserMessage> messagesToPlay = GetAnimationPointsToPlay(settingsToPlay);
-                await LaserConnectionLogic.SendMessages(messagesToPlay);
+                await _laserLogic.SendData(messagesToPlay);
             }
         }
 
@@ -98,18 +98,6 @@ namespace LaserAPI.Logic
                     AnimationPointDto point = settingToPlay.Points[k];
                     AnimationPointDto rotatedPoint = RotatePoint(point, settingToPlay);
 
-                    if (i == 0)
-                    {
-                        messagesToPlay.Add(new LaserMessage
-                        {
-                            X = rotatedPoint.X,
-                            Y = rotatedPoint.Y,
-                            RedLaser = 0,
-                            GreenLaser = 0,
-                            BlueLaser = 0,
-                        });
-                    }
-
                     messagesToPlay.Add(new LaserMessage
                     {
                         X = rotatedPoint.X,
@@ -118,18 +106,6 @@ namespace LaserAPI.Logic
                         GreenLaser = rotatedPoint.GreenLaserPowerPwm,
                         BlueLaser = rotatedPoint.BlueLaserPowerPwm,
                     });
-
-                    if (k + 1 == pointsCount)
-                    {
-                        messagesToPlay.Add(new LaserMessage
-                        {
-                            X = rotatedPoint.X,
-                            Y = rotatedPoint.Y,
-                            RedLaser = 0,
-                            GreenLaser = 0,
-                            BlueLaser = 0,
-                        });
-                    }
                 }
             }
 

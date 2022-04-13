@@ -38,7 +38,8 @@ namespace LaserAPI.Dal
 
             zoneToUpdate.Name = zone.Name;
             zoneToUpdate.MaxLaserPowerInZonePwm = zone.MaxLaserPowerInZonePwm;
-            zoneToUpdate.Points = zone.Points;
+            _context.ZonePosition.RemoveRange(zoneToUpdate.Points);
+            await _context.ZonePosition.AddRangeAsync(zone.Points);
             _context.Zone.Update(zoneToUpdate);
             await _context.SaveChangesAsync();
         }

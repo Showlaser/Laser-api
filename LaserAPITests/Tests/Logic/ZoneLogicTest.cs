@@ -29,21 +29,9 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void CalculateCrossingPointBetweenTwoLinesTest()
         {
-            LaserConnectionLogic.PreviousLaserMessage.X = -4000;
-            LaserConnectionLogic.PreviousLaserMessage.Y = 4000;
+            LaserMessage previousMessage = new(0, 0, 0, -4000, 4000);
             Point crossingPoint = ZoneLogic.CalculateCrossingPointOfZoneLineAndLaserPath(new LaserMessage(0, 0, 0, 4000, 0),
-                new Point(-1000, 3000), new Point(-1000, 0));
-
-            Assert.IsTrue(crossingPoint.X == -1000 && crossingPoint.Y == 2500);
-        }
-
-        [TestMethod]
-        public void CalculateCrossingPointBetweenTwoLinesTest2()
-        {
-            LaserConnectionLogic.PreviousLaserMessage.X = -2000;
-            LaserConnectionLogic.PreviousLaserMessage.Y = 3000;
-            Point crossingPoint = ZoneLogic.CalculateCrossingPointOfZoneLineAndLaserPath(new LaserMessage(0, 0, 0, 4000, 0),
-                new Point(-1000, 3000), new Point(-1000, 0));
+                previousMessage, new Point(-1000, 3000), new Point(-1000, 0));
 
             Assert.IsTrue(crossingPoint.X == -1000 && crossingPoint.Y == 2500);
         }
@@ -51,10 +39,9 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void CalculateCrossingPointBetweenTwoLinesTest3()
         {
-            LaserConnectionLogic.PreviousLaserMessage.X = -4000;
-            LaserConnectionLogic.PreviousLaserMessage.Y = 4000;
+            LaserMessage previousMessage = new(0, 0, 0, -4000, 4000);
             Point crossingPoint = ZoneLogic.CalculateCrossingPointOfZoneLineAndLaserPath(new LaserMessage(0, 0, 0, 4000, -4000),
-                new Point(-4000, -4000), new Point(4000, 4000));
+                previousMessage, new Point(-4000, -4000), new Point(4000, 4000));
 
             Assert.IsTrue(crossingPoint.X == 0 && crossingPoint.Y == 0);
         }
@@ -62,10 +49,9 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void CalculateCrossingPointBetweenTwoLinesTest4()
         {
-            LaserConnectionLogic.PreviousLaserMessage.X = -4000;
-            LaserConnectionLogic.PreviousLaserMessage.Y = 4000;
+            LaserMessage previousMessage = new(0, 0, 0, -4000, 4000);
             Point crossingPoint = ZoneLogic.CalculateCrossingPointOfZoneLineAndLaserPath(new LaserMessage(0, 0, 0, 4000, 0),
-                new Point(-4000, 0), new Point(4000, 4000));
+                previousMessage, new Point(-4000, 0), new Point(4000, 4000));
 
             Assert.IsTrue(crossingPoint.X == 0 && crossingPoint.Y == 2000);
         }
@@ -73,10 +59,9 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void CalculateCrossingPointBetweenTwoLinesLineDoesNotCrossTest()
         {
-            LaserConnectionLogic.PreviousLaserMessage.X = -4000;
-            LaserConnectionLogic.PreviousLaserMessage.Y = 4000;
+            LaserMessage previousMessage = new(0, 0, 0, -4000, 4000);
             Point crossingPoint = ZoneLogic.CalculateCrossingPointOfZoneLineAndLaserPath(new LaserMessage(0, 0, 0, -4000, 0),
-                new Point(4000, 0), new Point(4000, 4000));
+                previousMessage, new Point(4000, 0), new Point(4000, 4000));
 
             Assert.IsTrue(crossingPoint.X == -4001 && crossingPoint.Y == -4001);
         }
@@ -84,10 +69,9 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void CalculateCrossingPointBetweenTwoLinesLineDoesNotCrossTest2()
         {
-            LaserConnectionLogic.PreviousLaserMessage.X = -4000;
-            LaserConnectionLogic.PreviousLaserMessage.Y = 4000;
+            LaserMessage previousMessage = new(0, 0, 0, -4000, 4000);
             Point crossingPoint = ZoneLogic.CalculateCrossingPointOfZoneLineAndLaserPath(new LaserMessage(0, 0, 0, 4000, 4000),
-                new Point(-4000, 0), new Point(4000, 0));
+                previousMessage, new Point(-4000, 0), new Point(4000, 0));
 
             Assert.IsTrue(crossingPoint.X == -4001 && crossingPoint.Y == -4001);
         }
@@ -95,9 +79,8 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void GetLineHitByPathTest()
         {
-            LaserConnectionLogic.PreviousLaserMessage.X = -4000;
-            LaserConnectionLogic.PreviousLaserMessage.Y = 4000;
-            List<ZoneLine> zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[0], new LaserMessage(0, 0, 0, 4000, 0));
+            LaserMessage previousMessage = new(0, 0, 0, -4000, 4000);
+            List<ZoneLine> zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[0], new LaserMessage(0, 0, 0, 4000, 0), previousMessage);
 
             Point firstIntersectPosition = zoneLinesHit[0].CrossedPoint;
             Point secondIntersectPosition = zoneLinesHit[1].CrossedPoint;
@@ -109,9 +92,8 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void GetLineHitByPathParallelogramZoneTest()
         {
-            LaserConnectionLogic.PreviousLaserMessage.X = -3000;
-            LaserConnectionLogic.PreviousLaserMessage.Y = -1000;
-            List<ZoneLine> zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[2], new LaserMessage(0, 0, 0, 3000, -1000));
+            LaserMessage previousMessage = new(0, 0, 0, -3000, -1000);
+            List<ZoneLine> zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[2], new LaserMessage(0, 0, 0, 3000, -1000), previousMessage);
 
             Point firstIntersectPosition = zoneLinesHit[0].CrossedPoint;
             Point secondIntersectPosition = zoneLinesHit[1].CrossedPoint;
@@ -123,9 +105,10 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void GetLineHitByPath6PointZoneTest()
         {
-            LaserConnectionLogic.PreviousLaserMessage.X = -3000;
-            LaserConnectionLogic.PreviousLaserMessage.Y = -1000;
-            List<ZoneLine> zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[3], new LaserMessage(0, 0, 0, 3000, -1000));
+            LaserConnectionLogic.PreviousMessage.X = -3000;
+            LaserConnectionLogic.PreviousMessage.Y = -1000;
+            LaserMessage previousMessage = new(0, 0, 0, -3000, -1000);
+            List<ZoneLine> zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[3], new LaserMessage(0, 0, 0, 3000, -1000), previousMessage);
 
             Assert.IsTrue(zoneLinesHit.Count == 3);
         }
@@ -134,11 +117,11 @@ namespace LaserAPITests.Tests.Logic
         public void GetLineHitByPathPerformanceTest()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            LaserConnectionLogic.PreviousLaserMessage.X = -4000;
+            LaserConnectionLogic.PreviousMessage.X = -4000;
             for (int i = -4000; i < 4000; i++)
             {
-                LaserConnectionLogic.PreviousLaserMessage.Y = i;
-                ZoneLogic.GetZoneLineHitByPath(_zones[1], new LaserMessage(0, 0, 0, 4000, 4000));
+                LaserMessage previousMessage = new(0, 0, 0, 0, i);
+                ZoneLogic.GetZoneLineHitByPath(_zones[1], new LaserMessage(0, 0, 0, 4000, 4000), previousMessage);
             }
 
             stopwatch.Stop();
@@ -148,7 +131,7 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void GetPointsClosestToPreviousSendMessageTest()
         {
-            LaserConnectionLogic.PreviousLaserMessage = new LaserMessage(0, 0, 0, -4000, 4000);
+            LaserConnectionLogic.PreviousMessage = new LaserMessage(0, 0, 0, -4000, 4000);
             List<LaserMessage> pointsToSort = new()
             {
                 new LaserMessage(0, 0, 0, -400, 4000),
@@ -162,7 +145,8 @@ namespace LaserAPITests.Tests.Logic
                 new LaserMessage(0, 0, 0, 400, 4000),
             };
 
-            List<LaserMessage> sortedPoints = ZoneLogic.SortPointsFromClosestToPreviousSendMessageToFarthest(pointsToSort);
+            LaserMessage previousMessage = new(0, 0, 0, -4000, 4000);
+            List<LaserMessage> sortedPoints = ZoneLogic.SortPointsFromClosestToPreviousSendMessageToFarthest(pointsToSort, previousMessage);
             for (int i = 0; i < sortedPoints.Count; i++)
             {
                 LaserMessage message = sortedPoints[i];
@@ -171,14 +155,6 @@ namespace LaserAPITests.Tests.Logic
                 Point expectedPoint = new(expectedMessage.X, expectedMessage.Y);
                 Assert.IsTrue(sortedPoint.X == expectedPoint.X && sortedPoint.Y == expectedPoint.Y);
             }
-        }
-
-        [TestMethod]
-        public void GetPointsOfZoneLinesHitByPathTest()
-        {
-            LaserConnectionLogic.PreviousLaserMessage = new LaserMessage(0, 0, 0, -4000, 4000);
-            List<LaserMessage> messages = _zoneLogic.GetPointsOfZoneLinesHitByPath(new LaserMessage(0, 0, 0, 4000, -4000));
-            Assert.IsNotNull(messages);
         }
 
         [TestMethod]
@@ -228,9 +204,8 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void GetZoneWherePathIsInsideTest()
         {
-            LaserConnectionLogic.PreviousLaserMessage.X = 500;
-            LaserConnectionLogic.PreviousLaserMessage.Y = 0;
-            ZoneDto zone = _zoneLogic.GetZoneWherePathIsInside(new LaserMessage(0, 0, 0, 500, 0));
+            LaserMessage previousMessage = new(0, 0, 0, 500, 0);
+            ZoneDto zone = _zoneLogic.GetZoneWherePathIsInside(new LaserMessage(0, 0, 0, 500, 0), previousMessage);
             Assert.IsTrue(zone.Uuid == Guid.Parse("fc220bc5-68ff-45d8-8e51-d884687e324b"));
         }
     }

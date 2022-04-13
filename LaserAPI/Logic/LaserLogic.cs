@@ -1,6 +1,7 @@
 ﻿using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
@@ -14,19 +15,32 @@ namespace LaserAPI.Logic
             _zoneLogic = zoneLogic;
         }
 
-        public async Task SendData(LaserMessage newMessage)
+        public async Task SendData(List<LaserMessage> messages)
         {
-            ZoneDto zoneWherePathIsInside = _zoneLogic.GetZoneWherePathIsInside(newMessage);
-            bool positionIsInProjectionZone = zoneWherePathIsInside != null;
+            List<LaserMessage> messagesToSend = new();
 
-            if (positionIsInProjectionZone)
+            int messagesLength = messages.Count;
+            for (int i = 0; i < messagesLength; i++)
             {
-                LimitTotalLaserPowerIfNecessary(ref newMessage, zoneWherePathIsInside.MaxLaserPowerInZonePwm);
-                await LaserConnectionLogic.SendMessages(new List<LaserMessage> { newMessage });
-                return;
+                LaserMessage message = messages[i];
+                LaserMessage previousMessage = i == 0 ? message : messages[i - 1];
+
+                ZoneDto zoneWherePathIsInside = _zoneLogic.GetZoneWherePathIsInside(message, previousMessage);
+                bool positionIsInProjectionZone = zoneWherePathIsInside != null;
+
+                if (positionIsInProjectionZone)
+                {
+                    LimitTotalLaserPowerIfNecessary(ref message, zoneWherePathIsInside.MaxLaserPowerInZonePwm);
+                    messagesToSend.Add(message);
+                }
+
+                List<LaserMessage> zoneCrossingPoints = _zoneLogic.GetPointsOfZoneLinesHitByPath(message, previousMessage);
+                if (zoneCrossingPoints.Any())
+                {
+                    messagesToSend.AddRange(zoneCrossingPoints);
+                }
             }
 
-            List<LaserMessage> messagesToSend = _zoneLogic.GetPointsOfZoneLinesHitByPath(newMessage);
             await LaserConnectionLogic.SendMessages(messagesToSend);
         }
 
@@ -39,15 +53,15 @@ namespace LaserAPI.Logic
         {
             if (message.RedLaser > maxPowerPwmPerLaserColor)
             {
-                message.RedLaser = NumberHelper.Map(message.RedLaser, 0, 255, 0, maxPowerPwmPerLaserColor);
+                message.RedLaser = message.RedLaser.Map(0, 255, 0, maxPowerPwmPerLaserColor);
             }
             if (message.GreenLaser > maxPowerPwmPerLaserColor)
             {
-                message.GreenLaser = NumberHelper.Map(message.GreenLaser, 0, 255, 0, maxPowerPwmPerLaserColor);
+                message.GreenLaser = message.GreenLaser.Map(0, 255, 0, maxPowerPwmPerLaserColor);
             }
             if (message.BlueLaser > maxPowerPwmPerLaserColor)
             {
-                message.BlueLaser = NumberHelper.Map(message.BlueLaser, 0, 255, 0, maxPowerPwmPerLaserColor);
+                message.BlueLaser = message.BlueLaser.Map(0, 255, 0, maxPowerPwmPerLaserColor);
             }
         }
 
@@ -61,10 +75,10 @@ namespace LaserAPI.Logic
             int combinedPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
             if (combinedPower > maxPowerPwm)
             {
-                double divideFactor = combinedPower.ToDouble() / maxPowerPwm.ToDouble();
-                message.RedLaser = (message.RedLaser / divideFactor).ToInt();
-                message.GreenLaser = (message.GreenLaser / divideFactor).ToInt();
-                message.BlueLaser = (message.BlueLaser / divideFactor).ToInt();
+                int maxPowerPerColor = maxPowerPwm / 3;
+                message.RedLaser = message.RedLaser.Map(0, 255, 0, maxPowerPerColor);
+                message.GreenLaser = message.GreenLaser.Map(0, 255, 0, maxPowerPerColor);
+                message.BlueLaser = message.BlueLaser.Map(0, 255, 0, maxPowerPerColor); ;
             }
         }
     }

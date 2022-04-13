@@ -66,8 +66,9 @@ namespace LaserAPI.Models.Helper
             {
                 return new NotFoundResult();
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException e)
             {
+                Console.WriteLine(e);
                 return new StatusCodeResult(StatusCodes.Status304NotModified);
             }
             catch (DuplicateNameException)

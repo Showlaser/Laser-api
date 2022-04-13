@@ -12,7 +12,7 @@ namespace LaserAPI.Logic
     public static class LaserConnectionLogic
     {
         public static bool RanByUnitTest { get; set; } = false;
-        public static LaserMessage PreviousLaserMessage { get; set; } = new();
+        public static LaserMessage PreviousMessage { get; set; } = new();
         public static bool Connected { get; private set; }
         private static TcpListener _server;
         private static NetworkStream _stream;
@@ -85,8 +85,7 @@ namespace LaserAPI.Logic
 
                 byte[] bytes = new byte[msg.Length];
                 await _stream.ReadAsync(bytes);
-
-                PreviousLaserMessage = messages.Last();
+                PreviousMessage = messages.Last();
             }
             catch (Exception e)
             {

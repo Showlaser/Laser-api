@@ -61,11 +61,13 @@ namespace LaserAPI.Logic
 
             while (stopwatch.ElapsedMilliseconds < 500)
             {
+                List<LaserMessage> messages = new();
+
                 int pointsLength = pattern.Points.Count;
                 for (int index = 0; index < pointsLength; index++)
                 {
                     PointDto point = pattern.Points[index];
-                    await _laserLogic.SendData(new LaserMessage
+                    messages.Add(new LaserMessage
                     {
                         RedLaser = point.RedLaserPowerPwm,
                         GreenLaser = point.GreenLaserPowerPwm,
@@ -74,6 +76,9 @@ namespace LaserAPI.Logic
                         Y = point.Y,
                     });
                 }
+
+                await _laserLogic.SendData(messages);
+                messages.Clear();
             }
 
             stopwatch.Stop();

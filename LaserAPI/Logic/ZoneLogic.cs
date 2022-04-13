@@ -102,10 +102,10 @@ namespace LaserAPI.Logic
         /// Gets the zone where the laser path is in, if the path is not within a zone null is returned
         /// </summary>
         /// <param name="message">The laser message</param>
+        /// <param name="previousMessage">The previous message send</param>
         /// <returns>The zone where the laser path is in, if the path is not within a zone null is returned</returns>
-        public ZoneDto GetZoneWherePathIsInside(LaserMessage message)
+        public ZoneDto GetZoneWherePathIsInside(LaserMessage message, LaserMessage previousMessage)
         {
-            LaserMessage previousMessage = LaserConnectionLogic.PreviousLaserMessage;
             int zonesLength = _zones.Count;
             for (int i = 0; i < zonesLength; i++)
             {
@@ -125,8 +125,9 @@ namespace LaserAPI.Logic
         /// Gets all the points of the lines that form a zone that are hit with the laser path, points are sorted from closest to previous location
         /// </summary>
         /// <param name="message">The new location for the laser to go to</param>
+        /// <param name="previousMessage"></param>
         /// <returns>The points of the lines that form a zone that are hit with the laser path in a laser message model</returns>
-        public List<LaserMessage> GetPointsOfZoneLinesHitByPath(LaserMessage message)
+        public List<LaserMessage> GetPointsOfZoneLinesHitByPath(LaserMessage message, LaserMessage previousMessage)
         {
             if (ZonesLength == 0)
             {
@@ -137,7 +138,7 @@ namespace LaserAPI.Logic
             for (int i = 0; i < ZonesLength; i++)
             {
                 ZoneDto zone = _zones[i];
-                List<ZoneLine> zoneLinesHit = GetZoneLineHitByPath(zone, message);
+                List<ZoneLine> zoneLinesHit = GetZoneLineHitByPath(zone, message, previousMessage);
 
                 int zoneLinesHitLength = zoneLinesHit.Count;
                 for (int j = 0; j < zoneLinesHitLength; j++)
@@ -153,7 +154,7 @@ namespace LaserAPI.Logic
                 }
             }
 
-            return SortPointsFromClosestToPreviousSendMessageToFarthest(crossingPoints);
+            return SortPointsFromClosestToPreviousSendMessageToFarthest(crossingPoints, previousMessage);
         }
 
         /// <summary>
@@ -162,7 +163,7 @@ namespace LaserAPI.Logic
         /// <param name="zone">The zone to check</param>
         /// <param name="message">The new location for the laser</param>
         /// <returns>The zones that are crossed</returns>
-        public static List<ZoneLine> GetZoneLineHitByPath(ZoneDto zone, LaserMessage message)
+        public static List<ZoneLine> GetZoneLineHitByPath(ZoneDto zone, LaserMessage message, LaserMessage previousMessage)
         {
             List<ZoneLine> points = new();
             int zonePositionsLength = zone.Points.Count;
@@ -177,7 +178,7 @@ namespace LaserAPI.Logic
                 Point zonePoint1 = new(position.X, position.Y);
                 Point zonePoint2 = new(secondPosition.X, secondPosition.Y);
 
-                Point crossedPoint = CalculateCrossingPointOfZoneLineAndLaserPath(message, zonePoint1, zonePoint2);
+                Point crossedPoint = CalculateCrossingPointOfZoneLineAndLaserPath(message, previousMessage, zonePoint1, zonePoint2);
                 if (crossedPoint.X != -4001 && crossedPoint.Y != -4001)
                 {
                     points.Add(new ZoneLine
@@ -197,16 +198,15 @@ namespace LaserAPI.Logic
         /// </summary>
         /// <param name="points">The points to sort</param>
         /// <returns>The given points sorted from closest to farthest away from the previous send point</returns>
-        public static List<LaserMessage> SortPointsFromClosestToPreviousSendMessageToFarthest(List<LaserMessage> points)
+        public static List<LaserMessage> SortPointsFromClosestToPreviousSendMessageToFarthest(List<LaserMessage> points, LaserMessage previousMessage)
         {
-            LaserMessage previousLaserMessage = LaserConnectionLogic.PreviousLaserMessage;
             DistanceSorter[] distances = new DistanceSorter[points.Count];
             int pointsLength = points.Count;
             for (int i = 0; i < pointsLength; i++)
             {
                 LaserMessage message = points[i];
                 int totalLaserPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
-                double distance = Math.Sqrt(Math.Pow(previousLaserMessage.X - message.X, 2) + Math.Pow(previousLaserMessage.Y - message.Y, 2));
+                double distance = Math.Sqrt(Math.Pow(previousMessage.X - message.X, 2) + Math.Pow(previousMessage.Y - message.Y, 2));
                 distances[i] = new DistanceSorter(message, distance, totalLaserPower);
             }
 
@@ -328,13 +328,14 @@ namespace LaserAPI.Logic
         /// This method calculates the crossing x and y point with two lines
         /// </summary>
         /// <param name="newMessage">The new position</param>
+        /// <param name="previousMessage">The previous message send</param>
         /// <param name="line2Point1">The first point of the line</param>
         /// <param name="line2Point2">The second point of the line</param>
         /// <returns>A new point with the x and y position of the crossing point if the lines do not cross a point with the values -4001, -4001 is returned</returns>
-        public static Point CalculateCrossingPointOfZoneLineAndLaserPath(LaserMessage newMessage, Point line2Point1, Point line2Point2)
+        public static Point CalculateCrossingPointOfZoneLineAndLaserPath(LaserMessage newMessage, LaserMessage previousMessage, Point line2Point1, Point line2Point2)
         {
-            int currentXPosition = LaserConnectionLogic.PreviousLaserMessage.X;
-            int currentYPosition = LaserConnectionLogic.PreviousLaserMessage.Y;
+            int currentXPosition = previousMessage.X;
+            int currentYPosition = previousMessage.Y;
             bool linesDoNotCross = !DoIntersect(new Point(newMessage.X, newMessage.Y),
                 new Point(currentXPosition, currentYPosition), line2Point1, line2Point2);
 
