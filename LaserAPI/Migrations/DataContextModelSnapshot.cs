@@ -153,9 +153,6 @@ namespace LaserAPI.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("PatternDtoUuid")
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid>("PatternUuid")
                         .HasColumnType("TEXT");
 
@@ -170,9 +167,9 @@ namespace LaserAPI.Migrations
 
                     b.HasKey("Uuid");
 
-                    b.HasIndex("PatternDtoUuid");
+                    b.HasIndex("PatternUuid");
 
-                    b.ToTable("PointDto");
+                    b.ToTable("Point");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Zones.ZoneDto", b =>
@@ -248,7 +245,9 @@ namespace LaserAPI.Migrations
                 {
                     b.HasOne("LaserAPI.Models.Dto.Patterns.PatternDto", null)
                         .WithMany("Points")
-                        .HasForeignKey("PatternDtoUuid");
+                        .HasForeignKey("PatternUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Zones.ZonesPositionDto", b =>

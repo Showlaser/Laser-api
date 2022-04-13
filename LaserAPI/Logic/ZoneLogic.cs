@@ -52,7 +52,7 @@ namespace LaserAPI.Logic
                                                                && p.ZoneUuid == zone.Uuid) && zone.Points.Any();
 
             bool zoneValid = zone.Uuid != Guid.Empty && !string.IsNullOrEmpty(zone.Name) &&
-                zone.MaxLaserPowerInZonePwm.IsBetweenOrEqualTo(0, 255) && zonePointsValid;
+                zone.MaxLaserPowerInZonePwm.IsBetweenOrEqualTo(0, 765) && zonePointsValid;
 
             if (!zoneValid)
             {
@@ -80,10 +80,11 @@ namespace LaserAPI.Logic
             zone.Points = zone.Points.OrderBy(p => p.Order).ToList();
             Stopwatch stopwatch = Stopwatch.StartNew();
 
+            int power = zone.MaxLaserPowerInZonePwm / 3;
             while (stopwatch.ElapsedMilliseconds < 1000)
             {
                 List<LaserMessage> messages = zone.Points
-                    .Select(p => new LaserMessage(zone.MaxLaserPowerInZonePwm, 0, 0, p.X, p.Y))
+                    .Select(p => new LaserMessage(power, power, power, p.X, p.Y))
                     .ToList();
                 messages.Add(messages.First());
                 await LaserConnectionLogic.SendMessages(messages);

@@ -1,3 +1,4 @@
+using LaserAPI.CustomExceptions;
 using LaserAPI.Dal;
 using LaserAPI.Interfaces.Dal;
 using LaserAPI.Logic;
@@ -10,6 +11,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text.Json.Serialization;
 
 namespace LaserAPI
@@ -31,8 +35,7 @@ namespace LaserAPI
             services.AddDbContextPool<DataContext>(
                 dbContextOptions => dbContextOptions
                     .UseSqlite(connectionString, o =>
-                        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
-                    .EnableSensitiveDataLogging());
+                        o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
             services
                 .AddControllers()
                 .AddJsonOptions(opts =>
@@ -70,7 +73,7 @@ namespace LaserAPI
             app.UseRouting();
             app.UseCors(builder =>
             {
-                builder.WithOrigins("http://localhost:3000", "http://localhost:3001")
+                builder.WithOrigins("http://localhost:3000")
                     .AllowCredentials()
                     .AllowAnyHeader()
                     .AllowAnyMethod();
@@ -84,6 +87,25 @@ namespace LaserAPI
             });
 
             CreateDatabaseIfNotExist(app);
+            SetCurrentIpAddress();
+        }
+
+        private static void SetCurrentIpAddress()
+        {
+            System.Net.IPAddress currentIpAddress = NetworkInterface
+                .GetAllNetworkInterfaces()
+                .Where(n => n.OperationalStatus == OperationalStatus.Up)
+                .Where(n => n.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                .FirstOrDefault(n => n.GetIPProperties().GatewayAddresses
+                    .Any())
+                .GetIPProperties().UnicastAddresses.FirstOrDefault().Address;
+            LaserConnectionLogic.IpAddress = currentIpAddress.ToString();
+
+            if (string.IsNullOrEmpty(LaserConnectionLogic.IpAddress))
+            {
+                string errorMessage = "Could not connect to client software, start it first before starting this application!";
+                throw new NoClientSoftwareFoundException(errorMessage);
+            }
         }
 
         /// <summary>

@@ -4,7 +4,7 @@ using LaserAPI.Models.Helper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 
-namespace LaserAPITests.Tests.Helper
+namespace LaserAPITests.Tests.Logic
 {
     [TestClass]
     public class LasershowGeneratorLogicTest

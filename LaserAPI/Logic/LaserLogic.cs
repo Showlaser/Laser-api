@@ -75,10 +75,13 @@ namespace LaserAPI.Logic
             int combinedPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
             if (combinedPower > maxPowerPwm)
             {
-                int maxPowerPerColor = maxPowerPwm / 3;
-                message.RedLaser = message.RedLaser.Map(0, 255, 0, maxPowerPerColor);
-                message.GreenLaser = message.GreenLaser.Map(0, 255, 0, maxPowerPerColor);
-                message.BlueLaser = message.BlueLaser.Map(0, 255, 0, maxPowerPerColor); ;
+                while (combinedPower > maxPowerPwm)
+                { // todo make formula instead of loop
+                    if (message.RedLaser > 0) message.RedLaser--;
+                    if (message.GreenLaser > 0) message.GreenLaser--;
+                    if (message.BlueLaser > 0) message.BlueLaser--;
+                    combinedPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
+                }
             }
         }
     }

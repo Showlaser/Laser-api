@@ -12,6 +12,7 @@ namespace LaserAPI.Logic
     public static class LaserConnectionLogic
     {
         public static bool RanByUnitTest { get; set; } = false;
+        public static string IpAddress { get; set; }
         public static LaserMessage PreviousMessage { get; set; } = new();
         public static bool Connected { get; private set; }
         private static TcpListener _server;
@@ -22,7 +23,7 @@ namespace LaserAPI.Logic
         {
             try
             {
-                IPAddress localAddress = IPAddress.Parse("192.168.1.31");
+                IPAddress localAddress = IPAddress.Parse(IpAddress);
                 _server = new TcpListener(localAddress, 50000)
                 {
                     Server =

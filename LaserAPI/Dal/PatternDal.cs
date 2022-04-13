@@ -37,10 +37,13 @@ namespace LaserAPI.Dal
 
         public async Task Update(PatternDto pattern)
         {
-            PatternDto patternToUpdate = await _context.Pattern.FindAsync(pattern.Uuid);
+            PatternDto patternToUpdate = await _context.Pattern.Include(p => p.Points)
+                .SingleOrDefaultAsync(p => p.Uuid == pattern.Uuid);
+
             patternToUpdate.Name = pattern.Name;
             patternToUpdate.Scale = pattern.Scale;
-            patternToUpdate.Points = pattern.Points;
+            _context.Point.RemoveRange(patternToUpdate.Points);
+            await _context.Point.AddRangeAsync(pattern.Points);
 
             _context.Pattern.Update(patternToUpdate);
             await _context.SaveChangesAsync();
