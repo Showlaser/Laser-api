@@ -1,10 +1,13 @@
 ﻿using LaserAPI.Models.Helper;
+using Microsoft.AspNetCore.Connections;
 using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
@@ -12,18 +15,19 @@ namespace LaserAPI.Logic
     public static class LaserConnectionLogic
     {
         public static bool RanByUnitTest { get; set; } = false;
-        public static string IpAddress { get; set; }
+        public static string ComputerIpAddress { get; set; }
         public static LaserMessage PreviousMessage { get; set; } = new();
-        public static bool Connected { get; private set; }
+        public static bool ConnectionPending { get; private set; }
         private static TcpListener _server;
         private static NetworkStream _stream;
-        private static TcpClient _client;
+        public static TcpClient Client;
+        private static readonly SerialPort SerialPort = new();
 
-        public static void Connect()
+        public static void NetworkConnect()
         {
             try
             {
-                IPAddress localAddress = IPAddress.Parse(IpAddress);
+                IPAddress localAddress = IPAddress.Parse(ComputerIpAddress);
                 _server = new TcpListener(localAddress, 50000)
                 {
                     Server =
@@ -31,16 +35,19 @@ namespace LaserAPI.Logic
                         SendTimeout = -1
                     }
                 };
-                _server.Start();
 
+                ConnectionPending = true;
+                _server.Start();
                 Console.WriteLine("Waiting");
-                _client = _server.AcceptTcpClient();
-                Console.WriteLine("Connected");
-                _stream = _client.GetStream();
+
+                Client = _server.AcceptTcpClient();
+                ConnectionPending = false;
+                Console.WriteLine("Connected with laser");
+                _stream = Client.GetStream();
             }
             catch (Exception)
             {
-                _client.Close();
+                Client?.Close();
             }
         }
 
@@ -51,10 +58,9 @@ namespace LaserAPI.Logic
                 return;
             }
 
-            Connected = _client != null && _client.Connected;
-            if (!Connected)
+            if (Client != null && !Client.Connected)
             {
-                Connect();
+                NetworkConnect();
             }
 
             try
@@ -91,9 +97,51 @@ namespace LaserAPI.Logic
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                _client.Close();
+                Client.Close();
                 _server.Stop();
-                Connect();
+                NetworkConnect();
+            }
+        }
+
+        public static string[] GetAvailableComDevices()
+        {
+            return SerialPort.GetPortNames();
+        }
+
+        public static void ConnectSerial(string portName)
+        {
+            if (SerialPort.IsOpen)
+            {
+                return;
+            }
+
+            SerialPort.PortName = portName;
+            SerialPort.BaudRate = 9600;
+            SerialPort.Open();
+        }
+
+        public static void SendDataAsJson(string json)
+        {
+            if (!SerialPort.IsOpen)
+            {
+                throw new ConnectionAbortedException("No connection to the com device was available");
+            }
+
+            SerialPort.WriteLine(json);
+
+            string returnMessage = "";
+            int iterations = 0;
+            while (!returnMessage.Contains("Settings ip is:") && iterations < 25)
+            {
+                returnMessage = SerialPort.ReadLine();
+                iterations++;
+                Thread.Sleep(500);
+            }
+
+            SerialPort.Close();
+            if (!returnMessage.Contains("Settings ip is:"))
+            {
+                throw new InvalidOperationException("The laser was not in settings mode!");
             }
         }
     }

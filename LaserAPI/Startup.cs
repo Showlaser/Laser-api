@@ -12,9 +12,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.Json.Serialization;
+using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace LaserAPI
 {
@@ -88,6 +91,22 @@ namespace LaserAPI
 
             CreateDatabaseIfNotExist(app);
             SetCurrentIpAddress();
+
+            Timer timer = new() { Interval = 10000 };
+            timer.Elapsed += delegate (object o, ElapsedEventArgs eventArgs)
+            {
+                bool clientConnected = LaserConnectionLogic.Client?.Connected is true;
+                if (!clientConnected && !LaserConnectionLogic.ConnectionPending)
+                {
+                    LaserConnectionLogic.NetworkConnect();
+                }
+                else if (clientConnected)
+                {
+                    LaserConnectionLogic.SendMessages(new List<LaserMessage> { new LaserMessage(0, 0, 0, 0, 0) }).Start();
+                }
+            };
+
+            timer.Start();
         }
 
         private static void SetCurrentIpAddress()
@@ -99,9 +118,9 @@ namespace LaserAPI
                 .FirstOrDefault(n => n.GetIPProperties().GatewayAddresses
                     .Any())
                 .GetIPProperties().UnicastAddresses.FirstOrDefault().Address;
-            LaserConnectionLogic.IpAddress = currentIpAddress.ToString();
+            LaserConnectionLogic.ComputerIpAddress = currentIpAddress.ToString();
 
-            if (string.IsNullOrEmpty(LaserConnectionLogic.IpAddress))
+            if (string.IsNullOrEmpty(LaserConnectionLogic.ComputerIpAddress))
             {
                 string errorMessage = "Could not connect to client software, start it first before starting this application!";
                 throw new NoClientSoftwareFoundException(errorMessage);

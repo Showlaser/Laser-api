@@ -33,14 +33,14 @@ namespace LaserAPI.Controllers
             {
                 List<ZoneDto> zones = await _zoneLogic.All();
                 int zonesLength = zones.Count;
-                bool developmentModeActive = zones.Any(z => z.MaxLaserPowerInZonePwm == 6 && z.Points.Count == 4) &&
+                bool developmentModeActive = zones.Any(z => z.MaxLaserPowerInZonePwm == 20 && z.Points.Count == 4) &&
                                              zonesLength == 1;
 
                 List<AnimationDto> animations = await _animationLogic.All();
                 return new DashboardViewmodel
                 {
                     LaserSettings = new LaserSettingsViewmodel(zones.Count, developmentModeActive),
-                    LaserStatus = new LaserStatusViewmodel(LaserConnectionLogic.Connected),
+                    ApplicationStatus = new ApplicationStatusViewmodel(LaserConnectionLogic.Client?.Connected is true, LaserConnectionLogic.ComputerIpAddress),
                     Logs = GetLogMessages(developmentModeActive, zonesLength),
                     Shows = animations.Select(a => new ShowViewmodel(a.Name)).ToList()
                 };
@@ -53,7 +53,7 @@ namespace LaserAPI.Controllers
         {
             List<LogViewmodel> logs = new();
             LogViewmodel developmentModeLog = developmentModeActive
-                ? new LogViewmodel("Development mode active laser power is limited", LogType.Warning)
+                ? new LogViewmodel("Development mode active laser power is limited", LogType.Info)
                 : new LogViewmodel("Development mode is not active, watch out for high powered beams!",
                     LogType.Warning);
 

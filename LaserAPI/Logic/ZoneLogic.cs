@@ -80,11 +80,14 @@ namespace LaserAPI.Logic
             zone.Points = zone.Points.OrderBy(p => p.Order).ToList();
             Stopwatch stopwatch = Stopwatch.StartNew();
 
-            int power = zone.MaxLaserPowerInZonePwm / 3;
             while (stopwatch.ElapsedMilliseconds < 1000)
             {
                 List<LaserMessage> messages = zone.Points
-                    .Select(p => new LaserMessage(power, power, power, p.X, p.Y))
+                    .Select(p =>
+                    {
+                        LaserMessage message = new(zone.MaxLaserPowerInZonePwm, 0, 0, p.X, p.Y);
+                        return message;
+                    })
                     .ToList();
                 messages.Add(messages.First());
                 await LaserConnectionLogic.SendMessages(messages);

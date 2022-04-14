@@ -1,4 +1,5 @@
-﻿using LaserAPI.Models.Dto;
+﻿using LaserAPI.Logic;
+using LaserAPI.Models.Dto;
 using LaserAPI.Models.FromFrontend;
 using LaserAPI.Models.Helper;
 using Mapster;
@@ -28,6 +29,29 @@ namespace LaserAPI.Controllers
             }
 
             return await _controllerResultHandler.Execute(Action());
+        }
+
+        [HttpPost("serial")]
+        public ActionResult SendSerialMessageToLaser([FromQuery] string comport, [FromQuery] string message)
+        {
+            void Action()
+            {
+                LaserConnectionLogic.ConnectSerial(comport);
+                LaserConnectionLogic.SendDataAsJson(message);
+            }
+
+            return _controllerResultHandler.Execute(Action);
+        }
+
+        [HttpGet("serial")]
+        public ActionResult<string[]> GetComDevices()
+        {
+            string[] Action()
+            {
+                return LaserConnectionLogic.GetAvailableComDevices();
+            }
+
+            return _controllerResultHandler.Execute(Action);
         }
     }
 }
