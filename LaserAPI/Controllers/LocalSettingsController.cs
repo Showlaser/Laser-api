@@ -37,7 +37,7 @@ namespace LaserAPI.Controllers
             void Action()
             {
                 LaserConnectionLogic.ConnectSerial(comport);
-                LaserConnectionLogic.SendDataAsJson(message);
+                LaserConnectionLogic.SetLaserSettingsBySerial(message);
             }
 
             return _controllerResultHandler.Execute(Action);

@@ -40,7 +40,7 @@ namespace LaserAPI.Controllers
                 return new DashboardViewmodel
                 {
                     LaserSettings = new LaserSettingsViewmodel(zones.Count, developmentModeActive),
-                    ApplicationStatus = new ApplicationStatusViewmodel(LaserConnectionLogic.Client?.Connected is true, LaserConnectionLogic.ComputerIpAddress),
+                    ApplicationStatus = new ApplicationStatusViewmodel(LaserConnectionLogic.TcpClient?.Connected is true, LaserConnectionLogic.ComputerIpAddress),
                     Logs = GetLogMessages(developmentModeActive, zonesLength),
                     Shows = animations.Select(a => new ShowViewmodel(a.Name)).ToList()
                 };

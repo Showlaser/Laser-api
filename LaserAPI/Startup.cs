@@ -95,7 +95,7 @@ namespace LaserAPI
             Timer timer = new() { Interval = 10000 };
             timer.Elapsed += delegate (object o, ElapsedEventArgs eventArgs)
             {
-                bool clientConnected = LaserConnectionLogic.Client?.Connected is true;
+                bool clientConnected = LaserConnectionLogic.TcpClient?.Connected is true;
                 if (!clientConnected && !LaserConnectionLogic.ConnectionPending)
                 {
                     LaserConnectionLogic.NetworkConnect();

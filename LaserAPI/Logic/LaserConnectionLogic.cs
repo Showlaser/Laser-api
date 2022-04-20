@@ -20,8 +20,9 @@ namespace LaserAPI.Logic
         public static bool ConnectionPending { get; private set; }
         private static TcpListener _server;
         private static NetworkStream _stream;
-        public static TcpClient Client;
+        public static TcpClient TcpClient { get; private set; }
         private static readonly SerialPort SerialPort = new();
+        private static Thread _networkConnectionThread;
 
         public static void NetworkConnect()
         {
@@ -40,67 +41,86 @@ namespace LaserAPI.Logic
                 _server.Start();
                 Console.WriteLine("Waiting");
 
-                Client = _server.AcceptTcpClient();
+                TcpClient = _server.AcceptTcpClient();
                 ConnectionPending = false;
                 Console.WriteLine("Connected with laser");
-                _stream = Client.GetStream();
+                _stream = TcpClient.GetStream();
             }
             catch (Exception)
             {
-                Client?.Close();
+                TcpClient?.Close();
             }
         }
 
-        public static async Task SendMessages(List<LaserMessage> messages)
+        public static void SendMessages(List<LaserMessage> messages)
         {
             if (RanByUnitTest)
             {
                 return;
             }
 
-            if (Client != null && !Client.Connected)
+            if (TcpClient?.Connected is false)
             {
                 NetworkConnect();
             }
 
             try
             {
-                if (!messages.Any())
+                int messagesLength = messages.Count;
+                bool messagesCannotBeSend = messagesLength == 0 || _networkConnectionThread?.IsAlive is true;
+                if (messagesCannotBeSend)
                 {
                     return;
                 }
 
-                string json = "[";
-                int messageLength = messages.Count;
-                for (int i = 0; i < messageLength; i++)
+                async void Start() => await SendNetworkDataToLaser(messages, messagesLength);
+                _networkConnectionThread = new Thread(Start)
                 {
-                    LaserMessage message = messages[i];
-                    string jsonMessage = "{\"r\":" + message.RedLaser + ",\"g\":" + message.GreenLaser + ",\"b\":" + message.BlueLaser + ",\"x\":" + message.X + ",\"y\":" + message.Y + "}";
-                    if (i + 1 != messageLength)
-                    {
-                        jsonMessage += ",";
-                    }
+                    Priority = ThreadPriority.Highest,
+                    IsBackground = true
+                };
 
-                    json += jsonMessage;
-                }
-
-                json += "]";
-                UTF8Encoding utf8 = new();
-
-                byte[] msg = utf8.GetBytes(json);
-                await _stream.WriteAsync(msg);
-
-                byte[] bytes = new byte[msg.Length];
-                await _stream.ReadAsync(bytes);
-                PreviousMessage = messages.Last();
+                _networkConnectionThread.Start();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                Client.Close();
+                TcpClient?.Close();
                 _server.Stop();
                 NetworkConnect();
             }
+        }
+
+        private static async Task SendNetworkDataToLaser(IReadOnlyList<LaserMessage> messages, int messagesLength)
+        {
+            string json = ConvertMessagesToJson(messages, messagesLength);
+            UTF8Encoding utf8 = new();
+            byte[] msg = utf8.GetBytes(json);
+            await _stream.WriteAsync(msg);
+
+            var bytes = new byte[msg.Length];
+            await _stream.ReadAsync(bytes);
+            PreviousMessage = messages[^1];
+        }
+
+        private static string ConvertMessagesToJson(IReadOnlyList<LaserMessage> messages, int messagesLength)
+        {
+            string json = "[";
+            for (int i = 0; i < messagesLength; i++)
+            {
+                LaserMessage message = messages[i];
+                string jsonMessage = "{\"r\":" + message.RedLaser + ",\"g\":" + message.GreenLaser + ",\"b\":" +
+                                     message.BlueLaser + ",\"x\":" + message.X + ",\"y\":" + message.Y + "}";
+                if (i + 1 != messagesLength)
+                {
+                    jsonMessage += ",";
+                }
+
+                json += jsonMessage;
+            }
+
+            json += "]";
+            return json;
         }
 
         public static string[] GetAvailableComDevices()
@@ -120,7 +140,7 @@ namespace LaserAPI.Logic
             SerialPort.Open();
         }
 
-        public static void SendDataAsJson(string json)
+        public static void SetLaserSettingsBySerial(string json)
         {
             if (!SerialPort.IsOpen)
             {
