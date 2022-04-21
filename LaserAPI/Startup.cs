@@ -100,10 +100,6 @@ namespace LaserAPI
                 {
                     LaserConnectionLogic.NetworkConnect();
                 }
-                else if (clientConnected)
-                {
-                    LaserConnectionLogic.SendMessages(new List<LaserMessage> { new LaserMessage(0, 0, 0, 0, 0) }).Start();
-                }
             };
 
             timer.Start();
