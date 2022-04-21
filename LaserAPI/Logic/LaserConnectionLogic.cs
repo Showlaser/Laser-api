@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Connections;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -23,6 +22,7 @@ namespace LaserAPI.Logic
         public static TcpClient TcpClient { get; private set; }
         private static readonly SerialPort SerialPort = new();
         private static Thread _networkConnectionThread;
+        private static bool _networkConnectionThreadIsAvailable = true;
 
         public static void NetworkConnect()
         {
@@ -54,25 +54,20 @@ namespace LaserAPI.Logic
 
         public static void SendMessages(List<LaserMessage> messages)
         {
-            if (RanByUnitTest)
+            int messagesLength = messages.Count;
+            bool messagesCannotBeSend = messagesLength == 0 || !_networkConnectionThreadIsAvailable;
+            if (RanByUnitTest || messagesCannotBeSend)
             {
                 return;
             }
 
-            if (TcpClient?.Connected is false)
+            if (TcpClient?.Connected is null || !TcpClient.Connected)
             {
                 NetworkConnect();
             }
 
             try
             {
-                int messagesLength = messages.Count;
-                bool messagesCannotBeSend = messagesLength == 0 || _networkConnectionThread?.IsAlive is true;
-                if (messagesCannotBeSend)
-                {
-                    return;
-                }
-
                 async void Start() => await SendNetworkDataToLaser(messages, messagesLength);
                 _networkConnectionThread = new Thread(Start)
                 {
@@ -81,6 +76,7 @@ namespace LaserAPI.Logic
                 };
 
                 _networkConnectionThread.Start();
+                _networkConnectionThreadIsAvailable = false;
             }
             catch (Exception e)
             {
@@ -93,14 +89,21 @@ namespace LaserAPI.Logic
 
         private static async Task SendNetworkDataToLaser(IReadOnlyList<LaserMessage> messages, int messagesLength)
         {
-            string json = ConvertMessagesToJson(messages, messagesLength);
-            UTF8Encoding utf8 = new();
-            byte[] msg = utf8.GetBytes(json);
-            await _stream.WriteAsync(msg);
+            try
+            {
+                string json = ConvertMessagesToJson(messages, messagesLength);
+                UTF8Encoding utf8 = new();
+                byte[] msg = utf8.GetBytes(json);
+                await _stream.WriteAsync(msg);
 
-            var bytes = new byte[msg.Length];
-            await _stream.ReadAsync(bytes);
-            PreviousMessage = messages[^1];
+                byte[] bytes = new byte[msg.Length];
+                await _stream.ReadAsync(bytes);
+                PreviousMessage = messages[^1];
+            }
+            finally
+            {
+                _networkConnectionThreadIsAvailable = true;
+            }
         }
 
         private static string ConvertMessagesToJson(IReadOnlyList<LaserMessage> messages, int messagesLength)

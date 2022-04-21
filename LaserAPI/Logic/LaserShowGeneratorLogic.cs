@@ -8,7 +8,6 @@ using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
@@ -19,7 +18,6 @@ namespace LaserAPI.Logic
         private double[] _spectrumData;
         private SongData _songData = new();
         private AlgorithmSettings _algorithmSettings = new();
-        private Task _playAnimationTask;
 
         public LaserShowGeneratorLogic(AudioAnalyser audioAnalyser, AnimationLogic animationLogic)
         {
@@ -88,13 +86,10 @@ namespace LaserAPI.Logic
             average /= frequencyRangeValues.Count;
 
             double threshold = _algorithmSettings.Threshold;
-            bool taskAvailable = _playAnimationTask == null || _playAnimationTask.IsCompleted;
-
-            if (average > threshold && taskAvailable)
+            if (average > threshold)
             {
                 AnimationDto animation = GenerateLaserAnimation();
-                _playAnimationTask = new Task(() => _animationLogic.PlayAnimation(animation).Wait(), TaskCreationOptions.LongRunning);
-                _playAnimationTask.Start();
+                _animationLogic.PlayAnimation(animation);
             }
         }
 

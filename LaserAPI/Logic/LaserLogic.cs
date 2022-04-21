@@ -2,7 +2,6 @@
 using LaserAPI.Models.Helper;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
@@ -15,7 +14,7 @@ namespace LaserAPI.Logic
             _zoneLogic = zoneLogic;
         }
 
-        public async Task SendData(List<LaserMessage> messages)
+        public void SendData(List<LaserMessage> messages)
         {
             List<LaserMessage> messagesToSend = new();
 
@@ -41,7 +40,7 @@ namespace LaserAPI.Logic
                 }
             }
 
-            await LaserConnectionLogic.SendMessages(messagesToSend);
+            LaserConnectionLogic.SendMessages(messagesToSend);
         }
 
         /// <summary>

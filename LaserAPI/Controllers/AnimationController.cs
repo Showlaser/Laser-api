@@ -38,16 +38,16 @@ namespace LaserAPI.Controllers
         }
 
         [HttpPost("play")]
-        public async Task<ActionResult> PlayAnimation([FromBody] Animation animation)
+        public ActionResult PlayAnimation([FromBody] Animation animation)
         {
-            async Task Action()
+            void Action()
             {
                 Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
                 AnimationDto animationDto = animation.Adapt<AnimationDto>();
-                await _animationLogic.PlayAnimation(animationDto);
+                _animationLogic.PlayAnimation(animationDto);
             }
 
-            return await _controllerResultHandler.Execute(Action());
+            return _controllerResultHandler.Execute(Action);
         }
 
         [HttpGet]

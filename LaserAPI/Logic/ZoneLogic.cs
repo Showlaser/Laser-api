@@ -74,7 +74,7 @@ namespace LaserAPI.Logic
             UpdateZones();
         }
 
-        public async Task Play(ZoneDto zone)
+        public void Play(ZoneDto zone)
         {
             ValidateZone(zone);
             zone.Points = zone.Points.OrderBy(p => p.Order).ToList();
@@ -90,7 +90,7 @@ namespace LaserAPI.Logic
                     })
                     .ToList();
                 messages.Add(messages.First());
-                await LaserConnectionLogic.SendMessages(messages);
+                LaserConnectionLogic.SendMessages(messages);
             }
 
             stopwatch.Stop();

@@ -52,7 +52,7 @@ namespace LaserAPI.Logic
             await _animationDal.Remove(uuid);
         }
 
-        public async Task PlayAnimation(AnimationDto animation)
+        public void PlayAnimation(AnimationDto animation)
         {
             int animationDuration = GetAnimationDuration(animation);
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -78,7 +78,7 @@ namespace LaserAPI.Logic
                 }
 
                 List<LaserMessage> messagesToPlay = GetAnimationPointsToPlay(settingsToPlay);
-                await _laserLogic.SendData(messagesToPlay);
+                _laserLogic.SendData(messagesToPlay);
             }
         }
 

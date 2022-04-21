@@ -4,7 +4,6 @@ using LaserAPI.Models.FromFrontend;
 using LaserAPI.Models.Helper;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace LaserAPI.Controllers
 {
@@ -20,15 +19,15 @@ namespace LaserAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> SetSettings([FromBody] LocalSettings localSettings)
+        public ActionResult SetSettings([FromBody] LocalSettings localSettings)
         {
-            async Task Action()
+            void Action()
             {
                 LocalSettingsDto localSettingsDto = localSettings.Adapt<LocalSettingsDto>();
 
             }
 
-            return await _controllerResultHandler.Execute(Action());
+            return _controllerResultHandler.Execute(Action);
         }
 
         [HttpPost("serial")]
@@ -46,7 +45,7 @@ namespace LaserAPI.Controllers
         [HttpGet("serial")]
         public ActionResult<string[]> GetComDevices()
         {
-            string[] Action()
+            static string[] Action()
             {
                 return LaserConnectionLogic.GetAvailableComDevices();
             }
