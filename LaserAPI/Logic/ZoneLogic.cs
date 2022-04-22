@@ -3,11 +3,13 @@ using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
+using LaserAPI.Models.Dto.Patterns;
 
 namespace LaserAPI.Logic
 {
@@ -74,7 +76,7 @@ namespace LaserAPI.Logic
             UpdateZones();
         }
 
-        public void Play(ZoneDto zone)
+        public async Task Play(ZoneDto zone)
         {
             ValidateZone(zone);
             zone.Points = zone.Points.OrderBy(p => p.Order).ToList();
@@ -90,7 +92,7 @@ namespace LaserAPI.Logic
                     })
                     .ToList();
                 messages.Add(messages.First());
-                LaserConnectionLogic.SendMessages(messages);
+                await LaserConnectionLogic.SendMessages(messages);
             }
 
             stopwatch.Stop();
@@ -110,11 +112,19 @@ namespace LaserAPI.Logic
         /// <returns>The zone where the laser path is in, if the path is not within a zone null is returned</returns>
         public ZoneDto GetZoneWherePathIsInside(LaserMessage message, LaserMessage previousMessage)
         {
-            int zonesLength = _zones.Count;
-            for (int i = 0; i < zonesLength; i++)
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            for (int i = 0; i < ZonesLength; i++)
             {
                 ZoneDto zone = _zones[i];
-                List<Point> zonePoints = zone.Points.Select(pos => new Point(pos.X, pos.Y)).ToList();
+
+                List<Point> zonePoints = new();
+                int zonePointLength = zone.Points.Count;
+                for (int j = 0; j < zonePointLength; j++)
+                {
+                    ZonesPositionDto zonePoint = zone.Points[j];
+                    zonePoints.Add(new Point(zonePoint.X, zonePoint.Y));
+                }
+
                 if (IsInsidePolygon(zonePoints, new Point(previousMessage.X, previousMessage.Y)) &&
                     IsInsidePolygon(zonePoints, new Point(message.X, message.Y)))
                 {
@@ -122,6 +132,7 @@ namespace LaserAPI.Logic
                 }
             }
 
+            stopwatch.Stop();
             return null;
         }
 
@@ -131,7 +142,7 @@ namespace LaserAPI.Logic
         /// <param name="message">The new location for the laser to go to</param>
         /// <param name="previousMessage"></param>
         /// <returns>The points of the lines that form a zone that are hit with the laser path in a laser message model</returns>
-        public List<LaserMessage> GetPointsOfZoneLinesHitByPath(LaserMessage message, LaserMessage previousMessage)
+        public LaserMessage[] GetPointsOfZoneLinesHitByPath(LaserMessage message, LaserMessage previousMessage)
         {
             if (ZonesLength == 0)
             {
@@ -142,14 +153,16 @@ namespace LaserAPI.Logic
             for (int i = 0; i < ZonesLength; i++)
             {
                 ZoneDto zone = _zones[i];
-                List<ZoneLine> zoneLinesHit = GetZoneLineHitByPath(zone, message, previousMessage);
+                ZoneLine[] zoneLinesHit = GetZoneLineHitByPath(zone, message, previousMessage);
 
-                int zoneLinesHitLength = zoneLinesHit.Count;
+                int zoneLinesHitLength = zoneLinesHit.Length;
+                LaserMessage messageWithLimitedPower = new(message.RedLaser, message.GreenLaser, message.BlueLaser, 0, 0);
+                LaserLogic.LimitTotalLaserPowerIfNecessary(ref messageWithLimitedPower, zone.MaxLaserPowerInZonePwm);
+
                 for (int j = 0; j < zoneLinesHitLength; j++)
                 {
                     Point point = zoneLinesHit[j].CrossedPoint;
-                    LaserMessage messageToAdd = new(message.RedLaser, message.GreenLaser, message.BlueLaser, point.X, point.Y);
-                    LaserLogic.LimitTotalLaserPowerIfNecessary(ref messageToAdd, zone.MaxLaserPowerInZonePwm);
+                    LaserMessage messageToAdd = new(messageWithLimitedPower.RedLaser, messageWithLimitedPower.GreenLaser, messageWithLimitedPower.BlueLaser, point.X, point.Y);
                     crossingPoints.Add(messageToAdd);
                     if (j == 0)
                     {
@@ -167,7 +180,7 @@ namespace LaserAPI.Logic
         /// <param name="zone">The zone to check</param>
         /// <param name="message">The new location for the laser</param>
         /// <returns>The zones that are crossed</returns>
-        public static List<ZoneLine> GetZoneLineHitByPath(ZoneDto zone, LaserMessage message, LaserMessage previousMessage)
+        public static ZoneLine[] GetZoneLineHitByPath(ZoneDto zone, LaserMessage message, LaserMessage previousMessage)
         {
             List<ZoneLine> points = new();
             int zonePositionsLength = zone.Points.Count;
@@ -194,7 +207,7 @@ namespace LaserAPI.Logic
                 }
             }
 
-            return points.DistinctBy(p => p.CrossedPoint).ToList();
+            return points.DistinctBy(p => p.CrossedPoint).ToArray();
         }
 
         /// <summary>
@@ -202,7 +215,7 @@ namespace LaserAPI.Logic
         /// </summary>
         /// <param name="points">The points to sort</param>
         /// <returns>The given points sorted from closest to farthest away from the previous send point</returns>
-        public static List<LaserMessage> SortPointsFromClosestToPreviousSendMessageToFarthest(List<LaserMessage> points, LaserMessage previousMessage)
+        public static LaserMessage[] SortPointsFromClosestToPreviousSendMessageToFarthest(List<LaserMessage> points, LaserMessage previousMessage)
         {
             DistanceSorter[] distances = new DistanceSorter[points.Count];
             int pointsLength = points.Count;
@@ -213,13 +226,21 @@ namespace LaserAPI.Logic
                 double distance = Math.Sqrt(Math.Pow(previousMessage.X - message.X, 2) + Math.Pow(previousMessage.Y - message.Y, 2));
                 distances[i] = new DistanceSorter(message, distance, totalLaserPower);
             }
-
-            return distances.OrderBy(d => d.Distance)
+            
+            DistanceSorter[] sortedDistances = distances.OrderBy(d => d.Distance)
                 .ThenByDescending(d => d.TotalLaserPower)
-                .Select(d => d.Message)
-                .ToList();
-        }
+                .ToArray();
 
+            LaserMessage[] sorted = new LaserMessage[pointsLength];
+            for (int i = 0; i < pointsLength; i++)
+            {
+                LaserMessage sortedMessage = sortedDistances[i].Message;
+                sorted[i] = sortedMessage;
+            }
+            
+            return sorted;
+        }
+        
         // Given three collinear points thePointToCheck, q, r, the function checks if
         // point q lies on line segment 'pr'
         private static bool OnSegment(Point p, Point q, Point r) =>

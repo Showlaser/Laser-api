@@ -1,6 +1,6 @@
 ﻿namespace LaserAPI.Models.Helper
 {
-    public class LaserMessage
+    public struct LaserMessage
     {
         public int RedLaser { get; set; }
         public int GreenLaser { get; set; }
@@ -19,7 +19,11 @@
 
         public LaserMessage()
         {
-
+            RedLaser = 0;
+            GreenLaser = 0;
+            BlueLaser = 0;
+            X = 0;
+            Y = 0;
         }
     }
 }

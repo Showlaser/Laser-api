@@ -1,7 +1,10 @@
-﻿using LaserAPI.Models.Dto.Zones;
+﻿using System;
+using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
@@ -14,8 +17,11 @@ namespace LaserAPI.Logic
             _zoneLogic = zoneLogic;
         }
 
-        public void SendData(List<LaserMessage> messages)
+        private List<double> elapsed = new();
+
+        public async Task SendData(List<LaserMessage> messages)
         {
+            Stopwatch sw = Stopwatch.StartNew();
             List<LaserMessage> messagesToSend = new();
 
             int messagesLength = messages.Count;
@@ -33,34 +39,20 @@ namespace LaserAPI.Logic
                     messagesToSend.Add(message);
                 }
 
-                List<LaserMessage> zoneCrossingPoints = _zoneLogic.GetPointsOfZoneLinesHitByPath(message, previousMessage);
+                LaserMessage[] zoneCrossingPoints = _zoneLogic.GetPointsOfZoneLinesHitByPath(message, previousMessage);
                 if (zoneCrossingPoints.Any())
                 {
                     messagesToSend.AddRange(zoneCrossingPoints);
                 }
             }
 
-            LaserConnectionLogic.SendMessages(messagesToSend);
-        }
-
-        /// <summary>
-        /// Limits the pwm laser power per laser color if the value is greater than the max power per laser color
-        /// </summary>
-        /// <param name="message">The message to modify</param>
-        /// <param name="maxPowerPwmPerLaserColor">The max power allowed in PWM value per laser</param>
-        public static void LimitLaserPowerPerLaserIfNecessary(ref LaserMessage message, int maxPowerPwmPerLaserColor)
-        {
-            if (message.RedLaser > maxPowerPwmPerLaserColor)
+            await LaserConnectionLogic.SendMessages(messagesToSend);
+            sw.Stop();
+            //Console.WriteLine(sw.Elapsed.TotalMilliseconds);
+            elapsed.Add(Math.Round(sw.Elapsed.TotalMilliseconds * 1000 / messagesLength));
+            if (elapsed.Count == 380)
             {
-                message.RedLaser = message.RedLaser.Map(0, 255, 0, maxPowerPwmPerLaserColor);
-            }
-            if (message.GreenLaser > maxPowerPwmPerLaserColor)
-            {
-                message.GreenLaser = message.GreenLaser.Map(0, 255, 0, maxPowerPwmPerLaserColor);
-            }
-            if (message.BlueLaser > maxPowerPwmPerLaserColor)
-            {
-                message.BlueLaser = message.BlueLaser.Map(0, 255, 0, maxPowerPwmPerLaserColor);
+                Console.WriteLine(elapsed.Max());
             }
         }
 
@@ -74,13 +66,13 @@ namespace LaserAPI.Logic
             int combinedPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
             if (combinedPower > maxPowerPwm)
             {
-                while (combinedPower > maxPowerPwm)
-                { // todo make formula instead of loop
-                    if (message.RedLaser > 0) message.RedLaser--;
-                    if (message.GreenLaser > 0) message.GreenLaser--;
-                    if (message.BlueLaser > 0) message.BlueLaser--;
-                    combinedPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
-                }
+                double redLaserPowerPercentage = message.RedLaser.ToDouble() / combinedPower.ToDouble();
+                double greenLaserPowerPercentage = message.GreenLaser.ToDouble() / combinedPower.ToDouble();
+                double blueLaserPowerPercentage = message.BlueLaser.ToDouble() / combinedPower.ToDouble();
+
+                message.RedLaser = Math.Floor(maxPowerPwm * redLaserPowerPercentage).ToInt();
+                message.GreenLaser = Math.Floor(maxPowerPwm * greenLaserPowerPercentage).ToInt();
+                message.BlueLaser = Math.Floor(maxPowerPwm * blueLaserPowerPercentage).ToInt();
             }
         }
     }

@@ -37,15 +37,15 @@ namespace LaserAPI.Controllers
         }
 
         [HttpPost("play")]
-        public ActionResult PlayAnimation([FromBody] Zone zone)
+        public async Task<ActionResult> PlayAnimation([FromBody] Zone zone)
         {
-            void Action()
+            async Task Action()
             {
                 ZoneDto zoneDto = zone.Adapt<ZoneDto>();
-                _zoneLogic.Play(zoneDto);
+                await _zoneLogic.Play(zoneDto);
             }
 
-            return _controllerResultHandler.Execute(Action);
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpGet]

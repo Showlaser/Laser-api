@@ -100,9 +100,11 @@ namespace LaserAPI
                 {
                     LaserConnectionLogic.NetworkConnect();
                 }
+
+                //todo add connection alive check
             };
 
-            timer.Start();
+            //timer.Start();
         }
 
         private static void SetCurrentIpAddress()

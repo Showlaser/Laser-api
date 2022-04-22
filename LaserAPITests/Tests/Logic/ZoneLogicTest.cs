@@ -80,11 +80,11 @@ namespace LaserAPITests.Tests.Logic
         public void GetLineHitByPathTest()
         {
             LaserMessage previousMessage = new(0, 0, 0, -4000, 4000);
-            List<ZoneLine> zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[0], new LaserMessage(0, 0, 0, 4000, 0), previousMessage);
+            ZoneLine[] zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[0], new LaserMessage(0, 0, 0, 4000, 0), previousMessage);
 
             Point firstIntersectPosition = zoneLinesHit[0].CrossedPoint;
             Point secondIntersectPosition = zoneLinesHit[1].CrossedPoint;
-            Assert.IsTrue(zoneLinesHit.Count == 2 &&
+            Assert.IsTrue(zoneLinesHit.Length == 2 &&
                           firstIntersectPosition.X == 1000 && firstIntersectPosition.Y == 1500 &&
                           secondIntersectPosition.X == -1000 && secondIntersectPosition.Y == 2500);
         }
@@ -93,11 +93,11 @@ namespace LaserAPITests.Tests.Logic
         public void GetLineHitByPathParallelogramZoneTest()
         {
             LaserMessage previousMessage = new(0, 0, 0, -3000, -1000);
-            List<ZoneLine> zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[2], new LaserMessage(0, 0, 0, 3000, -1000), previousMessage);
+            ZoneLine[] zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[2], new LaserMessage(0, 0, 0, 3000, -1000), previousMessage);
 
             Point firstIntersectPosition = zoneLinesHit[0].CrossedPoint;
             Point secondIntersectPosition = zoneLinesHit[1].CrossedPoint;
-            Assert.IsTrue(zoneLinesHit.Count == 2 &&
+            Assert.IsTrue(zoneLinesHit.Length == 2 &&
                           firstIntersectPosition.X == 2250 && firstIntersectPosition.Y == -1000 &&
                           secondIntersectPosition.X == -2250 && secondIntersectPosition.Y == -1000);
         }
@@ -105,19 +105,17 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void GetLineHitByPath6PointZoneTest()
         {
-            LaserConnectionLogic.PreviousMessage.X = -3000;
-            LaserConnectionLogic.PreviousMessage.Y = -1000;
             LaserMessage previousMessage = new(0, 0, 0, -3000, -1000);
-            List<ZoneLine> zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[3], new LaserMessage(0, 0, 0, 3000, -1000), previousMessage);
+            ZoneLine[] zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[3], new LaserMessage(0, 0, 0, 3000, -1000), previousMessage);
 
-            Assert.IsTrue(zoneLinesHit.Count == 3);
+            Assert.IsTrue(zoneLinesHit.Length == 3);
         }
 
         [TestMethod]
         public void GetLineHitByPathPerformanceTest()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            LaserConnectionLogic.PreviousMessage.X = -4000;
+            LaserConnectionLogic.PreviousMessage = new LaserMessage(0, 0, 0, -4000, 0);
             for (int i = -4000; i < 4000; i++)
             {
                 LaserMessage previousMessage = new(0, 0, 0, 0, i);
@@ -146,8 +144,8 @@ namespace LaserAPITests.Tests.Logic
             };
 
             LaserMessage previousMessage = new(0, 0, 0, -4000, 4000);
-            List<LaserMessage> sortedPoints = ZoneLogic.SortPointsFromClosestToPreviousSendMessageToFarthest(pointsToSort, previousMessage);
-            for (int i = 0; i < sortedPoints.Count; i++)
+            LaserMessage[] sortedPoints = ZoneLogic.SortPointsFromClosestToPreviousSendMessageToFarthest(pointsToSort, previousMessage);
+            for (int i = 0; i < sortedPoints.Length; i++)
             {
                 LaserMessage message = sortedPoints[i];
                 LaserMessage expectedMessage = expectedOrder[i];

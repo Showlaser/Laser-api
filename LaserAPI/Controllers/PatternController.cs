@@ -26,15 +26,15 @@ namespace LaserAPI.Controllers
         }
 
         [HttpPost("play")]
-        public ActionResult PlayPattern([FromBody] Pattern pattern)
+        public async Task<ActionResult> PlayPattern([FromBody] Pattern pattern)
         {
-            void Action()
+            async Task Action()
             {
                 PatternDto patternDto = pattern.Adapt<PatternDto>();
-                _patternLogic.PlayPattern(patternDto);
+                await _patternLogic.PlayPattern(patternDto);
             }
 
-            return _controllerResultHandler.Execute(Action);
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpPost]

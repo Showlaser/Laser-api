@@ -53,7 +53,7 @@ namespace LaserAPI.Logic
             await _patternDal.Add(pattern);
         }
 
-        public void PlayPattern(PatternDto pattern)
+        public async Task PlayPattern(PatternDto pattern)
         {
             ValidatePattern(pattern);
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -77,7 +77,7 @@ namespace LaserAPI.Logic
                     });
                 }
 
-                _laserLogic.SendData(messages);
+                await _laserLogic.SendData(messages);
                 messages.Clear();
             }
 

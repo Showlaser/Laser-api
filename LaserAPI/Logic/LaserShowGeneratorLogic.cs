@@ -8,6 +8,7 @@ using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
@@ -89,7 +90,7 @@ namespace LaserAPI.Logic
             if (average > threshold)
             {
                 AnimationDto animation = GenerateLaserAnimation();
-                _animationLogic.PlayAnimation(animation);
+                _animationLogic.PlayAnimation(animation).Wait();
             }
         }
 

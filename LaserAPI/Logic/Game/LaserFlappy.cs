@@ -29,13 +29,13 @@ namespace LaserAPI.Logic.Game
             _animationLogic = animationLogic;
         }
 
-        private void DrawScreen()
+        private async Task DrawScreen()
         {
-            DrawFlappy();
-            DrawObstacle();
+            await DrawFlappy();
+            await DrawObstacle();
         }
 
-        private void DrawFlappy()
+        private async Task DrawFlappy()
         {
             int width = 400;
             int height = 400;
@@ -43,10 +43,10 @@ namespace LaserAPI.Logic.Game
             int centerY = -4000 + height + _flappyYPosition;
 
             AnimationDto flappyAnimation = _preMadeAnimations.GetRectangle(width, height, centerX, centerY);
-            _animationLogic.PlayAnimation(flappyAnimation);
+            await _animationLogic.PlayAnimation(flappyAnimation);
         }
 
-        private void DrawObstacle()
+        private async Task DrawObstacle()
         {
             int centerY = _obstacleOnTop ? 4000 - _obstacleHeight : -4000 + _obstacleHeight;
 
@@ -63,7 +63,7 @@ namespace LaserAPI.Logic.Game
 
             AnimationDto obstacleAnimation =
                 _preMadeAnimations.GetRectangle(_obstacleWidth, _obstacleHeight, _obstacleXPosition, centerY);
-            _animationLogic.PlayAnimation(obstacleAnimation);
+            await _animationLogic.PlayAnimation(obstacleAnimation);
         }
 
         public string GetName()
@@ -101,13 +101,18 @@ namespace LaserAPI.Logic.Game
 
             if (taskAvailable)
             {
-                _gameTask = new Task(() =>
-                {
-                    if (-4000 + 400 + _flappyYPosition > -4000)
-                    {
-                        _flappyYPosition -= 20 * _gameSpeed;
-                    }
-                    /*else
+                _gameTask = new Task(DrawGame);
+                _gameTask.Start();
+            }
+        }
+
+        private async void DrawGame()
+        {
+            if (-4000 + 400 + _flappyYPosition > -4000)
+            {
+                _flappyYPosition -= 20 * _gameSpeed;
+            }
+            /*else
                     {
                         Console.WriteLine("Score: " + _score);
                         Debug.WriteLine("Score: " + _score);
@@ -115,11 +120,7 @@ namespace LaserAPI.Logic.Game
                         Stop();
                     }*/
 
-                    DrawScreen();
-                });
-
-                _gameTask.Start();
-            }
+            await DrawScreen();
         }
 
         public void Stop()

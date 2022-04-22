@@ -1,6 +1,6 @@
 ﻿namespace LaserAPI.Models.Helper
 {
-    public class DistanceSorter
+    public struct DistanceSorter
     {
         public LaserMessage Message { get; set; }
         public double Distance { get; set; }
