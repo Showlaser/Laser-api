@@ -48,11 +48,10 @@ namespace LaserAPI.Logic
 
             await LaserConnectionLogic.SendMessages(messagesToSend);
             sw.Stop();
-            //Console.WriteLine(sw.Elapsed.TotalMilliseconds);
             elapsed.Add(Math.Round(sw.Elapsed.TotalMilliseconds * 1000 / messagesLength));
             if (elapsed.Count == 380)
             {
-                Console.WriteLine(elapsed.Max());
+              //  Console.WriteLine(elapsed.Max());
             }
         }
 

@@ -7,7 +7,9 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Threading.Tasks;
+using LaserAPI.Models.FromFrontend.Animations;
 
 namespace LaserAPI.Logic
 {
@@ -28,6 +30,7 @@ namespace LaserAPI.Logic
             {
                 throw new InvalidDataException();
             }
+
             if (await _animationDal.Exists(animation.Uuid))
             {
                 await _animationDal.Update(animation);
@@ -49,6 +52,7 @@ namespace LaserAPI.Logic
             {
                 throw new NoNullAllowedException(nameof(uuid));
             }
+
             await _animationDal.Remove(uuid);
         }
 
@@ -59,7 +63,11 @@ namespace LaserAPI.Logic
 
             while (stopwatch.ElapsedMilliseconds < animationDuration)
             {
-                List<PatternAnimationDto> patternAnimationsToPlay = GetPatternAnimationsBetweenTimeMs(animation, stopwatch.ElapsedMilliseconds);
+                Stopwatch sw = Stopwatch.StartNew();
+                List<PatternAnimationDto> patternAnimationsToPlay =
+                    GetPatternAnimationsBetweenTimeMs(animation, stopwatch.ElapsedMilliseconds);
+                sw.Stop();
+                //Console.WriteLine(sw.Elapsed.TotalMilliseconds * 1000); todo remove
                 if (patternAnimationsToPlay == null)
                 {
                     continue;
@@ -82,7 +90,8 @@ namespace LaserAPI.Logic
             }
         }
 
-        private static List<LaserMessage> GetAnimationPointsToPlay(IReadOnlyList<PatternAnimationSettingsDto> settingsToPlay)
+        private static List<LaserMessage> GetAnimationPointsToPlay(
+            IReadOnlyList<PatternAnimationSettingsDto> settingsToPlay)
         {
             List<LaserMessage> messagesToPlay = new();
             int settingsToPlayLength = settingsToPlay.Count;
@@ -112,14 +121,16 @@ namespace LaserAPI.Logic
             return messagesToPlay;
         }
 
-        private static void GetPatternAnimationSettingsToPlay(int patternAnimationsLength, IReadOnlyList<PatternAnimationDto> patternAnimationsToPlay,
+        private static void GetPatternAnimationSettingsToPlay(int patternAnimationsLength,
+            IReadOnlyList<PatternAnimationDto> patternAnimationsToPlay,
             long stopwatchTime, ref List<PatternAnimationSettingsDto> settingsToPlay)
         {
             for (int i = 0; i < patternAnimationsLength; i++)
             {
                 PatternAnimationDto patternAnimation = patternAnimationsToPlay[i];
-                PatternAnimationSettingsDto closestPatternAnimationSettings = GetSettingClosestToTimeMs(patternAnimation.AnimationSettings, patternAnimation.StartTimeOffset,
-                        stopwatchTime);
+                PatternAnimationSettingsDto closestPatternAnimationSettings = GetSettingClosestToTimeMs(
+                    patternAnimation.AnimationSettings, patternAnimation.StartTimeOffset,
+                    stopwatchTime);
 
                 if (closestPatternAnimationSettings != null)
                 {
@@ -153,7 +164,7 @@ namespace LaserAPI.Logic
         {
             PatternAnimationDto maxStartTime = animation.PatternAnimations.MaxBy(pa => pa.StartTimeOffset);
             return maxStartTime.AnimationSettings.MaxBy(ast => ast.StartTime).StartTime +
-                                maxStartTime.StartTimeOffset;
+                   maxStartTime.StartTimeOffset;
         }
 
         private static bool AnimationDoesNotContainsSettingsWithSameStartTime(AnimationDto animation)
@@ -169,14 +180,14 @@ namespace LaserAPI.Logic
         public static bool AnimationValid(AnimationDto animation)
         {
             return animation != null &&
-                                  animation.PatternAnimations
-                                      .TrueForAll(pa => pa.AnimationSettings
-                                          .TrueForAll(ase => SettingsValid(pa.AnimationSettings))) &&
-                                  animation.PatternAnimations
-                                      .TrueForAll(pa => pa.AnimationSettings
-                                          .TrueForAll(ase => PointsValid(ase.Points))) &&
-                                  PatternAnimationValid(animation.PatternAnimations) &&
-                                  AnimationDoesNotContainsSettingsWithSameStartTime(animation);
+                   animation.PatternAnimations
+                       .TrueForAll(pa => pa.AnimationSettings
+                           .TrueForAll(ase => SettingsValid(pa.AnimationSettings))) &&
+                   animation.PatternAnimations
+                       .TrueForAll(pa => pa.AnimationSettings
+                           .TrueForAll(ase => PointsValid(ase.Points))) &&
+                   PatternAnimationValid(animation.PatternAnimations) &&
+                   AnimationDoesNotContainsSettingsWithSameStartTime(animation);
         }
 
         private static bool PointsValid(List<AnimationPointDto> points)
@@ -212,22 +223,108 @@ namespace LaserAPI.Logic
         /// <returns>The pattern animations that matches the time, sorted by time</returns>
         public static List<PatternAnimationDto> GetPatternAnimationsBetweenTimeMs(AnimationDto animation, long timeMs)
         {
-            return animation.PatternAnimations.FindAll(pa =>
-                {
-                    int startTimeOffset = pa.StartTimeOffset;
-                    int min = pa.AnimationSettings.MinBy(ast => ast.StartTime).StartTime + startTimeOffset;
-                    int max = pa.AnimationSettings.MaxBy(ast => ast.StartTime).StartTime + startTimeOffset;
+            int patternAnimationsCount = animation.PatternAnimations.Count;
+            List<PatternAnimationDto> patternAnimations = new(patternAnimationsCount);
+            for (int i = 0; i < patternAnimationsCount; i++)
+            {
+                PatternAnimationDto pa = animation.PatternAnimations[i];
+                int animationSettingsLength = pa.AnimationSettings.Count;
+                int startTimeOffset = pa.StartTimeOffset;
+                int min = 0;
+                int max = 0;
 
-                    return timeMs.IsBetweenOrEqualTo(min, max);
-                }).OrderBy(pa => pa.StartTimeOffset)
-                .ToList();
+                GetHighestAndLowestStartTimeFromSettings(pa.AnimationSettings, animationSettingsLength, ref min, ref max);
+                if (timeMs.IsBetweenOrEqualTo(min + startTimeOffset, max + startTimeOffset))
+                {
+                    patternAnimations.Add(pa);
+                }
+            }
+
+            Stopwatch sw = Stopwatch.StartNew();
+            int[] patternAnimationsStartTimeOffsetCollection = new int[patternAnimationsCount];
+            for (int i = 0; i < patternAnimationsCount; i++)
+            {
+                patternAnimationsStartTimeOffsetCollection[i] = patternAnimations[i].StartTimeOffset;
+            }
+
+            QuickSortHelper.QuickSort(patternAnimationsStartTimeOffsetCollection);
+            List<PatternAnimationDto> sortedPatternAnimations = new(patternAnimationsCount);
+
+            int index = 0;
+            while (patternAnimations.Count > 0)
+            {
+                PatternAnimationDto patternAnimation = patternAnimations[index];
+                if (patternAnimation.StartTimeOffset == patternAnimationsStartTimeOffsetCollection[index])
+                {
+                    patternAnimations.RemoveAt(index);
+                    sortedPatternAnimations.Add(patternAnimation);
+                }
+
+                index++;
+                if (index > patternAnimations.Count)
+                {
+                    index = 0;
+                }
+            }
+
+            sw.Stop();
+            Console.WriteLine(sw.Elapsed.TotalMilliseconds * 1000);
+            return sortedPatternAnimations;
         }
 
+        private static void GetHighestAndLowestStartTimeFromSettings(IReadOnlyList<PatternAnimationSettingsDto> settings,
+            int settingsLength, ref int lowest, ref int highest)
+        {
+            int lowestStartTime = settings[0].StartTime;
+            int highestStartTime = settings[0].StartTime;
+            for (int i = 0; i < settingsLength; i++)
+            {
+                int startTime = settings[i].StartTime;
+                if (startTime < lowestStartTime)
+                {
+                    lowestStartTime = startTime;
+                }
+
+                if (startTime > highestStartTime)
+                {
+                    highestStartTime = startTime;
+                }
+            }
+
+            highest = highestStartTime;
+            lowest = lowestStartTime;
+        }
+        
         public static PatternAnimationSettingsDto GetSettingClosestToTimeMs(
             List<PatternAnimationSettingsDto> settings, int offsetTime, long timeMs)
         {
-            List<PatternAnimationSettingsDto> settingsUnderTimeMs = settings.FindAll(s => s.StartTime + offsetTime < timeMs);
-            return settingsUnderTimeMs.OrderByDescending(s => s.StartTime).FirstOrDefault();
+            int settingsLength = settings.Count;
+            if (settingsLength == 0)
+            {
+                return null;
+            }
+
+            if (settingsLength == 1)
+            {
+                return settings[0];
+            }
+
+            int lowestStartTime = settings[0].StartTime;
+            int lowestStartTimeIndex = 0;
+
+            for (int i = 1; i < settingsLength; i++)
+            {
+                PatternAnimationSettingsDto setting = settings[i];
+                bool startTimeIsUnderTimeMs = setting.StartTime + offsetTime < timeMs;
+                bool startTimeIsCurrentlyLowest = lowestStartTime > setting.StartTime;
+                if (startTimeIsUnderTimeMs && startTimeIsCurrentlyLowest)
+                {
+                    lowestStartTime = setting.StartTime;
+                    lowestStartTimeIndex = i;
+                }
+            }
+            
+            return settings[lowestStartTimeIndex];
         }
     }
 }
