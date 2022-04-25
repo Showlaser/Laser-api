@@ -7,9 +7,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.AccessControl;
 using System.Threading.Tasks;
-using LaserAPI.Models.FromFrontend.Animations;
 
 namespace LaserAPI.Logic
 {
@@ -240,7 +238,6 @@ namespace LaserAPI.Logic
                 }
             }
 
-            Stopwatch sw = Stopwatch.StartNew();
             int[] patternAnimationsStartTimeOffsetCollection = new int[patternAnimationsCount];
             for (int i = 0; i < patternAnimationsCount; i++)
             {
@@ -267,8 +264,6 @@ namespace LaserAPI.Logic
                 }
             }
 
-            sw.Stop();
-            Console.WriteLine(sw.Elapsed.TotalMilliseconds * 1000);
             return sortedPatternAnimations;
         }
 
@@ -294,7 +289,7 @@ namespace LaserAPI.Logic
             highest = highestStartTime;
             lowest = lowestStartTime;
         }
-        
+
         public static PatternAnimationSettingsDto GetSettingClosestToTimeMs(
             List<PatternAnimationSettingsDto> settings, int offsetTime, long timeMs)
         {
@@ -323,7 +318,7 @@ namespace LaserAPI.Logic
                     lowestStartTimeIndex = i;
                 }
             }
-            
+
             return settings[lowestStartTimeIndex];
         }
     }

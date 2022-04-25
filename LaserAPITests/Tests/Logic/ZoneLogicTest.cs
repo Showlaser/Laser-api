@@ -6,7 +6,6 @@ using LaserAPITests.Mock;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 
 namespace LaserAPITests.Tests.Logic
@@ -109,21 +108,6 @@ namespace LaserAPITests.Tests.Logic
             ZoneLine[] zoneLinesHit = ZoneLogic.GetZoneLineHitByPath(_zones[3], new LaserMessage(0, 0, 0, 3000, -1000), previousMessage);
 
             Assert.IsTrue(zoneLinesHit.Length == 3);
-        }
-
-        [TestMethod]
-        public void GetLineHitByPathPerformanceTest()
-        {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            LaserConnectionLogic.PreviousMessage = new LaserMessage(0, 0, 0, -4000, 0);
-            for (int i = -4000; i < 4000; i++)
-            {
-                LaserMessage previousMessage = new(0, 0, 0, 0, i);
-                ZoneLogic.GetZoneLineHitByPath(_zones[1], new LaserMessage(0, 0, 0, 4000, 4000), previousMessage);
-            }
-
-            stopwatch.Stop();
-            Assert.IsTrue(stopwatch.ElapsedMilliseconds < 100);
         }
 
         [TestMethod]

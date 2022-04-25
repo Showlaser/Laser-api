@@ -137,40 +137,6 @@ namespace LaserAPI.Models.Helper
             };
         }
 
-        public AnimationDto RandomPoints(int centerX, int centerY, int rotation, double scale)
-        {
-            Guid animationUuid = Guid.NewGuid();
-            Guid patternAnimationUuid = Guid.NewGuid();
-
-            List<PatternAnimationSettingsDto> settings = new();
-            for (int i = 0; i < 200; i++)
-            {
-                settings.Add(GetAnimationSetting(new List<AnimationPointDto>
-                    {
-                        GetRandomPoint(centerX, centerY),
-                    },
-                    patternAnimationUuid, centerX, centerY, rotation, scale, Convert.ToInt32(i * 5 / _speed)));
-            }
-
-            return new AnimationDto
-            {
-                Name = "PreMade random dots",
-                Uuid = animationUuid,
-                PatternAnimations = new List<PatternAnimationDto>
-                {
-                    new()
-                    {
-                        Uuid = patternAnimationUuid,
-                        AnimationUuid = animationUuid,
-                        Name = "Random dots",
-                        StartTimeOffset = 0,
-                        TimeLineId = 0,
-                        AnimationSettings = settings
-                    }
-                }
-            };
-        }
-
         public AnimationDto GetRectangle(int width, int height, int centerX, int centerY)
         {
             Guid animationUuid = Guid.NewGuid();

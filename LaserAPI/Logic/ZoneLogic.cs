@@ -111,7 +111,6 @@ namespace LaserAPI.Logic
         /// <returns>The zone where the laser path is in, if the path is not within a zone null is returned</returns>
         public ZoneDto GetZoneWherePathIsInside(LaserMessage message, LaserMessage previousMessage)
         {
-            Stopwatch stopwatch = Stopwatch.StartNew();
             for (int i = 0; i < ZonesLength; i++)
             {
                 ZoneDto zone = _zones[i];
@@ -131,7 +130,6 @@ namespace LaserAPI.Logic
                 }
             }
 
-            stopwatch.Stop();
             return null;
         }
 

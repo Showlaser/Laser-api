@@ -8,7 +8,6 @@ using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
@@ -102,12 +101,10 @@ namespace LaserAPI.Logic
             double scale = new Random(Guid.NewGuid().GetHashCode()).NextDouble();
 
             PreMadeAnimations preMadeAnimations = new((int)_songData.MusicGenre);
-            int patternIndex = new Random(Guid.NewGuid().GetHashCode()).Next(0, 3);
+            int patternIndex = new Random(Guid.NewGuid().GetHashCode()).Next(0, 1);
             AnimationDto animation = patternIndex switch
             {
-                0 => preMadeAnimations.LineAnimation(centerX, centerY, rotation, scale),
-                1 => preMadeAnimations.RandomPoints(centerX, centerY, rotation, scale),
-                _ => preMadeAnimations.LineAnimation(centerX, centerY, rotation, scale)
+                0 => preMadeAnimations.LineAnimation(centerX, centerY, rotation, scale)
             };
 
             return animation;
