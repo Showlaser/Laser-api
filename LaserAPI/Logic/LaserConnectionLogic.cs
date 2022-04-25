@@ -2,11 +2,9 @@
 using Microsoft.AspNetCore.Connections;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO.Ports;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,7 +20,6 @@ namespace LaserAPI.Logic
         private static NetworkStream _stream;
         public static TcpClient TcpClient { get; private set; }
         private static readonly SerialPort SerialPort = new();
-        private static readonly int _scannerSpeed = 20000;
 
         public static void NetworkConnect()
         {
@@ -60,24 +57,30 @@ namespace LaserAPI.Logic
             {
                 return;
             }
-            /*
+
             if (TcpClient?.Connected is null || !TcpClient.Connected)
             {
                 NetworkConnect();
             }
-            */
+
             await SendNetworkDataToLaser(messages, messagesLength);
         }
 
         private static async Task SendNetworkDataToLaser(IReadOnlyList<LaserMessage> messages, int messagesLength)
         {
+            try
+            {
+                byte[] msg = Utf8Json.JsonSerializer.Serialize(messages);
+                await _stream.WriteAsync(msg);
 
-            byte[] msg = Utf8Json.JsonSerializer.Serialize(messages);
-            //await _stream.WriteAsync(msg);
-
-            //byte[] bytes = new byte[msg.Length];
-            //await _stream.ReadAsync(bytes);
-            PreviousMessage = messages[messagesLength - 1];
+                byte[] bytes = new byte[msg.Length];
+                await _stream.ReadAsync(bytes);
+                PreviousMessage = messages[messagesLength - 1];
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         public static string[] GetAvailableComDevices()

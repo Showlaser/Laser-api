@@ -1,6 +1,6 @@
-﻿using System;
-using LaserAPI.Models.Dto.Zones;
+﻿using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -16,8 +16,6 @@ namespace LaserAPI.Logic
         {
             _zoneLogic = zoneLogic;
         }
-
-        private List<double> elapsed = new();
 
         public async Task SendData(List<LaserMessage> messages)
         {
@@ -48,11 +46,6 @@ namespace LaserAPI.Logic
 
             await LaserConnectionLogic.SendMessages(messagesToSend);
             sw.Stop();
-            elapsed.Add(Math.Round(sw.Elapsed.TotalMilliseconds * 1000 / messagesLength));
-            if (elapsed.Count == 380)
-            {
-              //  Console.WriteLine(elapsed.Max());
-            }
         }
 
         /// <summary>

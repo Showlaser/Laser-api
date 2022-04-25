@@ -1,11 +1,22 @@
-﻿namespace LaserAPI.Models.Helper
+﻿using System.Runtime.Serialization;
+
+namespace LaserAPI.Models.Helper
 {
     public struct LaserMessage
     {
+        [DataMember(Name = "r")]
         public int RedLaser { get; set; }
+
+        [DataMember(Name = "g")]
         public int GreenLaser { get; set; }
+
+        [DataMember(Name = "b")]
         public int BlueLaser { get; set; }
+
+        [DataMember(Name = "x")]
         public int X { get; set; }
+
+        [DataMember(Name = "y")]
         public int Y { get; set; }
 
         public LaserMessage(int redLaser, int greenLaser, int blueLaser, int x, int y)

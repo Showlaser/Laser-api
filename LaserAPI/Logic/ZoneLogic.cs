@@ -9,7 +9,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using LaserAPI.Models.Dto.Patterns;
 
 namespace LaserAPI.Logic
 {
@@ -226,7 +225,7 @@ namespace LaserAPI.Logic
                 double distance = Math.Sqrt(Math.Pow(previousMessage.X - message.X, 2) + Math.Pow(previousMessage.Y - message.Y, 2));
                 distances[i] = new DistanceSorter(message, distance, totalLaserPower);
             }
-            
+
             DistanceSorter[] sortedDistances = distances.OrderBy(d => d.Distance)
                 .ThenByDescending(d => d.TotalLaserPower)
                 .ToArray();
@@ -237,10 +236,10 @@ namespace LaserAPI.Logic
                 LaserMessage sortedMessage = sortedDistances[i].Message;
                 sorted[i] = sortedMessage;
             }
-            
+
             return sorted;
         }
-        
+
         // Given three collinear points thePointToCheck, q, r, the function checks if
         // point q lies on line segment 'pr'
         private static bool OnSegment(Point p, Point q, Point r) =>
