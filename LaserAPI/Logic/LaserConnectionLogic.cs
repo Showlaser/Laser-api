@@ -20,6 +20,7 @@ namespace LaserAPI.Logic
         private static NetworkStream _stream;
         public static TcpClient TcpClient { get; private set; }
         private static readonly SerialPort SerialPort = new();
+        private static byte[] _lastSendMessages;
 
         public static void NetworkConnect()
         {
@@ -52,35 +53,36 @@ namespace LaserAPI.Logic
         public static async Task SendMessages(IReadOnlyList<LaserMessage> messages)
         {
             int messagesLength = messages.Count;
-            bool messagesCannotBeSend = messagesLength == 0;
-            if (RanByUnitTest || messagesCannotBeSend)
+            bool messagesInvalid = messagesLength == 0;
+            if (RanByUnitTest || messagesInvalid)
             {
                 return;
             }
 
-            if (TcpClient?.Connected is null || !TcpClient.Connected)
+            /*if (TcpClient?.Connected is null || !TcpClient.Connected)
             {
                 NetworkConnect();
             }
-
+            */
             await SendNetworkDataToLaser(messages, messagesLength);
+        }
+
+        public static async Task SendPreviousNetworkData()
+        {
+            //await _stream.WriteAsync(_lastSendMessages);
+
+            byte[] bytes = new byte[_lastSendMessages.Length];
+            //await _stream.ReadAsync(bytes);
         }
 
         private static async Task SendNetworkDataToLaser(IReadOnlyList<LaserMessage> messages, int messagesLength)
         {
-            try
-            {
-                byte[] msg = Utf8Json.JsonSerializer.Serialize(messages);
-                await _stream.WriteAsync(msg);
+            _lastSendMessages = Utf8Json.JsonSerializer.Serialize(messages);
+            //await _stream.WriteAsync(msg);
 
-                byte[] bytes = new byte[msg.Length];
-                await _stream.ReadAsync(bytes);
-                PreviousMessage = messages[messagesLength - 1];
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+            byte[] bytes = new byte[_lastSendMessages.Length];
+            //await _stream.ReadAsync(bytes);
+            PreviousMessage = messages[messagesLength - 1];
         }
 
         public static string[] GetAvailableComDevices()

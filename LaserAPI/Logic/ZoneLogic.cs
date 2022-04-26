@@ -179,8 +179,8 @@ namespace LaserAPI.Logic
         /// <returns>The zones that are crossed</returns>
         public static ZoneLine[] GetZoneLineHitByPath(ZoneDto zone, LaserMessage message, LaserMessage previousMessage)
         {
-            List<ZoneLine> points = new();
             int zonePositionsLength = zone.Points.Count;
+            List<ZoneLine> points = new(zonePositionsLength);
 
             for (int i = 0; i < zonePositionsLength; i++)
             {
@@ -214,6 +214,11 @@ namespace LaserAPI.Logic
         /// <returns>The given points sorted from closest to farthest away from the previous send point</returns>
         public static LaserMessage[] SortPointsFromClosestToPreviousSendMessageToFarthest(List<LaserMessage> points, LaserMessage previousMessage)
         {
+            if (points.Count == 0)
+            {
+                return Array.Empty<LaserMessage>();
+            }
+
             DistanceSorter[] distances = new DistanceSorter[points.Count];
             int pointsLength = points.Count;
             for (int i = 0; i < pointsLength; i++)
@@ -225,8 +230,8 @@ namespace LaserAPI.Logic
             }
 
             DistanceSorter[] sortedDistances = distances.OrderBy(d => d.Distance)
-                .ThenByDescending(d => d.TotalLaserPower)
-                .ToArray();
+                 .ThenByDescending(d => d.TotalLaserPower)
+                 .ToArray();
 
             LaserMessage[] sorted = new LaserMessage[pointsLength];
             for (int i = 0; i < pointsLength; i++)

@@ -19,7 +19,6 @@ namespace LaserAPI.Logic
 
         public async Task SendData(List<LaserMessage> messages)
         {
-            Stopwatch sw = Stopwatch.StartNew();
             List<LaserMessage> messagesToSend = new();
 
             int messagesLength = messages.Count;
@@ -38,14 +37,13 @@ namespace LaserAPI.Logic
                 }
 
                 LaserMessage[] zoneCrossingPoints = _zoneLogic.GetPointsOfZoneLinesHitByPath(message, previousMessage);
-                if (zoneCrossingPoints.Any())
+                if (zoneCrossingPoints.Length > 0)
                 {
                     messagesToSend.AddRange(zoneCrossingPoints);
                 }
             }
 
             await LaserConnectionLogic.SendMessages(messagesToSend);
-            sw.Stop();
         }
 
         /// <summary>

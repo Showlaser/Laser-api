@@ -58,14 +58,14 @@ namespace LaserAPI.Logic
         {
             int animationDuration = GetAnimationDuration(animation);
             Stopwatch stopwatch = Stopwatch.StartNew();
+            List<PatternAnimationSettingsDto> previousPlayedAnimationSettings = new(3);
 
             while (stopwatch.ElapsedMilliseconds < animationDuration)
             {
                 Stopwatch sw = Stopwatch.StartNew();
+
                 List<PatternAnimationDto> patternAnimationsToPlay =
                     GetPatternAnimationsBetweenTimeMs(animation, stopwatch.ElapsedMilliseconds);
-                sw.Stop();
-                //Console.WriteLine(sw.Elapsed.TotalMilliseconds * 1000); todo remove
                 if (patternAnimationsToPlay == null)
                 {
                     continue;
@@ -78,14 +78,48 @@ namespace LaserAPI.Logic
                 GetPatternAnimationSettingsToPlay(patternAnimationsLength, patternAnimationsToPlay,
                     stopwatchTime, ref settingsToPlay);
 
-                if (!settingsToPlay.Any())
+                if (settingsToPlay.Count == 0)
                 {
+                    continue;
+                }
+
+                if (PreviousSettingsEqualNewSettings(previousPlayedAnimationSettings, settingsToPlay) && previousPlayedAnimationSettings.Count > 0)
+                {
+                    await LaserConnectionLogic.SendPreviousNetworkData();
+                    sw.Stop();
+                    Console.WriteLine(sw.Elapsed.TotalMilliseconds * 1000);
                     continue;
                 }
 
                 List<LaserMessage> messagesToPlay = GetAnimationPointsToPlay(settingsToPlay);
                 await _laserLogic.SendData(messagesToPlay);
+                previousPlayedAnimationSettings.Clear();
+                previousPlayedAnimationSettings.AddRange(settingsToPlay);
+                sw.Stop();
+                Console.WriteLine(sw.Elapsed.TotalMilliseconds * 1000);
             }
+        }
+
+        private static bool PreviousSettingsEqualNewSettings(
+            IReadOnlyList<PatternAnimationSettingsDto> previousSettings,
+            IReadOnlyList<PatternAnimationSettingsDto> newSettings)
+        {
+            int previousSettingsLength = previousSettings.Count;
+            int newSettingsLength = newSettings.Count;
+            if (previousSettingsLength != newSettingsLength)
+            {
+                return true;
+            }
+
+            for (int i = 0; i < previousSettingsLength; i++)
+            {
+                if (previousSettings[i].Uuid != newSettings[i].Uuid)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static List<LaserMessage> GetAnimationPointsToPlay(
