@@ -62,8 +62,6 @@ namespace LaserAPI.Logic
 
             while (stopwatch.ElapsedMilliseconds < animationDuration)
             {
-                Stopwatch sw = Stopwatch.StartNew();
-
                 List<PatternAnimationDto> patternAnimationsToPlay =
                     GetPatternAnimationsBetweenTimeMs(animation, stopwatch.ElapsedMilliseconds);
                 if (patternAnimationsToPlay == null)
@@ -86,8 +84,6 @@ namespace LaserAPI.Logic
                 if (PreviousSettingsEqualNewSettings(previousPlayedAnimationSettings, settingsToPlay) && previousPlayedAnimationSettings.Count > 0)
                 {
                     await LaserConnectionLogic.SendPreviousNetworkData();
-                    sw.Stop();
-                    Console.WriteLine(sw.Elapsed.TotalMilliseconds * 1000);
                     continue;
                 }
 
@@ -95,8 +91,6 @@ namespace LaserAPI.Logic
                 await _laserLogic.SendData(messagesToPlay);
                 previousPlayedAnimationSettings.Clear();
                 previousPlayedAnimationSettings.AddRange(settingsToPlay);
-                sw.Stop();
-                Console.WriteLine(sw.Elapsed.TotalMilliseconds * 1000);
             }
         }
 
@@ -292,7 +286,7 @@ namespace LaserAPI.Logic
                 }
 
                 index++;
-                if (index > patternAnimations.Count)
+                if (index > patternAnimations.Count - 1)
                 {
                     index = 0;
                 }

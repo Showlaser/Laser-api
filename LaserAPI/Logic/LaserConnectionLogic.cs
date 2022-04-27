@@ -31,7 +31,8 @@ namespace LaserAPI.Logic
                 {
                     Server =
                     {
-                        SendTimeout = -1
+                        SendTimeout = -1,
+                        ReceiveBufferSize = 10000
                     }
                 };
 
@@ -59,29 +60,29 @@ namespace LaserAPI.Logic
                 return;
             }
 
-            /*if (TcpClient?.Connected is null || !TcpClient.Connected)
+            if (TcpClient?.Connected is null || !TcpClient.Connected)
             {
                 NetworkConnect();
             }
-            */
+
             await SendNetworkDataToLaser(messages, messagesLength);
         }
 
         public static async Task SendPreviousNetworkData()
         {
-            //await _stream.WriteAsync(_lastSendMessages);
+            await _stream.WriteAsync(_lastSendMessages);
 
             byte[] bytes = new byte[_lastSendMessages.Length];
-            //await _stream.ReadAsync(bytes);
+            await _stream.ReadAsync(bytes);
         }
 
         private static async Task SendNetworkDataToLaser(IReadOnlyList<LaserMessage> messages, int messagesLength)
         {
             _lastSendMessages = Utf8Json.JsonSerializer.Serialize(messages);
-            //await _stream.WriteAsync(msg);
+            await _stream.WriteAsync(_lastSendMessages);
 
             byte[] bytes = new byte[_lastSendMessages.Length];
-            //await _stream.ReadAsync(bytes);
+            await _stream.ReadAsync(bytes);
             PreviousMessage = messages[messagesLength - 1];
         }
 
