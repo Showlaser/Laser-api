@@ -1,32 +1,41 @@
 ﻿using LaserAPI.Logic;
-using LaserAPI.Models.Helper.Laser;
+using LaserAPI.Models.Helper;
 using LaserAPITests.Mock;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace LaserAPITests.Tests.Logic
 {
     [TestClass]
-    internal class LaserLogicTest
+    public class LaserLogicTest
     {
-        private readonly LaserLogic _laserLogic;
+        private readonly LaserLogic _laserLogic = new MockLaserLogic().LaserLogic;
 
-        public LaserLogicTest()
+        [TestInitialize]
+        public void Setup()
         {
-            _laserLogic = new MockLaserLogic().LaserLogic;
+            LaserConnectionLogic.RanByUnitTest = true;
         }
 
         [TestMethod]
-        public async Task SendDataTest()
+        public void LimitTotalLaserPowerNecessaryTest()
         {
-            await _laserLogic.SendData(new LaserMessage
+            for (int i = 0; i < 255; i++)
             {
-                RedLaser = 255,
-                BlueLaser = 0,
-                GreenLaser = 100,
-                X = 0,
-                Y = 4000
-            });
+                LaserMessage message = new()
+                {
+                    RedLaser = 255,
+                    GreenLaser = 255,
+                    BlueLaser = 255
+                };
+
+                LaserLogic.LimitTotalLaserPowerIfNecessary(ref message, i);
+                int totalPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
+                Assert.IsTrue(totalPower <= i && totalPower >= i - 3);
+            }
         }
     }
 }

@@ -51,6 +51,7 @@ namespace LaserAPI.Dal
             AnimationDto dbAnimation = await _context.Animation.Include(a => a.PatternAnimations)
                 .ThenInclude(pa => pa.AnimationSettings)
                 .ThenInclude(ast => ast.Points)
+                .AsNoTrackingWithIdentityResolution()
                 .SingleOrDefaultAsync(a => a.Uuid == animation.Uuid);
 
             if (dbAnimation == null)
@@ -58,10 +59,11 @@ namespace LaserAPI.Dal
                 throw new NoNullAllowedException();
             }
 
-            dbAnimation.PatternAnimations = animation.PatternAnimations;
             dbAnimation.Name = animation.Name;
+            _context.Animation.Update(dbAnimation);
 
-            _context.Animation.Update(animation);
+            _context.PatternAnimation.RemoveRange(dbAnimation.PatternAnimations);
+            await _context.PatternAnimation.AddRangeAsync(animation.PatternAnimations);
             await _context.SaveChangesAsync();
         }
 

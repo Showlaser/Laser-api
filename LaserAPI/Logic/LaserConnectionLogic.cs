@@ -1,8 +1,11 @@
-﻿using LaserAPI.Models.Helper.Laser;
+﻿using LaserAPI.Models.Helper;
+using Microsoft.AspNetCore.Connections;
 using System;
+using System.Collections.Generic;
+using System.IO.Ports;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
@@ -10,74 +13,118 @@ namespace LaserAPI.Logic
     public static class LaserConnectionLogic
     {
         public static bool RanByUnitTest { get; set; } = false;
-        public static int LastXPosition { get; private set; }
-        public static int LastYPosition { get; private set; }
+        public static string ComputerIpAddress { get; set; }
+        public static LaserMessage PreviousMessage { get; set; } = new();
+        public static bool ConnectionPending { get; private set; }
         private static TcpListener _server;
         private static NetworkStream _stream;
-        private static TcpClient _client;
+        public static TcpClient TcpClient { get; private set; }
+        private static readonly SerialPort SerialPort = new();
+        private static byte[] _lastSendMessages;
 
-        public static void Connect()
+        public static void NetworkConnect()
         {
             try
             {
-                IPAddress localAddress = IPAddress.Parse("192.168.1.31");
+                IPAddress localAddress = IPAddress.Parse(ComputerIpAddress);
                 _server = new TcpListener(localAddress, 50000)
                 {
                     Server =
                     {
-                        SendTimeout = -1
+                        SendTimeout = -1,
+                        ReceiveBufferSize = 10000
                     }
                 };
-                _server.Start();
 
+                ConnectionPending = true;
+                _server.Start();
                 Console.WriteLine("Waiting");
-                _client = _server.AcceptTcpClient();
-                Console.WriteLine("Connected");
-                _stream = _client.GetStream();
+
+                TcpClient = _server.AcceptTcpClient();
+                ConnectionPending = false;
+                Console.WriteLine("Connected with laser");
+                _stream = TcpClient.GetStream();
             }
             catch (Exception)
             {
-                _client.Close();
+                TcpClient?.Close();
             }
         }
 
-        public static async Task SendMessage(LaserMessage message)
+        public static async Task SendMessages(IReadOnlyList<LaserMessage> messages)
         {
-            LaserSafetyHelper.LimitLaserPowerIfNecessary(ref message, 6);
-            if (RanByUnitTest)
+            int messagesLength = messages.Count;
+            bool messagesInvalid = messagesLength == 0;
+            if (RanByUnitTest || messagesInvalid)
             {
                 return;
             }
 
-            if (_client == null || !_client.Connected)
+            if (TcpClient?.Connected is null || !TcpClient.Connected)
             {
-                Connect();
+                NetworkConnect();
             }
 
-            try
+            await SendNetworkDataToLaser(messages, messagesLength);
+        }
+
+        public static async Task SendPreviousNetworkData()
+        {
+            await _stream.WriteAsync(_lastSendMessages);
+
+            byte[] bytes = new byte[_lastSendMessages.Length];
+            await _stream.ReadAsync(bytes);
+        }
+
+        private static async Task SendNetworkDataToLaser(IReadOnlyList<LaserMessage> messages, int messagesLength)
+        {
+            _lastSendMessages = Utf8Json.JsonSerializer.Serialize(messages);
+            await _stream.WriteAsync(_lastSendMessages);
+
+            byte[] bytes = new byte[_lastSendMessages.Length];
+            await _stream.ReadAsync(bytes);
+            PreviousMessage = messages[messagesLength - 1];
+        }
+
+        public static string[] GetAvailableComDevices()
+        {
+            return SerialPort.GetPortNames();
+        }
+
+        public static void ConnectSerial(string portName)
+        {
+            if (SerialPort.IsOpen)
             {
-                int[] value = { message.RedLaser, message.GreenLaser, message.BlueLaser, message.X, message.Y };
-                string result = string.Join(",", value);
-                string json = @"{""d"":[" + result + "]}";
-
-                UTF8Encoding utf8 = new();
-
-                byte[] msg = utf8.GetBytes(json);
-                await _stream.WriteAsync(msg);
-
-                byte[] bytes = new byte[msg.Length];
-                await _stream.ReadAsync(bytes);
-                string data = utf8.GetString(bytes);
-
-                LastXPosition = message.X;
-                LastYPosition = message.Y;
+                return;
             }
-            catch (Exception e)
+
+            SerialPort.PortName = portName;
+            SerialPort.BaudRate = 9600;
+            SerialPort.Open();
+        }
+
+        public static void SetLaserSettingsBySerial(string json)
+        {
+            if (!SerialPort.IsOpen)
             {
-                Console.WriteLine(e);
-                _client.Close();
-                _server.Stop();
-                Connect();
+                throw new ConnectionAbortedException("No connection to the com device was available");
+            }
+
+            SerialPort.WriteLine(json);
+
+            string returnMessage = "";
+            int iterations = 0;
+            while (!returnMessage.Contains("Settings ip is:") && iterations < 25)
+            {
+                returnMessage = SerialPort.ReadLine();
+                iterations++;
+                Thread.Sleep(500);
+            }
+
+            SerialPort.Close();
+            if (!returnMessage.Contains("Settings ip is:"))
+            {
+                throw new InvalidOperationException("The laser was not in settings mode!");
             }
         }
     }

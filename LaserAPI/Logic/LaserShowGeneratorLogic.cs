@@ -3,35 +3,32 @@ using LaserAPI.Logic.Fft_algorithm;
 using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.FromFrontend.LasershowGenerator;
 using LaserAPI.Models.Helper;
-using LaserAPI.Models.Helper.FftHelper;
-using LaserAPI.Models.Helper.MusicGenre;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
     public class LaserShowGeneratorLogic
     {
         private readonly AudioAnalyser _audioAnalyser;
+        private readonly AnimationLogic _animationLogic;
         private double[] _spectrumData;
         private SongData _songData = new();
         private AlgorithmSettings _algorithmSettings = new();
-        private Task _playAnimationTask;
 
-        public LaserShowGeneratorLogic(AudioAnalyser audioAnalyser)
+        public LaserShowGeneratorLogic(AudioAnalyser audioAnalyser, AnimationLogic animationLogic)
         {
             _audioAnalyser = audioAnalyser;
+            _animationLogic = animationLogic;
         }
 
         public void SetSongData(SongData songData)
         {
-            MusicGenre musicGenre = MusicGenreHelper.GetMusicGenreFromSpotifyGenre(songData.Genres);
-            _algorithmSettings = FftHelper.GetAlgorithmSettingsByGenre(musicGenre);
+            MusicGenre musicGenre = GetMusicGenreFromSpotifyGenre(songData.Genres);
+            _algorithmSettings = GetAlgorithmSettingsByGenre(musicGenre);
             songData.MusicGenre = musicGenre;
             _songData = songData;
         }
@@ -89,17 +86,10 @@ namespace LaserAPI.Logic
             average /= frequencyRangeValues.Count;
 
             double threshold = _algorithmSettings.Threshold;
-            bool taskAvailable = _playAnimationTask == null || _playAnimationTask.IsCompleted;
             if (average > threshold)
             {
-                Debug.WriteLine(average);
-            }
-
-            if (average > threshold && taskAvailable)
-            {
                 AnimationDto animation = GenerateLaserAnimation();
-                _playAnimationTask = new Task(() => PlayerHelper.PlayAnimation(animation).Wait(), TaskCreationOptions.LongRunning);
-                _playAnimationTask.Start();
+                _animationLogic.PlayAnimation(animation).Wait();
             }
         }
 
@@ -111,15 +101,55 @@ namespace LaserAPI.Logic
             double scale = new Random(Guid.NewGuid().GetHashCode()).NextDouble();
 
             PreMadeAnimations preMadeAnimations = new((int)_songData.MusicGenre);
-            int patternIndex = new Random(Guid.NewGuid().GetHashCode()).Next(0, 3);
+            int patternIndex = new Random(Guid.NewGuid().GetHashCode()).Next(0, 1);
             AnimationDto animation = patternIndex switch
             {
-                0 => preMadeAnimations.LineAnimation(centerX, centerY, rotation, scale),
-                1 => preMadeAnimations.RandomPoints(centerX, centerY, rotation, scale),
-                _ => preMadeAnimations.LineAnimation(centerX, centerY, rotation, scale)
+                0 => preMadeAnimations.LineAnimation(centerX, centerY, rotation, scale)
             };
 
             return animation;
+        }
+
+        public static MusicGenre GetMusicGenreFromSpotifyGenre(List<string> spotifyMusicGenres)
+        {
+            string[] genres = Enum.GetNames(typeof(Enums.MusicGenre));
+            int genresLength = genres.Length;
+            for (int i = 0; i < genresLength; i++)
+            {
+                genres[i] = genres[i].ToLower();
+            }
+
+            int spotifyMusicGenresLength = spotifyMusicGenres.Count;
+            for (int i = 0; i < genresLength; i++)
+            {
+                string genre = genres[i];
+                for (int j = 0; j < spotifyMusicGenresLength; j++)
+                {
+                    string spotifyMusicGenre = spotifyMusicGenres[j].ToLower();
+                    if (spotifyMusicGenre.Contains(genre))
+                    {
+                        return (Enums.MusicGenre)Enum.Parse(typeof(Enums.MusicGenre), genre, true);
+                    }
+                }
+            }
+
+            return default;
+        }
+
+        public static AlgorithmSettings GetAlgorithmSettingsByGenre(Enums.MusicGenre genre)
+        {
+            return genre.ToString().ToLower() switch
+            {
+                "hardstyle" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.008 },
+                "hardcore" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.008 },
+                "classic" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                "techno" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                "metal" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                "trance" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                "rock" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                "house" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                _ => null
+            };
         }
     }
 }

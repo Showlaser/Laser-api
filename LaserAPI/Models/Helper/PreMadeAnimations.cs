@@ -17,16 +17,21 @@ namespace LaserAPI.Models.Helper
         {
             int randomValue = new Random(Guid.NewGuid().GetHashCode()).Next(-4000, 4000);
             int value = NumberHelper.GetHighestNumber(center, randomValue) + NumberHelper.GetLowestNumber(center, randomValue);
-            if (value > 4000)
+            return FixBoundary(center, value);
+        }
+
+        private static int FixBoundary(int center, int value)
+        {
+            if (value + center > 4000)
             {
                 value = 4000;
             }
-            if (value < -4000)
+            if (value + center < -4000)
             {
                 value = -4000;
             }
 
-            return value;
+            return value + center;
         }
 
         private static AnimationPointDto GetRandomPoint(int centerX, int centerY)
@@ -36,9 +41,9 @@ namespace LaserAPI.Models.Helper
 
             return new AnimationPointDto
             {
-                RedLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(0, 255),
-                GreenLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(0, 255),
-                BlueLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(0, 255),
+                RedLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
+                GreenLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
+                BlueLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
                 X = randomX,
                 Y = randomY
             };
@@ -48,11 +53,33 @@ namespace LaserAPI.Models.Helper
         {
             return new AnimationPointDto
             {
-                RedLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(0, 255),
-                GreenLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(0, 255),
-                BlueLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(0, 255),
+                RedLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
+                GreenLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
+                BlueLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
                 X = x,
                 Y = y,
+            };
+        }
+
+        /// <summary>
+        /// Returns a list of points that form a rectangle. The rectangle is placed at the center (center x and center y)
+        /// </summary>
+        /// <param name="width">The width of the rectangle</param>
+        /// <param name="height">The height of the rectangle</param>
+        /// <returns>A list of points that form a rectangle</returns>
+        private static List<AnimationPointDto> GetRectanglePoints(int width, int height, int centerX, int centerY)
+        {
+            if (width <= 0 || height <= 0)
+            {
+                throw new ArgumentOutOfRangeException(null, nameof(height) + nameof(width));
+            }
+
+            return new List<AnimationPointDto>
+            {
+                GetPoint(FixBoundary(centerX, - width / 2 ), FixBoundary(centerY, - height / 2)),
+                GetPoint(FixBoundary(centerX, - width / 2 ), FixBoundary(centerY, height / 2)),
+                GetPoint(FixBoundary(centerX, width / 2 ), FixBoundary(centerY, height / 2)),
+                GetPoint(FixBoundary(centerX, width / 2 ), FixBoundary(centerY, - height / 2)),
             };
         }
 
@@ -103,42 +130,38 @@ namespace LaserAPI.Models.Helper
                                     GetPoint(-4000, 0),
                                     GetPoint(4000, 0),
                                 },
-                                patternAnimationUuid, centerX, centerY, rotation, scale, Convert.ToInt32(1200 / _speed)),
+                                patternAnimationUuid, centerX, centerY, rotation, scale, Convert.ToInt32(2200 / _speed)),
                         }
                     }
                 }
             };
         }
 
-        public AnimationDto RandomPoints(int centerX, int centerY, int rotation, double scale)
+        public AnimationDto GetRectangle(int width, int height, int centerX, int centerY)
         {
             Guid animationUuid = Guid.NewGuid();
             Guid patternAnimationUuid = Guid.NewGuid();
-
-            List<PatternAnimationSettingsDto> settings = new();
-            for (int i = 0; i < 200; i++)
-            {
-                settings.Add(GetAnimationSetting(new List<AnimationPointDto>
-                    {
-                        GetRandomPoint(centerX, centerY),
-                    },
-                    patternAnimationUuid, centerX, centerY, rotation, scale, Convert.ToInt32(i + 20 / _speed)));
-            }
+            List<AnimationPointDto> points = new();
+            points.AddRange(GetRectanglePoints(width, height, centerX, centerY));
 
             return new AnimationDto
             {
-                Name = "PreMade random dots",
+                Name = "Rectangle",
                 Uuid = animationUuid,
+
                 PatternAnimations = new List<PatternAnimationDto>
                 {
                     new()
                     {
                         Uuid = patternAnimationUuid,
                         AnimationUuid = animationUuid,
-                        Name = "Random dots",
+                        Name = "Rectangle",
                         StartTimeOffset = 0,
-                        TimeLineId = 0,
-                        AnimationSettings = settings
+                        AnimationSettings = new List<PatternAnimationSettingsDto>
+                        {
+                            GetAnimationSetting(points, patternAnimationUuid, 0, 0, 0, 0, 0),
+                            GetAnimationSetting(points, patternAnimationUuid, 0, 0, 0, 0, 16),
+                        }
                     }
                 }
             };

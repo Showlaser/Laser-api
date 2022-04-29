@@ -13,14 +13,16 @@ namespace LaserAPI.Controllers
     public class LasershowGeneratorController : ControllerBase
     {
         private readonly LaserShowGeneratorLogic _laserShowGeneratorLogic;
+        private readonly ControllerResultHandler _controllerResultHandler;
 
-        public LasershowGeneratorController(LaserShowGeneratorLogic laserShowGeneratorLogic)
+        public LasershowGeneratorController(LaserShowGeneratorLogic laserShowGeneratorLogic, ControllerResultHandler controllerResultHandler)
         {
             _laserShowGeneratorLogic = laserShowGeneratorLogic;
+            _controllerResultHandler = controllerResultHandler;
         }
 
         [HttpGet("devices")]
-        public IEnumerable<string> GetDevices()
+        public ActionResult<IEnumerable<string>> GetDevices()
         {
             IEnumerable<string> Action()
             {
@@ -28,8 +30,7 @@ namespace LaserAPI.Controllers
                 return devices.Select(d => d.FriendlyName);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            return controllerErrorHandler.Execute(Action);
+            return _controllerResultHandler.Execute(Action);
         }
 
         [HttpPost("start")]
@@ -41,22 +42,19 @@ namespace LaserAPI.Controllers
                 _laserShowGeneratorLogic.Start(deviceName);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            controllerErrorHandler.Execute(Action);
+            _controllerResultHandler.Execute(Action);
         }
 
         [HttpPost("stop")]
         public void Stop()
         {
-            ControllerErrorHandler controllerErrorHandler = new();
-            controllerErrorHandler.Execute(_laserShowGeneratorLogic.Stop);
+            _controllerResultHandler.Execute(_laserShowGeneratorLogic.Stop);
         }
 
         [HttpPost("data")]
         public void SetSongData([FromBody] SongData songData)
         {
-            ControllerErrorHandler controllerErrorHandler = new();
-            controllerErrorHandler.Execute(() => _laserShowGeneratorLogic.SetSongData(songData));
+            _controllerResultHandler.Execute(() => _laserShowGeneratorLogic.SetSongData(songData));
         }
     }
 }

@@ -16,28 +16,19 @@ namespace LaserAPI.Models.Helper
             return data >= min && data <= max;
         }
 
-        public static bool IsBetweenOrEqualTo(this int source, int min, int max)
-        {
-            return source >= min && source <= max;
-        }
+        public static bool IsBetweenOrEqualTo(this int source, int min, int max) =>
+            source >= min && source <= max;
 
-        public static int GetHighestNumber(int nr1, int nr2)
-        {
-            return nr1 > nr2 ? nr1 : nr2;
-        }
+        public static int ToInt(this double source) => Convert.ToInt32(source);
+        public static double ToDouble(this int source) => Convert.ToDouble(source);
 
-        public static int GetLowestNumber(int nr1, int nr2)
-        {
-            return nr1 < nr2 ? nr1 : nr2;
-        }
+        public static int GetHighestNumber(int nr1, int nr2) =>
+            nr1 > nr2 ? nr1 : nr2;
 
-        public static int Map(int value, int fromLow, int fromHigh, int toLow, int toHigh)
-        {
-            if (value == 0 && fromLow == 0 && fromHigh == 0 && toLow == 0 && toHigh == 0)
-            {
-                return 0;
-            }
-            return (value - fromLow) / (fromHigh - fromLow) * (toHigh - toLow) + toLow;
-        }
+        public static int GetLowestNumber(int nr1, int nr2) =>
+            nr1 < nr2 ? nr1 : nr2;
+
+        public static int Map(this int value, int inMin, int inMax, int outMin, int outMax) =>
+            (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
 }

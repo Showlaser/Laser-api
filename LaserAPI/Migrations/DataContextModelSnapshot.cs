@@ -43,8 +43,8 @@ namespace LaserAPI.Migrations
                     b.Property<int>("GreenLaserPowerPwm")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("PatternAnimationSettingsDtoUuid")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("PatternAnimationSettingsUuid")
                         .HasColumnType("TEXT");
@@ -60,18 +60,15 @@ namespace LaserAPI.Migrations
 
                     b.HasKey("Uuid");
 
-                    b.HasIndex("PatternAnimationSettingsDtoUuid");
+                    b.HasIndex("PatternAnimationSettingsUuid");
 
-                    b.ToTable("AnimationPointDto");
+                    b.ToTable("AnimationPoint");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.PatternAnimationDto", b =>
                 {
                     b.Property<Guid>("Uuid")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("AnimationDtoUuid")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("AnimationUuid")
@@ -88,9 +85,9 @@ namespace LaserAPI.Migrations
 
                     b.HasKey("Uuid");
 
-                    b.HasIndex("AnimationDtoUuid");
+                    b.HasIndex("AnimationUuid");
 
-                    b.ToTable("PatternAnimationDto");
+                    b.ToTable("PatternAnimation");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.PatternAnimationSettingsDto", b =>
@@ -104,9 +101,6 @@ namespace LaserAPI.Migrations
 
                     b.Property<int>("CenterY")
                         .HasColumnType("INTEGER");
-
-                    b.Property<Guid?>("PatternAnimationDtoUuid")
-                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("PatternAnimationUuid")
                         .HasColumnType("TEXT");
@@ -122,53 +116,9 @@ namespace LaserAPI.Migrations
 
                     b.HasKey("Uuid");
 
-                    b.HasIndex("PatternAnimationDtoUuid");
+                    b.HasIndex("PatternAnimationUuid");
 
-                    b.ToTable("PatternAnimationSettingsDto");
-                });
-
-            modelBuilder.Entity("LaserAPI.Models.Dto.Lasershow.LasershowAnimationDto", b =>
-                {
-                    b.Property<Guid>("Uuid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("AnimationUuid")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("LasershowDtoUuid")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("StartTime")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TimelineId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Uuid");
-
-                    b.HasIndex("AnimationUuid");
-
-                    b.HasIndex("LasershowDtoUuid");
-
-                    b.ToTable("LasershowAnimationDto");
-                });
-
-            modelBuilder.Entity("LaserAPI.Models.Dto.Lasershow.LasershowDto", b =>
-                {
-                    b.Property<Guid>("Uuid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Uuid");
-
-                    b.ToTable("LasershowDto");
+                    b.ToTable("PatternAnimationSetting");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Patterns.PatternDto", b =>
@@ -200,8 +150,8 @@ namespace LaserAPI.Migrations
                     b.Property<int>("GreenLaserPowerPwm")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("PatternDtoUuid")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("PatternUuid")
                         .HasColumnType("TEXT");
@@ -217,9 +167,9 @@ namespace LaserAPI.Migrations
 
                     b.HasKey("Uuid");
 
-                    b.HasIndex("PatternDtoUuid");
+                    b.HasIndex("PatternUuid");
 
-                    b.ToTable("PointDto");
+                    b.ToTable("Point");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Zones.ZoneDto", b =>
@@ -230,6 +180,9 @@ namespace LaserAPI.Migrations
 
                     b.Property<int>("MaxLaserPowerInZonePwm")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Uuid");
 
@@ -242,71 +195,68 @@ namespace LaserAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("X")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Y")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid?>("ZoneDtoUuid")
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid>("ZoneUuid")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Uuid");
 
-                    b.HasIndex("ZoneDtoUuid");
+                    b.HasIndex("ZoneUuid");
 
-                    b.ToTable("ZonesPositionDto");
+                    b.ToTable("ZonePosition");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.AnimationPointDto", b =>
                 {
                     b.HasOne("LaserAPI.Models.Dto.Animations.PatternAnimationSettingsDto", null)
                         .WithMany("Points")
-                        .HasForeignKey("PatternAnimationSettingsDtoUuid");
+                        .HasForeignKey("PatternAnimationSettingsUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.PatternAnimationDto", b =>
                 {
                     b.HasOne("LaserAPI.Models.Dto.Animations.AnimationDto", null)
                         .WithMany("PatternAnimations")
-                        .HasForeignKey("AnimationDtoUuid");
+                        .HasForeignKey("AnimationUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.PatternAnimationSettingsDto", b =>
                 {
                     b.HasOne("LaserAPI.Models.Dto.Animations.PatternAnimationDto", null)
                         .WithMany("AnimationSettings")
-                        .HasForeignKey("PatternAnimationDtoUuid");
-                });
-
-            modelBuilder.Entity("LaserAPI.Models.Dto.Lasershow.LasershowAnimationDto", b =>
-                {
-                    b.HasOne("LaserAPI.Models.Dto.Animations.AnimationDto", "Animation")
-                        .WithMany()
-                        .HasForeignKey("AnimationUuid");
-
-                    b.HasOne("LaserAPI.Models.Dto.Lasershow.LasershowDto", null)
-                        .WithMany("Animations")
-                        .HasForeignKey("LasershowDtoUuid");
-
-                    b.Navigation("Animation");
+                        .HasForeignKey("PatternAnimationUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Patterns.PointDto", b =>
                 {
                     b.HasOne("LaserAPI.Models.Dto.Patterns.PatternDto", null)
                         .WithMany("Points")
-                        .HasForeignKey("PatternDtoUuid");
+                        .HasForeignKey("PatternUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Zones.ZonesPositionDto", b =>
                 {
                     b.HasOne("LaserAPI.Models.Dto.Zones.ZoneDto", null)
-                        .WithMany("Positions")
-                        .HasForeignKey("ZoneDtoUuid");
+                        .WithMany("Points")
+                        .HasForeignKey("ZoneUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.AnimationDto", b =>
@@ -324,11 +274,6 @@ namespace LaserAPI.Migrations
                     b.Navigation("Points");
                 });
 
-            modelBuilder.Entity("LaserAPI.Models.Dto.Lasershow.LasershowDto", b =>
-                {
-                    b.Navigation("Animations");
-                });
-
             modelBuilder.Entity("LaserAPI.Models.Dto.Patterns.PatternDto", b =>
                 {
                     b.Navigation("Points");
@@ -336,7 +281,7 @@ namespace LaserAPI.Migrations
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Zones.ZoneDto", b =>
                 {
-                    b.Navigation("Positions");
+                    b.Navigation("Points");
                 });
 #pragma warning restore 612, 618
         }

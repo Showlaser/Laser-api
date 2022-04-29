@@ -16,10 +16,12 @@ namespace LaserAPI.Controllers
     public class ZonesController : ControllerBase
     {
         private readonly ZoneLogic _zoneLogic;
+        private readonly ControllerResultHandler _controllerResultHandler;
 
-        public ZonesController(ZoneLogic zonesLogic)
+        public ZonesController(ZoneLogic zonesLogic, ControllerResultHandler controllerResultHandler)
         {
             _zoneLogic = zonesLogic;
+            _controllerResultHandler = controllerResultHandler;
         }
 
         [HttpPost]
@@ -31,9 +33,19 @@ namespace LaserAPI.Controllers
                 await _zoneLogic.AddOrUpdate(zoneDto);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new ControllerErrorHandler();
-            await controllerErrorHandler.Execute(Action());
-            return StatusCode(controllerErrorHandler.StatusCode);
+            return await _controllerResultHandler.Execute(Action());
+        }
+
+        [HttpPost("play")]
+        public async Task<ActionResult> PlayAnimation([FromBody] Zone zone)
+        {
+            async Task Action()
+            {
+                ZoneDto zoneDto = zone.Adapt<ZoneDto>();
+                await _zoneLogic.Play(zoneDto);
+            }
+
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpGet]
@@ -45,8 +57,7 @@ namespace LaserAPI.Controllers
                 return zones.Adapt<List<ZoneViewmodel>>();
             }
 
-            ControllerErrorHandler controllerErrorHandler = new ControllerErrorHandler();
-            return await controllerErrorHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpDelete("{uuid}")]
@@ -57,9 +68,7 @@ namespace LaserAPI.Controllers
                 await _zoneLogic.Remove(uuid);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new ControllerErrorHandler();
-            await controllerErrorHandler.Execute(Action());
-            return StatusCode(controllerErrorHandler.StatusCode);
+            return await _controllerResultHandler.Execute(Action());
         }
     }
 }

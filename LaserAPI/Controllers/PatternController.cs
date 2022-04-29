@@ -1,4 +1,5 @@
-﻿using LaserAPI.Logic;
+﻿
+using LaserAPI.Logic;
 using LaserAPI.Models.Dto.Patterns;
 using LaserAPI.Models.FromFrontend.Patterns;
 using LaserAPI.Models.Helper;
@@ -16,10 +17,12 @@ namespace LaserAPI.Controllers
     public class PatternController : ControllerBase
     {
         private readonly PatternLogic _patternLogic;
+        private readonly ControllerResultHandler _controllerResultHandler;
 
-        public PatternController(PatternLogic patternLogic)
+        public PatternController(PatternLogic patternLogic, ControllerResultHandler controllerResultHandler)
         {
             _patternLogic = patternLogic;
+            _controllerResultHandler = controllerResultHandler;
         }
 
         [HttpPost("play")]
@@ -31,9 +34,7 @@ namespace LaserAPI.Controllers
                 await _patternLogic.PlayPattern(patternDto);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            await controllerErrorHandler.Execute(Action());
-            return StatusCode(controllerErrorHandler.StatusCode);
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpPost]
@@ -45,9 +46,7 @@ namespace LaserAPI.Controllers
                 await _patternLogic.AddOrUpdate(patternDto);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            await controllerErrorHandler.Execute(Action());
-            return StatusCode(controllerErrorHandler.StatusCode);
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpGet]
@@ -59,8 +58,7 @@ namespace LaserAPI.Controllers
                 return patterns.Adapt<List<PatternViewmodel>>();
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            return await controllerErrorHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpDelete("{uuid}")]
@@ -71,9 +69,7 @@ namespace LaserAPI.Controllers
                 await _patternLogic.Remove(uuid);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            await controllerErrorHandler.Execute(Action());
-            return StatusCode(controllerErrorHandler.StatusCode);
+            return await _controllerResultHandler.Execute(Action());
         }
     }
 }

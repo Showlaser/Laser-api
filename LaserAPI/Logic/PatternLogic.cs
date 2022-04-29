@@ -1,7 +1,6 @@
 ﻿using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Patterns;
 using LaserAPI.Models.Helper;
-using LaserAPI.Models.Helper.Laser;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -15,10 +14,12 @@ namespace LaserAPI.Logic
     public class PatternLogic
     {
         private readonly IPatternDal _patternDal;
+        private readonly LaserLogic _laserLogic;
 
-        public PatternLogic(IPatternDal patternDal)
+        public PatternLogic(IPatternDal patternDal, LaserLogic laserLogic)
         {
             _patternDal = patternDal;
+            _laserLogic = laserLogic;
         }
 
         private static bool ValidatePoints(List<PointDto> points)
@@ -26,9 +27,9 @@ namespace LaserAPI.Logic
             return points.Any() && points.TrueForAll(p => p.PatternUuid != Guid.Empty &&
                                                           p.Y.IsBetweenOrEqualTo(-4000, 4000) &&
                                                           p.X.IsBetweenOrEqualTo(-4000, 4000) &&
-                                                          p.RedLaserPowerPwm.IsBetweenOrEqualTo(0, 511) &&
-                                                          p.GreenLaserPowerPwm.IsBetweenOrEqualTo(0, 511) &&
-                                                          p.BlueLaserPowerPwm.IsBetweenOrEqualTo(0, 511));
+                                                          p.RedLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
+                                                          p.GreenLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
+                                                          p.BlueLaserPowerPwm.IsBetweenOrEqualTo(0, 255));
         }
 
         private static void ValidatePattern(PatternDto pattern)
@@ -56,14 +57,17 @@ namespace LaserAPI.Logic
         {
             ValidatePattern(pattern);
             Stopwatch stopwatch = Stopwatch.StartNew();
+            pattern.Points = pattern.Points.OrderBy(p => p.Order).ToList();
 
             while (stopwatch.ElapsedMilliseconds < 500)
             {
+                List<LaserMessage> messages = new();
+
                 int pointsLength = pattern.Points.Count;
                 for (int index = 0; index < pointsLength; index++)
                 {
                     PointDto point = pattern.Points[index];
-                    await LaserConnectionLogic.SendMessage(new LaserMessage
+                    messages.Add(new LaserMessage
                     {
                         RedLaser = point.RedLaserPowerPwm,
                         GreenLaser = point.GreenLaserPowerPwm,
@@ -72,6 +76,9 @@ namespace LaserAPI.Logic
                         Y = point.Y,
                     });
                 }
+
+                await _laserLogic.SendData(messages);
+                messages.Clear();
             }
 
             stopwatch.Stop();

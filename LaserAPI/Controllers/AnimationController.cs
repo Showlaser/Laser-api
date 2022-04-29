@@ -7,6 +7,7 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Controllers
@@ -16,10 +17,12 @@ namespace LaserAPI.Controllers
     public class AnimationController : ControllerBase
     {
         private readonly AnimationLogic _animationLogic;
+        private readonly ControllerResultHandler _controllerResultHandler;
 
-        public AnimationController(AnimationLogic animationLogic)
+        public AnimationController(AnimationLogic animationLogic, ControllerResultHandler controllerResultHandler)
         {
             _animationLogic = animationLogic;
+            _controllerResultHandler = controllerResultHandler;
         }
 
         [HttpPost]
@@ -31,9 +34,7 @@ namespace LaserAPI.Controllers
                 await _animationLogic.AddOrUpdate(animationDto);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            await controllerErrorHandler.Execute(Action());
-            return StatusCode(controllerErrorHandler.StatusCode);
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpPost("play")]
@@ -41,13 +42,12 @@ namespace LaserAPI.Controllers
         {
             async Task Action()
             {
+                Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
                 AnimationDto animationDto = animation.Adapt<AnimationDto>();
-                await PlayerHelper.PlayAnimation(animationDto);
+                await _animationLogic.PlayAnimation(animationDto);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            await controllerErrorHandler.Execute(Action());
-            return StatusCode(controllerErrorHandler.StatusCode);
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpGet]
@@ -59,8 +59,7 @@ namespace LaserAPI.Controllers
                 return animations.Adapt<List<AnimationViewModel>>();
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            return await controllerErrorHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpDelete("{uuid}")]
@@ -71,9 +70,7 @@ namespace LaserAPI.Controllers
                 await _animationLogic.Remove(uuid);
             }
 
-            ControllerErrorHandler controllerErrorHandler = new();
-            await controllerErrorHandler.Execute(Action());
-            return StatusCode(controllerErrorHandler.StatusCode);
+            return await _controllerResultHandler.Execute(Action());
         }
     }
 }
