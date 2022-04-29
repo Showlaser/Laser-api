@@ -37,7 +37,7 @@ namespace LaserAPI.Controllers
         }
 
         [HttpPost("play")]
-        public async Task<ActionResult> PlayAnimation([FromBody] Zone zone)
+        public async Task<ActionResult> PlayZone([FromBody] Zone zone)
         {
             async Task Action()
             {
