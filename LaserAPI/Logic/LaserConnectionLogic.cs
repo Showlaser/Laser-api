@@ -32,6 +32,8 @@ namespace LaserAPI.Logic
         {
             try
             {
+                _server?.Server.Dispose();
+
                 IPAddress localAddress = IPAddress.Parse(ComputerIpAddress);
                 _server = new TcpListener(localAddress, 50000)
                 {
@@ -61,7 +63,7 @@ namespace LaserAPI.Logic
         {
             int messagesLength = commando.Messages.Length;
             bool messagesInvalid = messagesLength == 0;
-            
+
             if (!commando.Stop)
             {
                 if (RanByUnitTest || messagesInvalid || !LaserIsAvailable())
@@ -80,10 +82,29 @@ namespace LaserAPI.Logic
 
         private static async Task SendNetworkDataToLaser(LaserCommando commando)
         {
-            _lastSendMessages = Utf8Json.JsonSerializer.Serialize(commando);
-            LaserAvailableDateTime = DateTime.Now.AddMilliseconds(commando.DurationInMilliseconds);
-            await _stream.WriteAsync(_lastSendMessages);
-            PreviousMessage = commando.Messages[^1];
+            try
+            {
+                byte[] messageBytes = Utf8Json.JsonSerializer.Serialize(commando);
+                int messageBytesLength = messageBytes.Length + 2;
+
+                byte[] bytes = new byte[messageBytesLength];
+                bytes[0] = Convert.ToByte('(');
+                bytes[messageBytesLength - 1] = Convert.ToByte(')');
+
+                for (int i = 1; i < messageBytesLength - 1; i++)
+                {
+                    bytes[i] = messageBytes[i - 1];
+                }
+
+                _lastSendMessages = bytes;
+                LaserAvailableDateTime = DateTime.Now.AddMilliseconds(commando.DurationInMilliseconds);
+                await _stream.WriteAsync(_lastSendMessages);
+                PreviousMessage = commando.Messages[^1];
+            }
+            catch (Exception)
+            {
+                NetworkConnect();
+            }
         }
 
         public static string[] GetAvailableComDevices()

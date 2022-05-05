@@ -72,7 +72,7 @@ namespace LaserAPI.Logic
                 List<PatternAnimationSettingsDto> settingsToPlay = new(3);
                 int patternAnimationsLength = patternAnimationsToPlay.Count;
 
-                int duration = 0;
+                int duration = 0; // todo fix duration
                 GetPatternAnimationSettingsToPlay(patternAnimationsLength, patternAnimationsToPlay,
                     stopwatch.ElapsedMilliseconds, ref settingsToPlay, ref duration);
 
@@ -150,18 +150,26 @@ namespace LaserAPI.Logic
             IReadOnlyList<PatternAnimationDto> patternAnimationsToPlay,
             long stopwatchTime, ref List<PatternAnimationSettingsDto> settingsToPlay, ref int duration)
         {
+            int lowestDuration = 999999999;
             for (int i = 0; i < patternAnimationsLength; i++)
             {
+                int currentDuration = 0;
                 PatternAnimationDto patternAnimation = patternAnimationsToPlay[i];
                 PatternAnimationSettingsDto closestPatternAnimationSettings = GetSettingClosestToTimeMs(
                     patternAnimation.AnimationSettings, patternAnimation.StartTimeOffset,
-                    stopwatchTime, ref duration);
+                    stopwatchTime, ref currentDuration);
 
                 if (closestPatternAnimationSettings != null)
                 {
                     settingsToPlay.Add(closestPatternAnimationSettings);
+                    if (currentDuration < lowestDuration)
+                    {
+                        lowestDuration = currentDuration;
+                    }
                 }
             }
+
+            duration = lowestDuration;
         }
 
         private static AnimationPointDto RotatePoint(AnimationPointDto point, PatternAnimationSettingsDto setting)
