@@ -56,32 +56,12 @@ namespace LaserAPI.Logic
         public async Task PlayPattern(PatternDto pattern)
         {
             ValidatePattern(pattern);
-            Stopwatch stopwatch = Stopwatch.StartNew();
             pattern.Points = pattern.Points.OrderBy(p => p.Order).ToList();
+            IReadOnlyList<LaserMessage> messages = pattern.Points.Select(p => 
+                new LaserMessage(p.RedLaserPowerPwm, p.GreenLaserPowerPwm, p.BlueLaserPowerPwm, p.X, p.Y))
+                .ToList();
 
-            while (stopwatch.ElapsedMilliseconds < 500)
-            {
-                List<LaserMessage> messages = new();
-
-                int pointsLength = pattern.Points.Count;
-                for (int index = 0; index < pointsLength; index++)
-                {
-                    PointDto point = pattern.Points[index];
-                    messages.Add(new LaserMessage
-                    {
-                        RedLaser = point.RedLaserPowerPwm,
-                        GreenLaser = point.GreenLaserPowerPwm,
-                        BlueLaser = point.BlueLaserPowerPwm,
-                        X = point.X,
-                        Y = point.Y,
-                    });
-                }
-
-                await _laserLogic.SendData(messages);
-                messages.Clear();
-            }
-
-            stopwatch.Stop();
+            await _laserLogic.SendData(messages, 1000);
         }
 
         public async Task<List<PatternDto>> All()

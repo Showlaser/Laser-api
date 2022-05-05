@@ -79,22 +79,15 @@ namespace LaserAPI.Logic
         {
             ValidateZone(zone);
             zone.Points = zone.Points.OrderBy(p => p.Order).ToList();
-            Stopwatch stopwatch = Stopwatch.StartNew();
-
-            while (stopwatch.ElapsedMilliseconds < 1000)
-            {
-                List<LaserMessage> messages = zone.Points
-                    .Select(p =>
-                    {
-                        LaserMessage message = new(zone.MaxLaserPowerInZonePwm, 0, 0, p.X, p.Y); // todo do something if power goes over 255 add other color
-                        return message;
-                    })
-                    .ToList();
-                messages.Add(messages.First());
-                await LaserConnectionLogic.SendMessages(messages);
-            }
-
-            stopwatch.Stop();
+            List<LaserMessage> messages = zone.Points
+                .Select(p =>
+                {
+                    LaserMessage message = new(zone.MaxLaserPowerInZonePwm, 0, 0, p.X, p.Y); // todo do something if power goes over 255 add other color
+                    return message;
+                })
+                .ToList();
+            messages.Add(messages.First());
+            await LaserConnectionLogic.SendMessages(new LaserCommando(1000, messages.ToArray()));
         }
 
         public async Task Remove(Guid uuid)

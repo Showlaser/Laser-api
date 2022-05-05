@@ -72,23 +72,22 @@ namespace LaserAPI.Logic
                 List<PatternAnimationSettingsDto> settingsToPlay = new(3);
                 int patternAnimationsLength = patternAnimationsToPlay.Count;
 
-                long stopwatchTime = stopwatch.ElapsedMilliseconds;
+                int duration = 0;
                 GetPatternAnimationSettingsToPlay(patternAnimationsLength, patternAnimationsToPlay,
-                    stopwatchTime, ref settingsToPlay);
+                    stopwatch.ElapsedMilliseconds, ref settingsToPlay, ref duration);
 
-                if (settingsToPlay.Count == 0)
+                if (settingsToPlay.Count == 0 || !LaserConnectionLogic.LaserIsAvailable())
                 {
                     continue;
                 }
 
                 if (PreviousSettingsEqualNewSettings(previousPlayedAnimationSettings, settingsToPlay) && previousPlayedAnimationSettings.Count > 0)
                 {
-                    await LaserConnectionLogic.SendPreviousNetworkData();
                     continue;
                 }
 
                 List<LaserMessage> messagesToPlay = GetAnimationPointsToPlay(settingsToPlay);
-                await _laserLogic.SendData(messagesToPlay);
+                await _laserLogic.SendData(messagesToPlay, duration);
                 previousPlayedAnimationSettings.Clear();
                 previousPlayedAnimationSettings.AddRange(settingsToPlay);
             }
@@ -149,14 +148,14 @@ namespace LaserAPI.Logic
 
         private static void GetPatternAnimationSettingsToPlay(int patternAnimationsLength,
             IReadOnlyList<PatternAnimationDto> patternAnimationsToPlay,
-            long stopwatchTime, ref List<PatternAnimationSettingsDto> settingsToPlay)
+            long stopwatchTime, ref List<PatternAnimationSettingsDto> settingsToPlay, ref int duration)
         {
             for (int i = 0; i < patternAnimationsLength; i++)
             {
                 PatternAnimationDto patternAnimation = patternAnimationsToPlay[i];
                 PatternAnimationSettingsDto closestPatternAnimationSettings = GetSettingClosestToTimeMs(
                     patternAnimation.AnimationSettings, patternAnimation.StartTimeOffset,
-                    stopwatchTime);
+                    stopwatchTime, ref duration);
 
                 if (closestPatternAnimationSettings != null)
                 {
@@ -242,7 +241,7 @@ namespace LaserAPI.Logic
         }
 
         /// <summary>
-        /// Gets the pattern animations the fall between the timeMs value
+        /// Gets the pattern animations the fall between the stopwatchTime value
         /// </summary>
         /// <param name="animation">The animation to search the pattern animations in</param>
         /// <param name="timeMs">The time that the pattern animations need to fall between</param>
@@ -319,7 +318,7 @@ namespace LaserAPI.Logic
         }
 
         public static PatternAnimationSettingsDto GetSettingClosestToTimeMs(
-            List<PatternAnimationSettingsDto> settings, int offsetTime, long timeMs)
+            List<PatternAnimationSettingsDto> settings, int offsetTime, long stopwatchTime, ref int duration)
         {
             int settingsLength = settings.Count;
             if (settingsLength == 0)
@@ -338,12 +337,24 @@ namespace LaserAPI.Logic
             for (int i = 1; i < settingsLength; i++)
             {
                 PatternAnimationSettingsDto setting = settings[i];
-                bool startTimeIsUnderTimeMs = setting.StartTime + offsetTime < timeMs;
+                bool startTimeIsUnderStopwatchTime = setting.StartTime + offsetTime < stopwatchTime;
                 bool startTimeIsCurrentlyLowest = lowestStartTime > setting.StartTime;
-                if (startTimeIsUnderTimeMs && startTimeIsCurrentlyLowest)
+                if (startTimeIsUnderStopwatchTime && startTimeIsCurrentlyLowest)
                 {
                     lowestStartTime = setting.StartTime;
                     lowestStartTimeIndex = i;
+                }
+
+                if (i == settingsLength - 1)
+                {
+                    continue;
+                }
+
+                PatternAnimationSettingsDto nextSetting = settings[i + 1];
+                int settingDuration = nextSetting.StartTime - setting.StartTime;
+                if (settingDuration < duration)
+                {
+                    duration = settingDuration;
                 }
             }
 
