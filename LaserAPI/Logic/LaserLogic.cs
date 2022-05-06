@@ -15,7 +15,7 @@ namespace LaserAPI.Logic
             _zoneLogic = zoneLogic;
         }
 
-        public async Task SendData(IReadOnlyList<LaserMessage> messages, int duration)
+        public async Task SendData(IReadOnlyList<LaserMessage> messages, long duration)
         {
             List<LaserMessage> messagesToSend = new();
 

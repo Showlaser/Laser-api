@@ -28,7 +28,7 @@ namespace LaserAPI.Models.Helper
         /// <param name="durationInMilliseconds">The time the laser should project the pattern, if set to -1 the laser will keep projecting until a commando with the stop property set to true is send</param>
         /// <param name="messages">The messages the laser should send</param>
         /// <param name="stop">If set to true the laser will stop playing the pattern</param>
-        public LaserCommando(int durationInMilliseconds, LaserMessage[] messages, bool stop = false)
+        public LaserCommando(long durationInMilliseconds, LaserMessage[] messages, bool stop = false)
         {
             DurationInMilliseconds = durationInMilliseconds;
             Messages = messages;
