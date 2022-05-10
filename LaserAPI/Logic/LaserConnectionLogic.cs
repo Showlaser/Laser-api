@@ -61,7 +61,7 @@ namespace LaserAPI.Logic
         {
             int messagesLength = commando.Messages.Length;
             bool messagesInvalid = messagesLength == 0;
-            
+
             if (!commando.Stop)
             {
                 if (RanByUnitTest || messagesInvalid || !LaserIsAvailable())

@@ -3,6 +3,7 @@ using LaserAPI.Logic.Fft_algorithm;
 using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.FromFrontend.LasershowGenerator;
 using LaserAPI.Models.Helper;
+using LaserAPI.Models.ToFrontend;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
@@ -14,15 +15,14 @@ namespace LaserAPI.Logic
     public class LaserShowGeneratorLogic
     {
         private readonly AudioAnalyser _audioAnalyser;
-        private readonly AnimationLogic _animationLogic;
         private double[] _spectrumData;
         private SongData _songData = new();
         private AlgorithmSettings _algorithmSettings = new();
+        private bool _isActive;
 
-        public LaserShowGeneratorLogic(AudioAnalyser audioAnalyser, AnimationLogic animationLogic)
+        public LaserShowGeneratorLogic(AudioAnalyser audioAnalyser)
         {
             _audioAnalyser = audioAnalyser;
-            _animationLogic = animationLogic;
         }
 
         public void SetSongData(SongData songData)
@@ -38,6 +38,9 @@ namespace LaserAPI.Logic
             return _audioAnalyser.GetDevices();
         }
 
+        public LaserGeneratorStatusViewmodel GetStatus => new(_isActive,
+            _songData.MusicGenre.ToString(), _songData.Bpm);
+
         public void Start(string deviceName)
         {
             MMDeviceCollection devices = _audioAnalyser.GetDevices();
@@ -46,12 +49,14 @@ namespace LaserAPI.Logic
             _audioAnalyser.Capture.DataAvailable += CaptureOnDataAvailable;
             _audioAnalyser.SpectrumCalculated += AudioAnalyserOnSpectrumCalculated;
             _audioAnalyser.Capture.StartRecording();
+            _isActive = true;
         }
 
         public void Stop()
         {
             _audioAnalyser.SampleAggregator.PerformFft = false;
             _audioAnalyser.Capture.StopRecording();
+            _isActive = false;
         }
 
         private void CaptureOnDataAvailable(object sender, WaveInEventArgs audioEvent)
@@ -76,7 +81,9 @@ namespace LaserAPI.Logic
 
             for (int i = 0; i < spectrumDataLength; i++)
             {
-                if (i.IsBetweenOrEqualTo(_algorithmSettings.FrequencyRange.Start.Value, _algorithmSettings.FrequencyRange.End.Value))
+                bool dataIsBetweenFrequencyRange = i.IsBetweenOrEqualTo(_algorithmSettings.FrequencyRange.Start.Value,
+                    _algorithmSettings.FrequencyRange.End.Value);
+                if (dataIsBetweenFrequencyRange)
                 {
                     average += _spectrumData[i];
                     frequencyRangeValues.Add(_spectrumData[i]);
@@ -85,11 +92,11 @@ namespace LaserAPI.Logic
 
             average /= frequencyRangeValues.Count;
 
-            double threshold = _algorithmSettings.Threshold;
-            if (average > threshold)
+            bool displayAnimation = average > _algorithmSettings.Threshold;
+            if (displayAnimation)
             {
                 AnimationDto animation = GenerateLaserAnimation();
-                _animationLogic.PlayAnimation(animation).Wait();
+                // _animationLogic.PlayAnimation(animation).Wait();
             }
         }
 
@@ -136,7 +143,7 @@ namespace LaserAPI.Logic
             return default;
         }
 
-        public static AlgorithmSettings GetAlgorithmSettingsByGenre(Enums.MusicGenre genre)
+        public static AlgorithmSettings GetAlgorithmSettingsByGenre(MusicGenre genre)
         {
             return genre.ToString().ToLower() switch
             {

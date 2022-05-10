@@ -43,7 +43,7 @@ namespace LaserAPI.Logic.Game
             int centerY = -4000 + height + _flappyYPosition;
 
             AnimationDto flappyAnimation = _preMadeAnimations.GetRectangle(width, height, centerX, centerY);
-            await _animationLogic.PlayAnimation(flappyAnimation);
+            await AnimationLogic.PlayAnimation(flappyAnimation);
         }
 
         private async Task DrawObstacle()
@@ -63,7 +63,7 @@ namespace LaserAPI.Logic.Game
 
             AnimationDto obstacleAnimation =
                 _preMadeAnimations.GetRectangle(_obstacleWidth, _obstacleHeight, _obstacleXPosition, centerY);
-            await _animationLogic.PlayAnimation(obstacleAnimation);
+            await AnimationLogic.PlayAnimation(obstacleAnimation);
         }
 
         public string GetName()

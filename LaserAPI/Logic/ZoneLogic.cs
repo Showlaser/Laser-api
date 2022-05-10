@@ -3,9 +3,7 @@ using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper;
 using System;
-using System.Buffers;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,9 +13,9 @@ namespace LaserAPI.Logic
     public class ZoneLogic
     {
         private readonly IZoneDal _zoneDal;
-        private List<ZoneDto> _zones;
-        public int ZonesLength { get; private set; }
-        public ZoneDto ZoneWithLowestLaserPowerPwm { get; private set; }
+        private static List<ZoneDto> _zones;
+        public static int ZonesLength { get; private set; }
+        public static ZoneDto ZoneWithLowestLaserPowerPwm { get; private set; }
 
         public ZoneLogic(IZoneDal zoneDal)
         {
@@ -102,7 +100,7 @@ namespace LaserAPI.Logic
         /// <param name="message">The laser message</param>
         /// <param name="previousMessage">The previous message send</param>
         /// <returns>The zone where the laser path is in, if the path is not within a zone null is returned</returns>
-        public ZoneDto GetZoneWherePathIsInside(LaserMessage message, LaserMessage previousMessage)
+        public static ZoneDto GetZoneWherePathIsInside(LaserMessage message, LaserMessage previousMessage)
         {
             for (int i = 0; i < ZonesLength; i++)
             {
@@ -132,7 +130,7 @@ namespace LaserAPI.Logic
         /// <param name="message">The new location for the laser to go to</param>
         /// <param name="previousMessage"></param>
         /// <returns>The points of the lines that form a zone that are hit with the laser path in a laser message model</returns>
-        public LaserMessage[] GetPointsOfZoneLinesHitByPath(LaserMessage message, LaserMessage previousMessage)
+        public static LaserMessage[] GetPointsOfZoneLinesHitByPath(LaserMessage message, LaserMessage previousMessage)
         {
             if (ZonesLength == 0)
             {

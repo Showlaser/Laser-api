@@ -12,7 +12,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.Json.Serialization;
@@ -55,8 +54,8 @@ namespace LaserAPI
             services.AddScoped<PatternLogic>();
             services.AddScoped<AnimationLogic>();
             services.AddScoped<ZoneLogic>();
-            services.AddScoped<AudioAnalyser>();
-            services.AddScoped<LaserShowGeneratorLogic>();
+            services.AddSingleton<AudioAnalyser>();
+            services.AddSingleton<LaserShowGeneratorLogic>();
             services.AddScoped<GameLogic>();
             services.AddTransient<ControllerResultHandler>();
             services.AddSingleton<GameStateLogic>();

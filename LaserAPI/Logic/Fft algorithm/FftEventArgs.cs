@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-using NAudio.Dsp;
+﻿using NAudio.Dsp;
+using System.Diagnostics;
 
 namespace LaserAPI.Logic.Fft_algorithm
 {

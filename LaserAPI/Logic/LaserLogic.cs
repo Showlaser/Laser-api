@@ -15,7 +15,7 @@ namespace LaserAPI.Logic
             _zoneLogic = zoneLogic;
         }
 
-        public async Task SendData(IReadOnlyList<LaserMessage> messages, int duration)
+        public static async Task SendData(IReadOnlyList<LaserMessage> messages, int duration)
         {
             List<LaserMessage> messagesToSend = new();
 
@@ -25,7 +25,7 @@ namespace LaserAPI.Logic
                 LaserMessage message = messages[i];
                 LaserMessage previousMessage = i == 0 ? message : messages[i - 1];
 
-                ZoneDto zoneWherePathIsInside = _zoneLogic.GetZoneWherePathIsInside(message, previousMessage);
+                ZoneDto zoneWherePathIsInside = ZoneLogic.GetZoneWherePathIsInside(message, previousMessage);
                 bool positionIsInProjectionZone = zoneWherePathIsInside != null;
 
                 if (positionIsInProjectionZone)
@@ -34,7 +34,7 @@ namespace LaserAPI.Logic
                     messagesToSend.Add(message);
                 }
 
-                LaserMessage[] zoneCrossingPoints = _zoneLogic.GetPointsOfZoneLinesHitByPath(message, previousMessage);
+                LaserMessage[] zoneCrossingPoints = ZoneLogic.GetPointsOfZoneLinesHitByPath(message, previousMessage);
                 if (zoneCrossingPoints.Length > 0)
                 {
                     messagesToSend.AddRange(zoneCrossingPoints);

@@ -4,7 +4,6 @@ using LaserAPI.Models.Helper;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -57,11 +56,11 @@ namespace LaserAPI.Logic
         {
             ValidatePattern(pattern);
             pattern.Points = pattern.Points.OrderBy(p => p.Order).ToList();
-            IReadOnlyList<LaserMessage> messages = pattern.Points.Select(p => 
+            IReadOnlyList<LaserMessage> messages = pattern.Points.Select(p =>
                 new LaserMessage(p.RedLaserPowerPwm, p.GreenLaserPowerPwm, p.BlueLaserPowerPwm, p.X, p.Y))
                 .ToList();
 
-            await _laserLogic.SendData(messages, 1000);
+            await LaserLogic.SendData(messages, 1000);
         }
 
         public async Task<List<PatternDto>> All()

@@ -1,0 +1,16 @@
+﻿namespace LaserAPI.Models.ToFrontend
+{
+    public class LaserGeneratorStatusViewmodel
+    {
+        public bool IsActive { get; set; }
+        public string ActiveGenre { get; set; }
+        public int? BeatsPerMinute { get; set; }
+
+        public LaserGeneratorStatusViewmodel(bool isActive, string activeGenre, int? beatsPerMinute)
+        {
+            IsActive = isActive;
+            ActiveGenre = activeGenre;
+            BeatsPerMinute = beatsPerMinute;
+        }
+    }
+}
