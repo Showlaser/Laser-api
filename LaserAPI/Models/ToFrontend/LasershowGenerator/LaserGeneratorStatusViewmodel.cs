@@ -1,4 +1,4 @@
-﻿namespace LaserAPI.Models.ToFrontend
+﻿namespace LaserAPI.Models.ToFrontend.LasershowGenerator
 {
     public class LaserGeneratorStatusViewmodel
     {

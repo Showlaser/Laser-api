@@ -187,7 +187,7 @@ namespace LaserAPITests.Tests.Logic
         public void GetZoneWherePathIsInsideTest()
         {
             LaserMessage previousMessage = new(0, 0, 0, 500, 0);
-            ZoneDto zone = _zoneLogic.GetZoneWherePathIsInside(new LaserMessage(0, 0, 0, 500, 0), previousMessage);
+            ZoneDto zone = ZoneLogic.GetZoneWherePathIsInside(new LaserMessage(0, 0, 0, 500, 0), previousMessage);
             Assert.IsTrue(zone.Uuid == Guid.Parse("fc220bc5-68ff-45d8-8e51-d884687e324b"));
         }
     }

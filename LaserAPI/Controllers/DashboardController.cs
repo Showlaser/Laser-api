@@ -33,7 +33,7 @@ namespace LaserAPI.Controllers
             {
                 List<ZoneDto> zones = await _zoneLogic.All();
                 int zonesLength = zones.Count;
-                bool developmentModeActive = zones.Any(z => z.MaxLaserPowerInZonePwm == 20 && z.Points.Count == 4) &&
+                bool developmentModeActive = zones.Any(z => z.MaxLaserPowerInZonePwm <= 20 && z.Points.Count == 4) &&
                                              zonesLength == 1;
 
                 List<AnimationDto> animations = await _animationLogic.All();

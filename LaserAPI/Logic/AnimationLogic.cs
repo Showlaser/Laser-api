@@ -78,12 +78,8 @@ namespace LaserAPI.Logic
                 }
 
                 List<LaserMessage> messagesToPlay = GetAnimationPointsToPlay(settingsToPlay);
-                await LaserLogic.SendData(messagesToPlay, duration);
-                previousPlayedAnimationSettings.Clear();
-                previousPlayedAnimationSettings.AddRange(settingsToPlay);
-
                 int duration = GetDurationFromSettings(settingsToPlay, patternAnimationsToPlay.SelectMany(pa => pa.AnimationSettings).ToList());
-                await _laserLogic.SendData(messagesToPlay, duration);
+                await LaserLogic.SendData(messagesToPlay, duration);
             }
         }
 

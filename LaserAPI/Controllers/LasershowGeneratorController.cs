@@ -1,7 +1,7 @@
 ﻿using LaserAPI.Logic;
 using LaserAPI.Models.FromFrontend.LasershowGenerator;
 using LaserAPI.Models.Helper;
-using LaserAPI.Models.ToFrontend;
+using LaserAPI.Models.ToFrontend.LasershowGenerator;
 using Microsoft.AspNetCore.Mvc;
 using NAudio.CoreAudioApi;
 using System.Collections.Generic;
@@ -33,6 +33,7 @@ namespace LaserAPI.Controllers
 
             return _controllerResultHandler.Execute(Action);
         }
+
 
         [HttpGet("status")]
         public ActionResult<LaserGeneratorStatusViewmodel> GetStatus()

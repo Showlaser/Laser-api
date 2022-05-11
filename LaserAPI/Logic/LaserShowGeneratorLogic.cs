@@ -3,7 +3,7 @@ using LaserAPI.Logic.Fft_algorithm;
 using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.FromFrontend.LasershowGenerator;
 using LaserAPI.Models.Helper;
-using LaserAPI.Models.ToFrontend;
+using LaserAPI.Models.ToFrontend.LasershowGenerator;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
@@ -39,7 +39,7 @@ namespace LaserAPI.Logic
         }
 
         public LaserGeneratorStatusViewmodel GetStatus => new(_isActive,
-            _songData.MusicGenre.ToString(), _songData.Bpm);
+            Enum.GetName(_songData.MusicGenre), _songData.Bpm);
 
         public void Start(string deviceName)
         {
@@ -56,6 +56,7 @@ namespace LaserAPI.Logic
         {
             _audioAnalyser.SampleAggregator.PerformFft = false;
             _audioAnalyser.Capture.StopRecording();
+            _songData = new SongData();
             _isActive = false;
         }
 
@@ -117,30 +118,44 @@ namespace LaserAPI.Logic
             return animation;
         }
 
+        /// <summary>
+        /// Gets the music genre from the genres. The most occurring genre will be returned.
+        /// </summary>
+        /// <param name="spotifyMusicGenres">The music genre collection from Spotify</param>
+        /// <returns>The most occurring genre</returns>
         public static MusicGenre GetMusicGenreFromSpotifyGenre(List<string> spotifyMusicGenres)
         {
-            string[] genres = Enum.GetNames(typeof(Enums.MusicGenre));
+            string[] genres = Enum.GetNames(typeof(MusicGenre));
             int genresLength = genres.Length;
-            for (int i = 0; i < genresLength; i++)
-            {
-                genres[i] = genres[i].ToLower();
-            }
 
+            List<GenresSorter> genreOccurrences = new();
             int spotifyMusicGenresLength = spotifyMusicGenres.Count;
             for (int i = 0; i < genresLength; i++)
             {
+                genres[i] = genres[i].ToLower();
                 string genre = genres[i];
                 for (int j = 0; j < spotifyMusicGenresLength; j++)
                 {
                     string spotifyMusicGenre = spotifyMusicGenres[j].ToLower();
-                    if (spotifyMusicGenre.Contains(genre))
+                    if (!spotifyMusicGenre.Contains(genre))
                     {
-                        return (Enums.MusicGenre)Enum.Parse(typeof(Enums.MusicGenre), genre, true);
+                        continue;
+                    }
+
+                    int sorterIndex = genreOccurrences.FindIndex(g => g.Genre == genre);
+                    if (sorterIndex == -1)
+                    {
+                        genreOccurrences.Add(new GenresSorter(genre, 1));
+                    }
+                    else
+                    {
+                        genreOccurrences[sorterIndex].Occurrences++;
                     }
                 }
             }
 
-            return default;
+            GenresSorter sorter = genreOccurrences.MaxBy(go => go.Occurrences);
+            return (MusicGenre)Enum.Parse(typeof(MusicGenre), sorter.Genre, true);
         }
 
         public static AlgorithmSettings GetAlgorithmSettingsByGenre(MusicGenre genre)
