@@ -75,6 +75,11 @@ namespace LaserAPI.Logic
 
         private void AudioAnalyserOnSpectrumCalculated(double[] calculatedData)
         {
+            if (_algorithmSettings == null)
+            {
+                return;
+            }
+
             _spectrumData = calculatedData;
             int spectrumDataLength = calculatedData.Length;
             List<double> frequencyRangeValues = new();
@@ -155,6 +160,11 @@ namespace LaserAPI.Logic
             }
 
             GenresSorter sorter = genreOccurrences.MaxBy(go => go.Occurrences);
+            if (sorter == null)
+            {
+                return default;
+            }
+
             return (MusicGenre)Enum.Parse(typeof(MusicGenre), sorter.Genre, true);
         }
 
