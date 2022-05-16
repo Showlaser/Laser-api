@@ -99,10 +99,10 @@ namespace LaserAPI.Logic
             average /= frequencyRangeValues.Count;
 
             bool displayAnimation = average > _algorithmSettings.Threshold;
-            if (displayAnimation)
+            if (displayAnimation && LaserConnectionLogic.LaserIsAvailable())
             {
                 AnimationDto animation = GenerateLaserAnimation();
-                // _animationLogic.PlayAnimation(animation).Wait();
+                AnimationLogic.PlayAnimation(animation);
             }
         }
 
@@ -113,11 +113,11 @@ namespace LaserAPI.Logic
             int rotation = new Random(Guid.NewGuid().GetHashCode()).Next(0, 361);
             double scale = new Random(Guid.NewGuid().GetHashCode()).NextDouble();
 
-            PreMadeAnimations preMadeAnimations = new((int)_songData.MusicGenre);
             int patternIndex = new Random(Guid.NewGuid().GetHashCode()).Next(0, 1);
+            PreMadeAnimations.Speed = (int)_songData.MusicGenre;
             AnimationDto animation = patternIndex switch
             {
-                0 => preMadeAnimations.LineAnimation(centerX, centerY, rotation, scale)
+                0 => PreMadeAnimations.LineAnimation(centerX, centerY, rotation, scale)
             };
 
             return animation;

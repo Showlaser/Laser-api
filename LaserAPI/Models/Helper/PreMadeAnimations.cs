@@ -6,12 +6,7 @@ namespace LaserAPI.Models.Helper
 {
     public class PreMadeAnimations
     {
-        private readonly double _speed;
-
-        public PreMadeAnimations(double speed)
-        {
-            _speed = speed;
-        }
+        public static double Speed { get; set; }
 
         private static int GenerateRandomValueBetweenBoundaries(int center)
         {
@@ -99,7 +94,7 @@ namespace LaserAPI.Models.Helper
             };
         }
 
-        public AnimationDto LineAnimation(int centerX, int centerY, int rotation, double scale)
+        public static AnimationDto LineAnimation(int centerX, int centerY, int rotation, double scale)
         {
             Guid animationUuid = Guid.NewGuid();
             Guid patternAnimationUuid = Guid.NewGuid();
@@ -130,14 +125,14 @@ namespace LaserAPI.Models.Helper
                                     GetPoint(-4000, 0),
                                     GetPoint(4000, 0),
                                 },
-                                patternAnimationUuid, centerX, centerY, rotation, scale, Convert.ToInt32(2200 / _speed)),
+                                patternAnimationUuid, centerX, centerY, rotation, scale, Convert.ToInt32(1800 / Speed)),
                         }
                     }
                 }
             };
         }
 
-        public AnimationDto GetRectangle(int width, int height, int centerX, int centerY)
+        public static AnimationDto GetRectangle(int width, int height, int centerX, int centerY)
         {
             Guid animationUuid = Guid.NewGuid();
             Guid patternAnimationUuid = Guid.NewGuid();
