@@ -102,7 +102,7 @@ namespace LaserAPI.Logic
             if (displayAnimation && LaserConnectionLogic.LaserIsAvailable())
             {
                 AnimationDto animation = GenerateLaserAnimation();
-                AnimationLogic.PlayAnimation(animation);
+                //AnimationLogic.PlayAnimation(animation); todo uncomment me!
             }
         }
 
