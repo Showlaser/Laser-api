@@ -26,12 +26,12 @@ namespace LaserAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Add([FromBody] LasershowSpotifyConnector connector)
+        public async Task<ActionResult> AddOrUpdate([FromBody] LasershowSpotifyConnector connector)
         {
             async Task Action()
             {
                 LasershowSpotifyConnectorDto connectorDto = connector.Adapt<LasershowSpotifyConnectorDto>();
-                await _lasershowSpotifyConnectorLogic.Add(connectorDto);
+                await _lasershowSpotifyConnectorLogic.AddOrUpdate(connectorDto);
             }
 
            return await _controllerResultHandler.Execute(Action());
@@ -44,17 +44,6 @@ namespace LaserAPI.Controllers
             {
                 List<LasershowSpotifyConnectorDto> connectors = await _lasershowSpotifyConnectorLogic.All();
                 return connectors.Adapt<List<LasershowSpotifyConnectorViewmodel>>();
-            }
-
-            return await _controllerResultHandler.Execute(Action());
-        }
-
-        [HttpDelete]
-        public async Task<ActionResult> Remove([FromQuery] Guid lasershowUuid)
-        {
-            async Task Action()
-            {
-                await _lasershowSpotifyConnectorLogic.Remove(lasershowUuid);
             }
 
             return await _controllerResultHandler.Execute(Action());
