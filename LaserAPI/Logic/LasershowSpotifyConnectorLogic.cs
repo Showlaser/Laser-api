@@ -1,10 +1,9 @@
-﻿using System;
+﻿using LaserAPI.Interfaces.Dal;
+using LaserAPI.Models.Dto.LasershowSpotify;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
-using LaserAPI.Interfaces.Dal;
-using LaserAPI.Models.Dto.LasershowSpotify;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace LaserAPI.Logic
 {
@@ -19,8 +18,15 @@ namespace LaserAPI.Logic
 
         public async Task AddOrUpdate(LasershowSpotifyConnectorDto connector)
         {
+            bool songIsAlreadyConnectedToALasershow =
+                await _lasershowSpotifyConnectorDal.SongsExists(connector.SpotifySongs.Select(ss => ss.SpotifySongId).ToList());
+            if (songIsAlreadyConnectedToALasershow)
+            {
+                throw new DuplicateNameException();
+            }
+
             bool connectorExists = await _lasershowSpotifyConnectorDal.Exists(connector.LasershowUuid);
-            if (string.IsNullOrEmpty(connector.SpotifySongId) && connectorExists)
+            if (!connector.SpotifySongs.Any() && connectorExists)
             {
                 await _lasershowSpotifyConnectorDal.Remove(connector.LasershowUuid);
                 return;

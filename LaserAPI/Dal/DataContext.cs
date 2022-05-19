@@ -79,6 +79,14 @@ namespace LaserAPI.Dal
             builder.Entity<LasershowSpotifyConnectorDto>(e =>
             {
                 e.HasKey(lsc => lsc.Uuid);
+                e.HasMany(lsc => lsc.SpotifySongs)
+                    .WithOne()
+                    .HasForeignKey(lscs => lscs.LasershowSpotifyConnectorUuid);
+            });
+
+            builder.Entity<LasershowSpotifyConnectorSongDto>(e =>
+            {
+                e.HasKey(lscs => lscs.Uuid);
             });
         }
     }

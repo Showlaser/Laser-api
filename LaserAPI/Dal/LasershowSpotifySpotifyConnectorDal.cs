@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using LaserAPI.Interfaces.Dal;
+﻿using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.LasershowSpotify;
-using LaserAPI.Models.Dto.Patterns;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace LaserAPI.Dal
 {
@@ -25,7 +25,7 @@ namespace LaserAPI.Dal
 
         public async Task<List<LasershowSpotifyConnectorDto>> All()
         {
-            return await _context.LasershowSpotifyConnector.ToListAsync();
+            return await _context.LasershowSpotifyConnector.Include(lsc => lsc.SpotifySongs).ToListAsync();
         }
 
         public async Task<bool> Exists(Guid lasershowUuid)
@@ -33,9 +33,17 @@ namespace LaserAPI.Dal
             return await _context.LasershowSpotifyConnector.AnyAsync(c => c.LasershowUuid == lasershowUuid);
         }
 
+        public async Task<bool> SongsExists(List<string> spotifySongIds)
+        {
+            return await _context.LasershowSpotifyConnector.AnyAsync(lsc =>
+                lsc.SpotifySongs.Any(ss => 
+                    spotifySongIds.Contains(ss.SpotifySongId)));
+        }
+
         public async Task Remove(Guid lasershowUuid)
         {
-            LasershowSpotifyConnectorDto connector = await _context.LasershowSpotifyConnector.FirstOrDefaultAsync(c => c.LasershowUuid == lasershowUuid);
+            LasershowSpotifyConnectorDto connector = await _context.LasershowSpotifyConnector.Include(lsc => lsc.SpotifySongs)
+                .FirstOrDefaultAsync(c => c.LasershowUuid == lasershowUuid);
             if (connector == null)
             {
                 return;

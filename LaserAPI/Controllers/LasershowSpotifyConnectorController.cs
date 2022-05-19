@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using LaserAPI.Logic;
+﻿using LaserAPI.Logic;
 using LaserAPI.Models.Dto.LasershowSpotify;
-using LaserAPI.Models.FromFrontend.LasershowSpotifyConnector;
 using LaserAPI.Models.Helper;
 using LaserAPI.Models.ToFrontend.LasershowSpotifyConnector;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LaserAPI.Controllers
 {
@@ -26,7 +24,7 @@ namespace LaserAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> AddOrUpdate([FromBody] LasershowSpotifyConnector connector)
+        public async Task<ActionResult> AddOrUpdate([FromBody] LasershowSpotifyConnectorViewmodel connector)
         {
             async Task Action()
             {
@@ -34,7 +32,7 @@ namespace LaserAPI.Controllers
                 await _lasershowSpotifyConnectorLogic.AddOrUpdate(connectorDto);
             }
 
-           return await _controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpGet]
