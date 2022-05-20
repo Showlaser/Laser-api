@@ -12,7 +12,6 @@ namespace LaserAPI.Logic.Game
     {
         private readonly AnimationLogic _animationLogic;
         private int _score;
-        private readonly PreMadeAnimations _preMadeAnimations = new(0);
         private readonly Timer _timer = new();
         private int _flappyYPosition = 1000;
         private int _obstacleXPosition = 0;
@@ -42,8 +41,8 @@ namespace LaserAPI.Logic.Game
             int centerX = -4000 + width;
             int centerY = -4000 + height + _flappyYPosition;
 
-            AnimationDto flappyAnimation = _preMadeAnimations.GetRectangle(width, height, centerX, centerY);
-            await _animationLogic.PlayAnimation(flappyAnimation);
+            AnimationDto flappyAnimation = PreMadeAnimations.GetRectangle(width, height, centerX, centerY);
+            await AnimationLogic.PlayAnimation(flappyAnimation);
         }
 
         private async Task DrawObstacle()
@@ -62,8 +61,8 @@ namespace LaserAPI.Logic.Game
             }
 
             AnimationDto obstacleAnimation =
-                _preMadeAnimations.GetRectangle(_obstacleWidth, _obstacleHeight, _obstacleXPosition, centerY);
-            await _animationLogic.PlayAnimation(obstacleAnimation);
+                PreMadeAnimations.GetRectangle(_obstacleWidth, _obstacleHeight, _obstacleXPosition, centerY);
+            await AnimationLogic.PlayAnimation(obstacleAnimation);
         }
 
         public string GetName()

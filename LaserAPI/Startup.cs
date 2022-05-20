@@ -11,8 +11,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.Json.Serialization;
@@ -54,15 +52,17 @@ namespace LaserAPI
             services.AddScoped<LaserLogic>();
             services.AddScoped<PatternLogic>();
             services.AddScoped<AnimationLogic>();
+            services.AddScoped<LasershowSpotifyConnectorLogic>();
             services.AddScoped<ZoneLogic>();
-            services.AddScoped<AudioAnalyser>();
-            services.AddScoped<LaserShowGeneratorLogic>();
+            services.AddSingleton<AudioAnalyser>();
+            services.AddSingleton<LaserShowGeneratorLogic>();
             services.AddScoped<GameLogic>();
             services.AddTransient<ControllerResultHandler>();
             services.AddSingleton<GameStateLogic>();
             services.AddScoped<IPatternDal, PatternDal>();
             services.AddScoped<IAnimationDal, AnimationDal>();
             services.AddScoped<IZoneDal, ZoneDal>();
+            services.AddScoped<ILasershowSpotifyConnectorDal, LasershowSpotifySpotifyConnectorDal>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -3,6 +3,7 @@ using LaserAPI.Logic.Fft_algorithm;
 using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.FromFrontend.LasershowGenerator;
 using LaserAPI.Models.Helper;
+using LaserAPI.Models.ToFrontend.LasershowGenerator;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
@@ -14,15 +15,14 @@ namespace LaserAPI.Logic
     public class LaserShowGeneratorLogic
     {
         private readonly AudioAnalyser _audioAnalyser;
-        private readonly AnimationLogic _animationLogic;
         private double[] _spectrumData;
         private SongData _songData = new();
         private AlgorithmSettings _algorithmSettings = new();
+        private bool _isActive;
 
-        public LaserShowGeneratorLogic(AudioAnalyser audioAnalyser, AnimationLogic animationLogic)
+        public LaserShowGeneratorLogic(AudioAnalyser audioAnalyser)
         {
             _audioAnalyser = audioAnalyser;
-            _animationLogic = animationLogic;
         }
 
         public void SetSongData(SongData songData)
@@ -38,6 +38,9 @@ namespace LaserAPI.Logic
             return _audioAnalyser.GetDevices();
         }
 
+        public LaserGeneratorStatusViewmodel GetStatus => new(_isActive,
+            Enum.GetName(_songData.MusicGenre), _songData.Bpm);
+
         public void Start(string deviceName)
         {
             MMDeviceCollection devices = _audioAnalyser.GetDevices();
@@ -46,12 +49,15 @@ namespace LaserAPI.Logic
             _audioAnalyser.Capture.DataAvailable += CaptureOnDataAvailable;
             _audioAnalyser.SpectrumCalculated += AudioAnalyserOnSpectrumCalculated;
             _audioAnalyser.Capture.StartRecording();
+            _isActive = true;
         }
 
         public void Stop()
         {
             _audioAnalyser.SampleAggregator.PerformFft = false;
             _audioAnalyser.Capture.StopRecording();
+            _songData = new SongData();
+            _isActive = false;
         }
 
         private void CaptureOnDataAvailable(object sender, WaveInEventArgs audioEvent)
@@ -69,6 +75,11 @@ namespace LaserAPI.Logic
 
         private void AudioAnalyserOnSpectrumCalculated(double[] calculatedData)
         {
+            if (_algorithmSettings == null)
+            {
+                return;
+            }
+
             _spectrumData = calculatedData;
             int spectrumDataLength = calculatedData.Length;
             List<double> frequencyRangeValues = new();
@@ -76,7 +87,9 @@ namespace LaserAPI.Logic
 
             for (int i = 0; i < spectrumDataLength; i++)
             {
-                if (i.IsBetweenOrEqualTo(_algorithmSettings.FrequencyRange.Start.Value, _algorithmSettings.FrequencyRange.End.Value))
+                bool dataIsBetweenFrequencyRange = i.IsBetweenOrEqualTo(_algorithmSettings.FrequencyRange.Start.Value,
+                    _algorithmSettings.FrequencyRange.End.Value);
+                if (dataIsBetweenFrequencyRange)
                 {
                     average += _spectrumData[i];
                     frequencyRangeValues.Add(_spectrumData[i]);
@@ -85,11 +98,11 @@ namespace LaserAPI.Logic
 
             average /= frequencyRangeValues.Count;
 
-            double threshold = _algorithmSettings.Threshold;
-            if (average > threshold)
+            bool displayAnimation = average > _algorithmSettings.Threshold;
+            if (displayAnimation && LaserConnectionLogic.LaserIsAvailable())
             {
                 AnimationDto animation = GenerateLaserAnimation();
-                _animationLogic.PlayAnimation(animation).Wait();
+                //AnimationLogic.PlayAnimation(animation); todo uncomment me!
             }
         }
 
@@ -100,43 +113,62 @@ namespace LaserAPI.Logic
             int rotation = new Random(Guid.NewGuid().GetHashCode()).Next(0, 361);
             double scale = new Random(Guid.NewGuid().GetHashCode()).NextDouble();
 
-            PreMadeAnimations preMadeAnimations = new((int)_songData.MusicGenre);
             int patternIndex = new Random(Guid.NewGuid().GetHashCode()).Next(0, 1);
+            PreMadeAnimations.Speed = (int)_songData.MusicGenre;
             AnimationDto animation = patternIndex switch
             {
-                0 => preMadeAnimations.LineAnimation(centerX, centerY, rotation, scale)
+                0 => PreMadeAnimations.LineAnimation(centerX, centerY, rotation, scale)
             };
 
             return animation;
         }
 
+        /// <summary>
+        /// Gets the music genre from the genres. The most occurring genre will be returned.
+        /// </summary>
+        /// <param name="spotifyMusicGenres">The music genre collection from Spotify</param>
+        /// <returns>The most occurring genre</returns>
         public static MusicGenre GetMusicGenreFromSpotifyGenre(List<string> spotifyMusicGenres)
         {
-            string[] genres = Enum.GetNames(typeof(Enums.MusicGenre));
+            string[] genres = Enum.GetNames(typeof(MusicGenre));
             int genresLength = genres.Length;
-            for (int i = 0; i < genresLength; i++)
-            {
-                genres[i] = genres[i].ToLower();
-            }
 
+            List<GenresSorter> genreOccurrences = new();
             int spotifyMusicGenresLength = spotifyMusicGenres.Count;
             for (int i = 0; i < genresLength; i++)
             {
+                genres[i] = genres[i].ToLower();
                 string genre = genres[i];
                 for (int j = 0; j < spotifyMusicGenresLength; j++)
                 {
                     string spotifyMusicGenre = spotifyMusicGenres[j].ToLower();
-                    if (spotifyMusicGenre.Contains(genre))
+                    if (!spotifyMusicGenre.Contains(genre))
                     {
-                        return (Enums.MusicGenre)Enum.Parse(typeof(Enums.MusicGenre), genre, true);
+                        continue;
+                    }
+
+                    int sorterIndex = genreOccurrences.FindIndex(g => g.Genre == genre);
+                    if (sorterIndex == -1)
+                    {
+                        genreOccurrences.Add(new GenresSorter(genre, 1));
+                    }
+                    else
+                    {
+                        genreOccurrences[sorterIndex].Occurrences++;
                     }
                 }
             }
 
-            return default;
+            GenresSorter sorter = genreOccurrences.MaxBy(go => go.Occurrences);
+            if (sorter == null)
+            {
+                return default;
+            }
+
+            return (MusicGenre)Enum.Parse(typeof(MusicGenre), sorter.Genre, true);
         }
 
-        public static AlgorithmSettings GetAlgorithmSettingsByGenre(Enums.MusicGenre genre)
+        public static AlgorithmSettings GetAlgorithmSettingsByGenre(MusicGenre genre)
         {
             return genre.ToString().ToLower() switch
             {

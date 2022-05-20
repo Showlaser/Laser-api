@@ -1,7 +1,6 @@
 ﻿using LaserAPI.Models.Helper;
 using Microsoft.AspNetCore.Connections;
 using System;
-using System.Collections.Generic;
 using System.IO.Ports;
 using System.Net;
 using System.Net.Sockets;
@@ -22,10 +21,19 @@ namespace LaserAPI.Logic
         private static readonly SerialPort SerialPort = new();
         private static byte[] _lastSendMessages;
 
+        /// <summary>
+        /// The datetime when the laser will be available for executing messages
+        /// </summary>
+        public static DateTime LaserAvailableDateTime { get; private set; }
+
+        public static bool LaserIsAvailable() => DateTime.Now >= LaserAvailableDateTime;
+
         public static void NetworkConnect()
         {
             try
             {
+                _server?.Server.Dispose();
+
                 IPAddress localAddress = IPAddress.Parse(ComputerIpAddress);
                 _server = new TcpListener(localAddress, 50000)
                 {
@@ -51,13 +59,17 @@ namespace LaserAPI.Logic
             }
         }
 
-        public static async Task SendMessages(IReadOnlyList<LaserMessage> messages)
+        public static async Task SendMessages(LaserCommando commando)
         {
-            int messagesLength = messages.Count;
+            int messagesLength = commando.Messages.Length;
             bool messagesInvalid = messagesLength == 0;
-            if (RanByUnitTest || messagesInvalid)
+
+            if (!commando.Stop)
             {
-                return;
+                if (RanByUnitTest || messagesInvalid || !LaserIsAvailable())
+                {
+                    return;
+                }
             }
 
             if (TcpClient?.Connected is null || !TcpClient.Connected)
@@ -65,25 +77,34 @@ namespace LaserAPI.Logic
                 NetworkConnect();
             }
 
-            await SendNetworkDataToLaser(messages, messagesLength);
+            await SendNetworkDataToLaser(commando);
         }
 
-        public static async Task SendPreviousNetworkData()
+        private static async Task SendNetworkDataToLaser(LaserCommando commando)
         {
-            await _stream.WriteAsync(_lastSendMessages);
+            try
+            {
+                byte[] messageBytes = Utf8Json.JsonSerializer.Serialize(commando);
+                int messageBytesLength = messageBytes.Length + 2;
 
-            byte[] bytes = new byte[_lastSendMessages.Length];
-            await _stream.ReadAsync(bytes);
-        }
+                byte[] bytes = new byte[messageBytesLength];
+                bytes[0] = Convert.ToByte('(');
+                bytes[messageBytesLength - 1] = Convert.ToByte(')');
 
-        private static async Task SendNetworkDataToLaser(IReadOnlyList<LaserMessage> messages, int messagesLength)
-        {
-            _lastSendMessages = Utf8Json.JsonSerializer.Serialize(messages);
-            await _stream.WriteAsync(_lastSendMessages);
+                for (int i = 1; i < messageBytesLength - 1; i++)
+                {
+                    bytes[i] = messageBytes[i - 1];
+                }
 
-            byte[] bytes = new byte[_lastSendMessages.Length];
-            await _stream.ReadAsync(bytes);
-            PreviousMessage = messages[messagesLength - 1];
+                _lastSendMessages = bytes;
+                LaserAvailableDateTime = DateTime.Now.AddMilliseconds(commando.DurationInMilliseconds);
+                await _stream.WriteAsync(_lastSendMessages);
+                PreviousMessage = commando.Messages[^1];
+            }
+            catch (Exception)
+            {
+                NetworkConnect();
+            }
         }
 
         public static string[] GetAvailableComDevices()
