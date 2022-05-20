@@ -18,9 +18,11 @@ namespace LaserAPI.Logic
 
         public async Task AddOrUpdate(LasershowSpotifyConnectorDto connector)
         {
-            bool songIsAlreadyConnectedToALasershow =
-                await _lasershowSpotifyConnectorDal.SongsExists(connector.SpotifySongs.Select(ss => ss.SpotifySongId).ToList());
-            if (songIsAlreadyConnectedToALasershow)
+            List<string> songs = connector.SpotifySongs.Select(ss => ss.SpotifySongId).ToList();
+            bool songIsAlreadyConnectedToADifferentLasershow =
+                await _lasershowSpotifyConnectorDal.SongsExistsInAnotherLasershow(songs, connector.LasershowUuid);
+
+            if (songIsAlreadyConnectedToADifferentLasershow)
             {
                 throw new DuplicateNameException();
             }

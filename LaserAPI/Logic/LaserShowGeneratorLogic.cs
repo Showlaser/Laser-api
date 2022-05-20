@@ -3,6 +3,7 @@ using LaserAPI.Logic.Fft_algorithm;
 using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.FromFrontend.LasershowGenerator;
 using LaserAPI.Models.Helper;
+using LaserAPI.Models.Helper.LaserAnimations;
 using LaserAPI.Models.ToFrontend.LasershowGenerator;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
@@ -19,10 +20,17 @@ namespace LaserAPI.Logic
         private SongData _songData = new();
         private AlgorithmSettings _algorithmSettings = new();
         private bool _isActive;
+        private readonly List<IPreMadeLaserAnimation> _animations = new();
 
         public LaserShowGeneratorLogic(AudioAnalyser audioAnalyser)
         {
             _audioAnalyser = audioAnalyser;
+            List<Type> types = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(e => e.GetTypes())
+                .Where(e => typeof(IPreMadeLaserAnimation).IsAssignableFrom(e) && e.IsClass)
+                .ToList();
+
+            _animations.AddRange(types.Select(t => (IPreMadeLaserAnimation)Activator.CreateInstance(t)));
         }
 
         public void SetSongData(SongData songData)
@@ -102,25 +110,25 @@ namespace LaserAPI.Logic
             if (displayAnimation && LaserConnectionLogic.LaserIsAvailable())
             {
                 AnimationDto animation = GenerateLaserAnimation();
-                //AnimationLogic.PlayAnimation(animation); todo uncomment me!
+                AnimationLogic.PlayAnimation(animation);
             }
         }
 
         private AnimationDto GenerateLaserAnimation()
         {
-            int centerX = new Random(Guid.NewGuid().GetHashCode()).Next(-1000, 1000);
-            int centerY = new Random(Guid.NewGuid().GetHashCode()).Next(-1000, 1000);
-            int rotation = new Random(Guid.NewGuid().GetHashCode()).Next(0, 361);
-            double scale = new Random(Guid.NewGuid().GetHashCode()).NextDouble();
-
-            int patternIndex = new Random(Guid.NewGuid().GetHashCode()).Next(0, 1);
-            PreMadeAnimations.Speed = (int)_songData.MusicGenre;
-            AnimationDto animation = patternIndex switch
+            PreMadeAnimationOptions options = new()
             {
-                0 => PreMadeAnimations.LineAnimation(centerX, centerY, rotation, scale)
+                CenterX = new Random(Guid.NewGuid().GetHashCode()).Next(-1000, 1000),
+                CenterY = new Random(Guid.NewGuid().GetHashCode()).Next(-1000, 1000),
+                Rotation = new Random(Guid.NewGuid().GetHashCode()).Next(0, 361),
+                Scale = new Random(Guid.NewGuid().GetHashCode()).NextDouble()
             };
 
-            return animation;
+            int patternIndex = new Random(Guid.NewGuid().GetHashCode()).Next(0, _animations.Count);
+            IPreMadeLaserAnimation preMadeAnimation = _animations[patternIndex];
+            preMadeAnimation.Speed = (int)_songData.MusicGenre;
+
+            return preMadeAnimation.GetAnimation(options);
         }
 
         /// <summary>

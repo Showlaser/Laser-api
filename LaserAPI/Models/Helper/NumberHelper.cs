@@ -16,6 +16,9 @@ namespace LaserAPI.Models.Helper
             return data >= min && data <= max;
         }
 
+        public static int GetDifferenceBetweenTwoNumbers(int nr1, int nr2) =>
+            GetHighestNumber(nr1, nr2) - GetLowestNumber(nr1, nr2);
+
         public static bool IsBetweenOrEqualTo(this int source, int min, int max) =>
             source >= min && source <= max;
 

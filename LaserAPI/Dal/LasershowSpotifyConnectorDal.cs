@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace LaserAPI.Dal
 {
-    public class LasershowSpotifySpotifyConnectorDal : ILasershowSpotifyConnectorDal
+    public class LasershowSpotifyConnectorDal : ILasershowSpotifyConnectorDal
     {
         private readonly DataContext _context;
 
-        public LasershowSpotifySpotifyConnectorDal(DataContext context)
+        public LasershowSpotifyConnectorDal(DataContext context)
         {
             _context = context;
         }
@@ -33,11 +33,11 @@ namespace LaserAPI.Dal
             return await _context.LasershowSpotifyConnector.AnyAsync(c => c.LasershowUuid == lasershowUuid);
         }
 
-        public async Task<bool> SongsExists(List<string> spotifySongIds)
+        public async Task<bool> SongsExistsInAnotherLasershow(List<string> spotifySongIds, Guid currentLasershowUuid)
         {
             return await _context.LasershowSpotifyConnector.AnyAsync(lsc =>
-                lsc.SpotifySongs.Any(ss => 
-                    spotifySongIds.Contains(ss.SpotifySongId)));
+                lsc.SpotifySongs.Any(ss =>
+                    spotifySongIds.Contains(ss.SpotifySongId)) && lsc.LasershowUuid != currentLasershowUuid);
         }
 
         public async Task Remove(Guid lasershowUuid)

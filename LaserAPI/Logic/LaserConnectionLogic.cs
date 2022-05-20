@@ -59,10 +59,42 @@ namespace LaserAPI.Logic
             }
         }
 
+        private static bool MessagesFormADot(LaserCommando commando, int messagesLength)
+        {
+            int closeToEachOtherCount = 0;
+            int valueToTrigger = messagesLength / 2;
+
+            for (int i = 0; i < messagesLength; i++)
+            {
+                LaserMessage message = commando.Messages[i];
+                for (int j = 0; j < messagesLength; j++)
+                {
+                    if (i == j)
+                    {
+                        continue;
+                    }
+
+                    LaserMessage messageToCompare = commando.Messages[j];
+                    if (Math.Abs(message.Y - messageToCompare.Y) < 20
+                        && Math.Abs(message.X - messageToCompare.X) < 20)
+                    {
+                        closeToEachOtherCount++;
+                    }
+                }
+
+                if (closeToEachOtherCount > valueToTrigger)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static async Task SendMessages(LaserCommando commando)
         {
             int messagesLength = commando.Messages.Length;
-            bool messagesInvalid = messagesLength == 0;
+            bool messagesInvalid = messagesLength <= 1 || MessagesFormADot(commando, messagesLength);
 
             if (!commando.Stop)
             {

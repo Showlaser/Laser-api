@@ -157,7 +157,7 @@ namespace LaserAPI.Logic
             }
         }
 
-        private static AnimationPointDto RotatePoint(AnimationPointDto point, PatternAnimationSettingsDto setting)
+        public static AnimationPointDto RotatePoint(AnimationPointDto point, PatternAnimationSettingsDto setting)
         {
             double radians = (Math.PI / 180) * setting.Rotation;
             double cos = Math.Cos(radians);
