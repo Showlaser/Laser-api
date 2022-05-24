@@ -9,6 +9,7 @@ using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace LaserAPI.Logic
@@ -16,15 +17,20 @@ namespace LaserAPI.Logic
     public class LaserShowGeneratorLogic
     {
         private readonly AudioAnalyser _audioAnalyser;
+        private readonly AnimationLogic _animationLogic;
         private double[] _spectrumData;
         private SongData _songData = new();
         private AlgorithmSettings _algorithmSettings = new();
         private bool _isActive;
         private readonly List<IPreMadeLaserAnimation> _animations = new();
+        private string _currentPlayingSongName = "";
+        private AnimationDto _generatedLasershow = new();
+        private Stopwatch _stopwatch = new();
 
-        public LaserShowGeneratorLogic(AudioAnalyser audioAnalyser)
+        public LaserShowGeneratorLogic(AudioAnalyser audioAnalyser, AnimationLogic animationLogic)
         {
             _audioAnalyser = audioAnalyser;
+            _animationLogic = animationLogic;
             List<Type> types = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(e => e.GetTypes())
                 .Where(e => typeof(IPreMadeLaserAnimation).IsAssignableFrom(e) && e.IsClass)
@@ -39,6 +45,20 @@ namespace LaserAPI.Logic
             _algorithmSettings = GetAlgorithmSettingsByGenre(musicGenre);
             songData.MusicGenre = musicGenre;
             _songData = songData;
+            HandleLaserShowSave();
+        }
+
+        private void HandleLaserShowSave()
+        {
+            bool songChanged = _currentPlayingSongName != _songData.SongName;
+            if (_songData.SaveLasershow && songChanged)
+            {
+                _stopwatch.Restart();
+                _generatedLasershow.Name = $"{DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()} generated show | {_songData.SongName}";
+                _animationLogic.AddOrUpdate(_generatedLasershow).Wait();
+            }
+
+            _currentPlayingSongName = _songData.SongName;
         }
 
         public MMDeviceCollection GetDevices()
@@ -109,9 +129,21 @@ namespace LaserAPI.Logic
             bool displayAnimation = average > _algorithmSettings.Threshold;
             if (displayAnimation && LaserConnectionLogic.LaserIsAvailable())
             {
-                AnimationDto animation = GenerateLaserAnimation();
-                AnimationLogic.PlayAnimation(animation);
+                OnAnimationDisplay();
             }
+        }
+
+        private void OnAnimationDisplay()
+        {
+            AnimationDto animation = GenerateLaserAnimation();
+            if (_songData.SaveLasershow)
+            {
+                PatternAnimationDto patternAnimation = animation.PatternAnimations[0];
+                patternAnimation.StartTimeOffset = Convert.ToInt32(_stopwatch.ElapsedMilliseconds);
+                _generatedLasershow.PatternAnimations.Add(animation.PatternAnimations[0]);
+            }
+
+            AnimationLogic.PlayAnimation(animation);
         }
 
         private AnimationDto GenerateLaserAnimation()

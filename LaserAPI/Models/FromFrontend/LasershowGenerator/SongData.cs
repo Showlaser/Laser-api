@@ -7,6 +7,8 @@ namespace LaserAPI.Models.FromFrontend.LasershowGenerator
     {
         public List<string> Genres { get; set; }
         public int? Bpm { get; set; }
+        public string SongName { get; set; }
+        public bool SaveLasershow { get; set; }
         public MusicGenre MusicGenre { get; set; }
     }
 }
