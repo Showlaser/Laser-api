@@ -10,5 +10,6 @@ namespace LaserAPI.Models.FromFrontend.LasershowGenerator
         public string SongName { get; set; }
         public bool SaveLasershow { get; set; }
         public MusicGenre MusicGenre { get; set; }
+        public bool IsPlaying { get; set; }
     }
 }

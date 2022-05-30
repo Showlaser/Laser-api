@@ -21,7 +21,7 @@ namespace LaserAPI.Logic
         private double[] _spectrumData;
         private SongData _songData = new();
         private AlgorithmSettings _algorithmSettings = new();
-        private bool _isActive;
+        private bool _fftIsActive;
         private readonly List<IPreMadeLaserAnimation> _animations = new();
         private string _currentPlayingSongName = "";
         private AnimationDto _generatedLasershow = new();
@@ -45,10 +45,10 @@ namespace LaserAPI.Logic
             _algorithmSettings = GetAlgorithmSettingsByGenre(musicGenre);
             songData.MusicGenre = musicGenre;
             _songData = songData;
-            HandleLaserShowSave();
+            HandleSongData();
         }
 
-        private void HandleLaserShowSave()
+        private void HandleSongData()
         {
             try
             {
@@ -56,7 +56,16 @@ namespace LaserAPI.Logic
                 if (_songData.SaveLasershow && !_stopwatch.IsRunning)
                 {
                     _stopwatch.Start();
-                } 
+                }
+
+                if (!_songData.IsPlaying && _stopwatch.IsRunning)
+                {
+                    _stopwatch.Stop();
+                }
+                else if (_songData.IsPlaying && !_stopwatch.IsRunning)
+                {
+                    _stopwatch.Start();
+                }
 
                 Console.WriteLine(_songData.SongName);
                 if (_songData.SaveLasershow && songChanged)
@@ -80,7 +89,7 @@ namespace LaserAPI.Logic
             return _audioAnalyser.GetDevices();
         }
 
-        public LaserGeneratorStatusViewmodel GetStatus => new(_isActive,
+        public LaserGeneratorStatusViewmodel GetStatus => new(_fftIsActive,
             Enum.GetName(_songData.MusicGenre), _songData.Bpm);
 
         public void Start(string deviceName)
@@ -91,7 +100,7 @@ namespace LaserAPI.Logic
             _audioAnalyser.Capture.DataAvailable += CaptureOnDataAvailable;
             _audioAnalyser.SpectrumCalculated += AudioAnalyserOnSpectrumCalculated;
             _audioAnalyser.Capture.StartRecording();
-            _isActive = true;
+            _fftIsActive = true;
         }
 
         public void Stop()
@@ -99,7 +108,7 @@ namespace LaserAPI.Logic
             _audioAnalyser.SampleAggregator.PerformFft = false;
             _audioAnalyser.Capture.StopRecording();
             _songData = new SongData();
-            _isActive = false;
+            _fftIsActive = false;
         }
 
         private void CaptureOnDataAvailable(object sender, WaveInEventArgs audioEvent)
