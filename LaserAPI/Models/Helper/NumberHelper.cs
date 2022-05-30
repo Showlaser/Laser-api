@@ -22,6 +22,12 @@ namespace LaserAPI.Models.Helper
         public static bool IsBetweenOrEqualTo(this int source, int min, int max) =>
             source >= min && source <= max;
 
+        public static double GetRandomDouble(double minimum, double maximum)
+        {
+            Random random = new();
+            return random.NextDouble() * (maximum - minimum) + minimum;
+        }
+
         public static int ToInt(this double source) => Convert.ToInt32(source);
         public static double ToDouble(this int source) => Convert.ToDouble(source);
 

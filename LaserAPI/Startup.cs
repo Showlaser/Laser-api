@@ -55,8 +55,9 @@ namespace LaserAPI
             services.AddScoped<LasershowSpotifyConnectorLogic>();
             services.AddScoped<ZoneLogic>();
             services.AddSingleton<AudioAnalyser>();
-            services.AddSingleton<LaserShowGeneratorLogic>();
+            services.AddSingleton<LaserShowGeneratorAlgorithm>();
             services.AddScoped<GameLogic>();
+            services.AddScoped<LaserShowGeneratorLogic>();
             services.AddTransient<ControllerResultHandler>();
             services.AddSingleton<GameStateLogic>();
             services.AddScoped<IPatternDal, PatternDal>();

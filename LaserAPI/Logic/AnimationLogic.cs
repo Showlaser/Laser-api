@@ -175,6 +175,9 @@ namespace LaserAPI.Logic
                 RedLaserPowerPwm = point.RedLaserPowerPwm,
                 GreenLaserPowerPwm = point.GreenLaserPowerPwm,
                 BlueLaserPowerPwm = point.BlueLaserPowerPwm,
+                PatternAnimationSettingsUuid = point.PatternAnimationSettingsUuid,
+                Uuid = point.Uuid,
+                Order = point.Order
             };
         }
 
@@ -197,32 +200,49 @@ namespace LaserAPI.Logic
 
         public static bool AnimationValid(AnimationDto animation)
         {
-            return animation != null &&
-                   animation.PatternAnimations
-                       .TrueForAll(pa => pa.AnimationSettings
-                           .TrueForAll(ase => SettingsValid(pa.AnimationSettings))) &&
-                   animation.PatternAnimations
-                       .TrueForAll(pa => pa.AnimationSettings
-                           .TrueForAll(ase => PointsValid(ase.Points))) &&
-                   PatternAnimationValid(animation.PatternAnimations) &&
+            bool patternAnimationSettingsValid = animation.PatternAnimations
+                .TrueForAll(pa => pa.AnimationSettings
+                    .TrueForAll(ase => SettingsValid(pa.AnimationSettings) && PointsValid(ase.Points)));
+
+            return PatternAnimationValid(animation.PatternAnimations) &&
+                   patternAnimationSettingsValid &&
                    AnimationDoesNotContainsSettingsWithSameStartTime(animation);
         }
 
         private static bool PointsValid(List<AnimationPointDto> points)
         {
-            return points.Any() && points.TrueForAll(p => p.PatternAnimationSettingsUuid != Guid.Empty &&
-                                                          p.Y.IsBetweenOrEqualTo(-4000, 4000) &&
-                                                          p.X.IsBetweenOrEqualTo(-4000, 4000) &&
-                                                          p.RedLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
-                                                          p.GreenLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
-                                                          p.BlueLaserPowerPwm.IsBetweenOrEqualTo(0, 255));
+            return points.Any() && points.TrueForAll(p =>
+            {
+                bool valid = p.PatternAnimationSettingsUuid != Guid.Empty &&
+                       p.Y.IsBetweenOrEqualTo(-4000, 4000) &&
+                       p.X.IsBetweenOrEqualTo(-4000, 4000) &&
+                       p.RedLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
+                       p.GreenLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
+                       p.BlueLaserPowerPwm.IsBetweenOrEqualTo(0, 255);
+
+                if (!valid)
+                {
+                    Console.WriteLine();
+                }
+
+                return valid;
+            });
         }
 
         private static bool SettingsValid(List<PatternAnimationSettingsDto> settings)
         {
-            return settings.TrueForAll(setting => setting.CenterX.IsBetweenOrEqualTo(-4000, 4000) &&
-                                                  setting.CenterY.IsBetweenOrEqualTo(-4000, 4000) &&
-                                                  setting.Scale.IsBetweenOrEqualTo(0.1, 1));
+            return settings.TrueForAll(setting =>
+            {
+                bool valid = setting.CenterX.IsBetweenOrEqualTo(-4000, 4000) &&
+                       setting.CenterY.IsBetweenOrEqualTo(-4000, 4000) &&
+                       setting.Scale.IsBetweenOrEqualTo(0.1, 1);
+                if (!valid)
+                {
+                    Console.WriteLine();
+                }
+
+                return valid;
+            });
         }
 
         private static bool PatternAnimationValid(List<PatternAnimationDto> patternAnimations)

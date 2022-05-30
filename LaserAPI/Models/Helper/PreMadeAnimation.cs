@@ -46,14 +46,15 @@ namespace LaserAPI.Models.Helper
         {
             return new AnimationPointDto
             {
+                Uuid = Guid.NewGuid(),
                 RedLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
                 GreenLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
                 BlueLaserPowerPwm = new Random(Guid.NewGuid().GetHashCode()).Next(7, 255),
-                X = x,
-                Y = y,
+                X = FixBoundary(0, x),
+                Y = FixBoundary(0, y),
             };
         }
-
+        
         /// <summary>
         /// Returns a list of points that form a rectangle. The rectangle is placed at the center (center x and center y)
         /// </summary>
@@ -79,9 +80,17 @@ namespace LaserAPI.Models.Helper
         internal static PatternAnimationSettingsDto GetAnimationSetting(List<AnimationPointDto> points,
             Guid patternAnimationUuid, int centerX, int centerY, int rotation, double scale, int startTime)
         {
+            Guid uuid = Guid.NewGuid();
+            int pointsLength = points.Count;
+            for (int i = 0; i < pointsLength; i++)
+            {
+                AnimationPointDto point = points[i];
+                point.PatternAnimationSettingsUuid = uuid;
+            }
+
             return new PatternAnimationSettingsDto
             {
-                Uuid = Guid.NewGuid(),
+                Uuid = uuid,
                 PatternAnimationUuid = patternAnimationUuid,
                 CenterX = centerX,
                 CenterY = centerY,

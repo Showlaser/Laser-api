@@ -20,19 +20,16 @@ namespace LaserAPI.Models.Helper.LaserAnimations
             };
 
             List<AnimationPointDto> rotatedPoints = new();
-            int previous = 0;
-            for (int i = 0; i < 360; i++)
+            for (int i = 0; i < 36; i++)
             {
-                if (previous > 10)
-                {
-                    patternAnimationSettings.Rotation = i;
-                    AnimationPointDto rotatedPoint = AnimationLogic.RotatePoint(point, patternAnimationSettings);
-                    rotatedPoint.Order = i;
-                    rotatedPoints.Add(rotatedPoint);
-                    previous = 0;
-                }
 
-                previous++;
+                patternAnimationSettings.Rotation = i * 10;
+                AnimationPointDto rotatedPoint = AnimationLogic.RotatePoint(point, patternAnimationSettings);
+                rotatedPoint.X = FixBoundary(patternAnimationSettings.CenterX, patternAnimationSettings.CenterX);
+                rotatedPoint.Y = FixBoundary(patternAnimationSettings.CenterY, patternAnimationSettings.CenterY);
+                rotatedPoint.Order = i;
+                rotatedPoint.Uuid = Guid.NewGuid();
+                rotatedPoints.Add(rotatedPoint);
             }
 
             Guid animationUuid = Guid.NewGuid();
