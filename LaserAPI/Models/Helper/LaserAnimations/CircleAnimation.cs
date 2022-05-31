@@ -22,11 +22,10 @@ namespace LaserAPI.Models.Helper.LaserAnimations
             List<AnimationPointDto> rotatedPoints = new();
             for (int i = 0; i < 36; i++)
             {
-
                 patternAnimationSettings.Rotation = i * 10;
                 AnimationPointDto rotatedPoint = AnimationLogic.RotatePoint(point, patternAnimationSettings);
-                rotatedPoint.X = FixBoundary(patternAnimationSettings.CenterX, patternAnimationSettings.CenterX);
-                rotatedPoint.Y = FixBoundary(patternAnimationSettings.CenterY, patternAnimationSettings.CenterY);
+                rotatedPoint.X = FixBoundary(patternAnimationSettings.CenterX, rotatedPoint.X);
+                rotatedPoint.Y = FixBoundary(patternAnimationSettings.CenterY, rotatedPoint.Y);
                 rotatedPoint.Order = i;
                 rotatedPoint.Uuid = Guid.NewGuid();
                 rotatedPoints.Add(rotatedPoint);

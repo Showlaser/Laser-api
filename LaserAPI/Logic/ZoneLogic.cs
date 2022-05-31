@@ -130,7 +130,7 @@ namespace LaserAPI.Logic
         /// <param name="message">The new location for the laser to go to</param>
         /// <param name="previousMessage"></param>
         /// <returns>The points of the lines that form a zone that are hit with the laser path in a laser message model</returns>
-        public static LaserMessage[] GetPointsOfZoneLinesHitByPath(LaserMessage message, LaserMessage previousMessage)
+        public LaserMessage[] GetPointsOfZoneLinesHitByPath(LaserMessage message, LaserMessage previousMessage)
         {
             if (ZonesLength == 0)
             {

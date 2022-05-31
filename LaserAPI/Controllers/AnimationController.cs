@@ -44,7 +44,7 @@ namespace LaserAPI.Controllers
             {
                 Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
                 AnimationDto animationDto = animation.Adapt<AnimationDto>();
-                await AnimationLogic.PlayAnimation(animationDto);
+                await _animationLogic.PlayAnimation(animationDto);
             }
 
             return await _controllerResultHandler.Execute(Action());

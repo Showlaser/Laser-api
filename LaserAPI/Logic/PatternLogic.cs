@@ -60,7 +60,7 @@ namespace LaserAPI.Logic
                 new LaserMessage(p.RedLaserPowerPwm, p.GreenLaserPowerPwm, p.BlueLaserPowerPwm, p.X, p.Y))
                 .ToList();
 
-            await LaserLogic.SendData(messages, 1000);
+            await _laserLogic.SendData(messages, 1000);
         }
 
         public async Task<List<PatternDto>> All()

@@ -24,8 +24,8 @@ namespace LaserAPI.Logic
         private bool _fftIsActive;
         private readonly List<IPreMadeLaserAnimation> _animations = new();
         private string _currentPlayingSongName = "";
-        private AnimationDto _generatedLasershow = new();
-        private Stopwatch _stopwatch = new();
+        private readonly AnimationDto _generatedLasershow = new();
+        private readonly Stopwatch _stopwatch = new();
 
         public LaserShowGeneratorAlgorithm(AudioAnalyser audioAnalyser)
         {
@@ -50,6 +50,11 @@ namespace LaserAPI.Logic
 
         private void HandleSongData()
         {
+            if (!_fftIsActive || !_songData.IsPlaying)
+            {
+                return;
+            }
+
             try
             {
                 bool songChanged = _currentPlayingSongName != _songData.SongName && !string.IsNullOrEmpty(_currentPlayingSongName);
@@ -150,7 +155,7 @@ namespace LaserAPI.Logic
             average /= frequencyRangeValues.Count;
 
             bool displayAnimation = average > _algorithmSettings.Threshold;
-            if (displayAnimation)//&& LaserConnectionLogic.LaserIsAvailable()) todo uncomment
+            if (displayAnimation && LaserConnectionLogic.LaserIsAvailable())
             {
                 OnAnimationDisplay();
             }
@@ -166,7 +171,7 @@ namespace LaserAPI.Logic
                 _generatedLasershow.PatternAnimations.Add(patternAnimation);
             }
 
-            //AnimationLogic.PlayAnimation(animation);
+            AnimationLogic.PlayAnimation(animation);
         }
 
         private AnimationDto GenerateLaserAnimation()
@@ -176,7 +181,7 @@ namespace LaserAPI.Logic
                 CenterX = new Random(Guid.NewGuid().GetHashCode()).Next(-1000, 1000),
                 CenterY = new Random(Guid.NewGuid().GetHashCode()).Next(-1000, 1000),
                 Rotation = new Random(Guid.NewGuid().GetHashCode()).Next(0, 361),
-                Scale = NumberHelper.GetRandomDouble(0.1, 1)
+                Scale = NumberHelper.GetRandomDouble(0.4, 1)
             };
 
             int patternIndex = new Random(Guid.NewGuid().GetHashCode()).Next(0, _animations.Count);
@@ -235,8 +240,8 @@ namespace LaserAPI.Logic
         {
             return genre.ToString().ToLower() switch
             {
-                "hardstyle" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.008 },
-                "hardcore" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.008 },
+                "hardstyle" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                "hardcore" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
                 "classic" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
                 "techno" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
                 "metal" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },

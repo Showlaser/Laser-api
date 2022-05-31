@@ -13,6 +13,12 @@ namespace LaserAPI.Models.Helper
             return FixBoundary(center, value);
         }
 
+        /// <summary>
+        /// Checks if the value plus the center do not exceed 4000
+        /// </summary>
+        /// <param name="center"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         internal static int FixBoundary(int center, int value)
         {
             if (value + center > 4000)
@@ -24,7 +30,7 @@ namespace LaserAPI.Models.Helper
                 value = -4000;
             }
 
-            return value + center;
+            return value;
         }
 
         internal static AnimationPointDto GetRandomPoint(int centerX, int centerY)
@@ -54,7 +60,7 @@ namespace LaserAPI.Models.Helper
                 Y = FixBoundary(0, y),
             };
         }
-        
+
         /// <summary>
         /// Returns a list of points that form a rectangle. The rectangle is placed at the center (center x and center y)
         /// </summary>
