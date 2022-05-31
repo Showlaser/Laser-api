@@ -214,37 +214,20 @@ namespace LaserAPI.Logic
         private static bool PointsValid(List<AnimationPointDto> points)
         {
             return points.Any() && points.TrueForAll(p =>
-            {
-                bool valid = p.PatternAnimationSettingsUuid != Guid.Empty &&
+            p.PatternAnimationSettingsUuid != Guid.Empty &&
                        p.Y.IsBetweenOrEqualTo(-4000, 4000) &&
                        p.X.IsBetweenOrEqualTo(-4000, 4000) &&
                        p.RedLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
                        p.GreenLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
-                       p.BlueLaserPowerPwm.IsBetweenOrEqualTo(0, 255);
-
-                if (!valid)
-                {
-                    Console.WriteLine();
-                }
-
-                return valid;
-            });
+                       p.BlueLaserPowerPwm.IsBetweenOrEqualTo(0, 255));
         }
 
         private static bool SettingsValid(List<PatternAnimationSettingsDto> settings)
         {
             return settings.TrueForAll(setting =>
-            {
-                bool valid = setting.CenterX.IsBetweenOrEqualTo(-4000, 4000) &&
+               setting.CenterX.IsBetweenOrEqualTo(-4000, 4000) &&
                        setting.CenterY.IsBetweenOrEqualTo(-4000, 4000) &&
-                       setting.Scale.IsBetweenOrEqualTo(0.1, 1);
-                if (!valid)
-                {
-                    Console.WriteLine();
-                }
-
-                return valid;
-            });
+                       setting.Scale.IsBetweenOrEqualTo(0.1, 1));
         }
 
         private static bool PatternAnimationValid(List<PatternAnimationDto> patternAnimations)

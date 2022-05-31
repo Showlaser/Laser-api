@@ -72,14 +72,10 @@ namespace LaserAPI.Logic
                     _stopwatch.Start();
                 }
 
-                Console.WriteLine(_songData.SongName);
                 if (_songData.SaveLasershow && songChanged)
                 {
-                    Console.WriteLine("Songchanged and save lasershow");
                     _stopwatch.Restart();
                     _generatedLasershow.Name = $"{DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()} generated show | {_songData.SongName}";
-
-                    Console.WriteLine("Save generatedLasershow");
                     AnimationLogic.AddOrUpdate(_generatedLasershow).Wait();
                 }
             }
@@ -186,7 +182,7 @@ namespace LaserAPI.Logic
 
             int patternIndex = new Random(Guid.NewGuid().GetHashCode()).Next(0, _animations.Count);
             IPreMadeLaserAnimation preMadeAnimation = _animations[patternIndex];
-            preMadeAnimation.Speed = (int)_songData.MusicGenre;
+            preMadeAnimation.Speed = GetSpeedFromGenre(_songData.MusicGenre);
 
             return preMadeAnimation.GetAnimation(options);
         }
@@ -236,12 +232,28 @@ namespace LaserAPI.Logic
             return (MusicGenre)Enum.Parse(typeof(MusicGenre), sorter.Genre, true);
         }
 
+        private static int GetSpeedFromGenre(MusicGenre genre)
+        {
+            return genre switch
+            {
+                MusicGenre.Hardstyle => 15,
+                MusicGenre.Hardcore => 15,
+                MusicGenre.Classic => 3,
+                MusicGenre.Techno => 7,
+                MusicGenre.Metal => 6,
+                MusicGenre.Trance => 7,
+                MusicGenre.Rock => 6,
+                MusicGenre.House => 6,
+                _ => throw new ArgumentOutOfRangeException(nameof(genre), genre, null)
+            };
+        }
+
         public static AlgorithmSettings GetAlgorithmSettingsByGenre(MusicGenre genre)
         {
             return genre.ToString().ToLower() switch
             {
-                "hardstyle" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
-                "hardcore" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                "hardstyle" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.015 },
+                "hardcore" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.015 },
                 "classic" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
                 "techno" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
                 "metal" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
