@@ -152,7 +152,10 @@ namespace LaserAPI.Logic
                     patternAnimation.AnimationSettings, patternAnimation.StartTimeOffset,
                     stopwatchTime);
 
-                if (closestPatternAnimationSettings != null)
+                bool isLastSetting = patternAnimation.AnimationSettings.MaxBy(ast => ast.StartTime)
+                    ?.Uuid == closestPatternAnimationSettings?.Uuid;
+
+                if (closestPatternAnimationSettings != null && !isLastSetting)
                 {
                     settingsToPlay.Add(closestPatternAnimationSettings);
                 }

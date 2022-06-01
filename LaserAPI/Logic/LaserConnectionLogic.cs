@@ -1,4 +1,5 @@
-﻿using LaserAPI.Models.Helper;
+﻿using LaserAPI.CustomExceptions;
+using LaserAPI.Models.Helper;
 using Microsoft.AspNetCore.Connections;
 using System;
 using System.IO.Ports;
@@ -11,7 +12,6 @@ namespace LaserAPI.Logic
 {
     public static class LaserConnectionLogic
     {
-        public static bool RanByUnitTest { get; set; } = false;
         public static string ComputerIpAddress { get; set; }
         public static LaserMessage PreviousMessage { get; set; } = new();
         public static bool ConnectionPending { get; private set; }
@@ -61,28 +61,31 @@ namespace LaserAPI.Logic
 
         private static bool MessagesFormADot(LaserCommando commando, int messagesLength)
         {
-            int closeToEachOtherCount = 0;
-            int valueToTrigger = messagesLength / 2;
-
-            for (int i = 0; i < messagesLength; i++)
+            if (messagesLength == 0)
             {
-                LaserMessage message = commando.Messages[i];
-                for (int j = 0; j < messagesLength; j++)
-                {
-                    if (i == j)
-                    {
-                        continue;
-                    }
+                return false;
+            }
 
-                    LaserMessage messageToCompare = commando.Messages[j];
-                    if (Math.Abs(message.Y - messageToCompare.Y) < 20
-                        && Math.Abs(message.X - messageToCompare.X) < 20)
-                    {
-                        closeToEachOtherCount++;
-                    }
+            if (messagesLength == 1)
+            {
+                return true;
+            }
+
+            int closeToEachOtherCount = 0;
+            int valueToTrigger = Convert.ToInt32(messagesLength * 0.6);
+
+            for (int i = 1; i < messagesLength; i++)
+            {
+                LaserMessage previousMessage = commando.Messages[i - 1];
+                LaserMessage message = commando.Messages[i];
+                bool messagesAreCloseToEachOther = Math.Abs(previousMessage.X - message.X) < 20 &&
+                                                   Math.Abs(previousMessage.Y - message.Y) < 20;
+                if (messagesAreCloseToEachOther)
+                {
+                    closeToEachOtherCount++;
                 }
 
-                if (closeToEachOtherCount > valueToTrigger)
+                if (closeToEachOtherCount >= valueToTrigger)
                 {
                     return true;
                 }
@@ -98,7 +101,11 @@ namespace LaserAPI.Logic
 
             if (!commando.Stop)
             {
-                if (RanByUnitTest || messagesInvalid || !LaserIsAvailable())
+                if (messagesInvalid)
+                {
+                    throw new UnsafePatternDetectedException("The pattern is unsafe to project and will not be projected.");
+                }
+                if (!LaserIsAvailable())
                 {
                     return;
                 }

@@ -160,14 +160,14 @@ namespace LaserAPI.Logic
         private void OnAnimationDisplay()
         {
             AnimationDto animation = GenerateLaserAnimation();
+            AnimationLogic.PlayAnimation(animation);
+
             if (_songData.SaveLasershow)
             {
                 PatternAnimationDto patternAnimation = animation.PatternAnimations[0];
                 patternAnimation.StartTimeOffset = Convert.ToInt32(_stopwatch.ElapsedMilliseconds);
                 _generatedLasershow.PatternAnimations.Add(patternAnimation);
             }
-
-            AnimationLogic.PlayAnimation(animation);
         }
 
         private AnimationDto GenerateLaserAnimation()
