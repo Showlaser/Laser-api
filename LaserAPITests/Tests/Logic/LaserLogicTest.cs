@@ -10,12 +10,6 @@ namespace LaserAPITests.Tests.Logic
     {
         private readonly LaserLogic _laserLogic = new MockLaserLogic().LaserLogic;
 
-        [TestInitialize]
-        public void Setup()
-        {
-            LaserConnectionLogic.RanByUnitTest = true;
-        }
-
         [TestMethod]
         public void LimitTotalLaserPowerNecessaryTest()
         {

@@ -1,11 +1,12 @@
 ﻿namespace LaserAPI.Models.Helper.LaserAnimations
 {
-    public class PreMadeAnimationOptions
+    public struct PreMadeAnimationOptions
     {
-        public int CenterX;
-        public int CenterY;
-        public int Rotation;
-        public double Scale;
-        public bool SingleColor;
+        public int CenterX { get; set; }
+        public int CenterY { get; set; }
+        public int Rotation { get; set; }
+        public double Scale { get; set; }
+        public bool SingleColor { get; set; }
+        public int Speed { get; set; }
     }
 }

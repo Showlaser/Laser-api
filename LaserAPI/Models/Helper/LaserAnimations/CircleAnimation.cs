@@ -7,7 +7,6 @@ namespace LaserAPI.Models.Helper.LaserAnimations
 {
     public class CircleAnimation : PreMadeAnimation, IPreMadeLaserAnimation
     {
-        public double Speed { get; set; }
         public string AnimationName => "CircleAnimation";
 
         public AnimationDto GetAnimation(PreMadeAnimationOptions options)
@@ -52,7 +51,7 @@ namespace LaserAPI.Models.Helper.LaserAnimations
                             GetAnimationSetting(rotatedPoints,
                                 patternAnimationUuid, options.CenterX, options.CenterY, options.Rotation, options.Scale, 0),
                             GetAnimationSetting(rotatedPoints,
-                                patternAnimationUuid, options.CenterX, options.CenterY, options.Rotation, options.Scale, Convert.ToInt32(1800 / Speed)),
+                                patternAnimationUuid, options.CenterX, options.CenterY, options.Rotation, options.Scale, Convert.ToInt32(1800 / options.Speed)),
                         }
                     }
                 }

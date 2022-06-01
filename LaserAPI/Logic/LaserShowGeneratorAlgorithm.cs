@@ -177,13 +177,12 @@ namespace LaserAPI.Logic
                 CenterX = new Random(Guid.NewGuid().GetHashCode()).Next(-1000, 1000),
                 CenterY = new Random(Guid.NewGuid().GetHashCode()).Next(-1000, 1000),
                 Rotation = new Random(Guid.NewGuid().GetHashCode()).Next(0, 361),
-                Scale = NumberHelper.GetRandomDouble(0.4, 1)
+                Scale = NumberHelper.GetRandomDouble(0.4, 1),
+                Speed = GetSpeedFromGenre(_songData.MusicGenre)
             };
 
             int patternIndex = new Random(Guid.NewGuid().GetHashCode()).Next(0, _animations.Count);
             IPreMadeLaserAnimation preMadeAnimation = _animations[patternIndex];
-            preMadeAnimation.Speed = GetSpeedFromGenre(_songData.MusicGenre);
-
             return preMadeAnimation.GetAnimation(options);
         }
 

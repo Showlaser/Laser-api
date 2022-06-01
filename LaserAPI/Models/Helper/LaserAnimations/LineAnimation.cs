@@ -6,8 +6,6 @@ namespace LaserAPI.Models.Helper.LaserAnimations
 {
     public class LineAnimation : PreMadeAnimation, IPreMadeLaserAnimation
     {
-        public double Speed { get; set; }
-
         public string AnimationName => "LineAnimation";
 
         public AnimationDto GetAnimation(PreMadeAnimationOptions options)
@@ -41,7 +39,7 @@ namespace LaserAPI.Models.Helper.LaserAnimations
                                     GetPoint(-4000, 0),
                                     GetPoint(4000, 0),
                                 },
-                                patternAnimationUuid, options.CenterX, options.CenterY, options.Rotation, options.Scale, Convert.ToInt32(1800 / Speed)),
+                                patternAnimationUuid, options.CenterX, options.CenterY, options.Rotation, options.Scale, Convert.ToInt32(1800 / options.Speed)),
                         }
                     }
                 }

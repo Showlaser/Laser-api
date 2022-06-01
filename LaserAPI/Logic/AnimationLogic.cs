@@ -217,28 +217,49 @@ namespace LaserAPI.Logic
         private static bool PointsValid(List<AnimationPointDto> points)
         {
             return points.Any() && points.TrueForAll(p =>
-            p.PatternAnimationSettingsUuid != Guid.Empty &&
-                       p.Y.IsBetweenOrEqualTo(-4000, 4000) &&
-                       p.X.IsBetweenOrEqualTo(-4000, 4000) &&
-                       p.RedLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
-                       p.GreenLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
-                       p.BlueLaserPowerPwm.IsBetweenOrEqualTo(0, 255));
+            {
+                bool valid = p.PatternAnimationSettingsUuid != Guid.Empty &&
+                             p.Y.IsBetweenOrEqualTo(-4000, 4000) &&
+                             p.X.IsBetweenOrEqualTo(-4000, 4000) &&
+                             p.RedLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
+                             p.GreenLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
+                             p.BlueLaserPowerPwm.IsBetweenOrEqualTo(0, 255);
+                if (!valid)
+                {
+                    Console.WriteLine();
+                }
+                return valid;
+            });
         }
 
         private static bool SettingsValid(List<PatternAnimationSettingsDto> settings)
         {
             return settings.TrueForAll(setting =>
-               setting.CenterX.IsBetweenOrEqualTo(-4000, 4000) &&
-                       setting.CenterY.IsBetweenOrEqualTo(-4000, 4000) &&
-                       setting.Scale.IsBetweenOrEqualTo(0.1, 1));
+            {
+                bool valid = setting.CenterX.IsBetweenOrEqualTo(-4000, 4000) &&
+                    setting.CenterY.IsBetweenOrEqualTo(-4000, 4000) &&
+                    setting.Scale.IsBetweenOrEqualTo(0.1, 1);
+                if (!valid)
+                {
+                    Console.WriteLine();
+                }
+                return valid;
+            });
         }
 
         private static bool PatternAnimationValid(List<PatternAnimationDto> patternAnimations)
         {
             return patternAnimations.TrueForAll(patternAnimation =>
-                patternAnimation.AnimationUuid != Guid.Empty &&
-                patternAnimation.TimeLineId.IsBetweenOrEqualTo(0, 3) &&
-                patternAnimation.Uuid != Guid.Empty);
+            {
+                bool valid = patternAnimation.AnimationUuid != Guid.Empty &&
+                             patternAnimation.TimeLineId.IsBetweenOrEqualTo(0, 3) &&
+                             patternAnimation.Uuid != Guid.Empty;
+                if (!valid)
+                {
+                    Console.WriteLine();
+                }
+                return valid;
+            });
         }
 
         /// <summary>

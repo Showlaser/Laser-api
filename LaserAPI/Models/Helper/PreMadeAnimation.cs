@@ -19,13 +19,13 @@ namespace LaserAPI.Models.Helper
         /// <param name="center"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        internal static int FixBoundary(int center, int value)
+        public static int FixBoundary(int center, int value)
         {
             if (value + center > 4000)
             {
                 value = 4000;
             }
-            if (value + center < -4000)
+            if (value - center < -4000)
             {
                 value = -4000;
             }
@@ -91,7 +91,16 @@ namespace LaserAPI.Models.Helper
             for (int i = 0; i < pointsLength; i++)
             {
                 AnimationPointDto point = points[i];
+                point.Order = i;
+                point.X = FixBoundary(centerX, point.X);
+                point.Y = FixBoundary(centerY, point.Y);
                 point.PatternAnimationSettingsUuid = uuid;
+
+                if (point.X > 4000 || point.X < -4000 || point.Y > 4000 || point.Y < -4000)
+                {
+                    Console.WriteLine(centerX);
+                    Console.WriteLine(centerY);
+                }
             }
 
             return new PatternAnimationSettingsDto
