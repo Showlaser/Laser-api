@@ -1,3 +1,4 @@
+using System;
 using LaserAPI.Dal;
 using LaserAPI.Interfaces.Dal;
 using LaserAPI.Logic;
@@ -108,24 +109,35 @@ namespace LaserAPI
             timer.Start();
         }
 
+        private static bool NetworkInterfaceHasEthernetAccess(NetworkInterface networkInterface)
+        {
+            return networkInterface.OperationalStatus == OperationalStatus.Up &&
+                   networkInterface.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                   networkInterface.NetworkInterfaceType == NetworkInterfaceType.Ethernet ||
+                   networkInterface.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 &&
+                   networkInterface.GetIPProperties().GatewayAddresses.Any();
+        }
+
         private static void SetCurrentIpAddress()
         {
-            System.Net.IPAddress currentIpAddress = NetworkInterface
+            string currentIpAddress = NetworkInterface
                 .GetAllNetworkInterfaces()
-                .Where(n => n.OperationalStatus == OperationalStatus.Up)
-                .Where(n => n.NetworkInterfaceType != NetworkInterfaceType.Loopback && n.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
-                .FirstOrDefault(n => n.GetIPProperties().GatewayAddresses
-                    .Any())
-                .GetIPProperties().UnicastAddresses.FirstOrDefault().Address;
-            LaserConnectionLogic.ComputerIpAddress = currentIpAddress.ToString();
+                .FirstOrDefault(n => NetworkInterfaceHasEthernetAccess(n) && !n.Description.ToLower()
+                    .Contains("virtual"))
+                ?.GetIPProperties()
+                .GatewayAddresses
+                .FirstOrDefault()
+                ?.Address.ToString();
 
-            if (string.IsNullOrEmpty(LaserConnectionLogic.ComputerIpAddress))
+            if (string.IsNullOrEmpty(currentIpAddress))
             {
                 throw new ConnectionAbortedException("This computer is not connected to a local network. This application need access to an LAN network to function.");
 
                 //string errorMessage = "Could not connect to client software, start it first before starting this application!";
                 //throw new NoClientSoftwareFoundException(errorMessage);
             }
+
+            LaserConnectionLogic.ComputerIpAddress = currentIpAddress;
         }
 
         /// <summary>
