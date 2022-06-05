@@ -1,4 +1,3 @@
-using System;
 using LaserAPI.Dal;
 using LaserAPI.Interfaces.Dal;
 using LaserAPI.Logic;
@@ -12,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.Json.Serialization;
@@ -120,7 +120,7 @@ namespace LaserAPI
 
         private static void SetCurrentIpAddress()
         {
-            string currentIpAddress = NetworkInterface
+            /*string currentIpAddress = NetworkInterface
                 .GetAllNetworkInterfaces()
                 .FirstOrDefault(n => NetworkInterfaceHasEthernetAccess(n) && !n.Description.ToLower()
                     .Contains("virtual"))
@@ -128,7 +128,8 @@ namespace LaserAPI
                 .GatewayAddresses
                 .FirstOrDefault()
                 ?.Address.ToString();
-
+            */
+            string currentIpAddress = "192.168.1.31";
             if (string.IsNullOrEmpty(currentIpAddress))
             {
                 throw new ConnectionAbortedException("This computer is not connected to a local network. This application need access to an LAN network to function.");
