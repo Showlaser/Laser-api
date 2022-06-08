@@ -2,6 +2,7 @@
 {
     public enum MusicGenre
     {
+        Unsupported,
         Hardstyle,
         Hardcore,
         Classic,

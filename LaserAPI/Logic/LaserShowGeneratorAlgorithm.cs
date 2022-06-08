@@ -58,10 +58,10 @@ namespace LaserAPI.Logic
             try
             {
                 bool songChanged = _currentPlayingSongName != _songData.SongName && !string.IsNullOrEmpty(_currentPlayingSongName);
-                if (_songData.SaveLasershow && !_stopwatch.IsRunning)
-                {
-                    _stopwatch.Start();
-                }
+                /* if (_songData.SaveLasershow && !_stopwatch.IsRunning)
+                  {
+                      _stopwatch.Start();
+                  }*/
 
                 if (!_songData.IsPlaying && _stopwatch.IsRunning)
                 {
@@ -189,46 +189,30 @@ namespace LaserAPI.Logic
         /// <summary>
         /// Gets the music genre from the genres. The most occurring genre will be returned.
         /// </summary>
-        /// <param name="spotifyMusicGenres">The music genre collection from Spotify</param>
         /// <returns>The most occurring genre</returns>
-        public static MusicGenre GetMusicGenreFromSpotifyGenre(List<string> spotifyMusicGenres)
+        public static MusicGenre GetMusicGenreFromSpotifyGenre(List<string> spotifyGenres)
         {
-            string[] genres = Enum.GetNames(typeof(MusicGenre));
-            int genresLength = genres.Length;
-
-            List<GenresSorter> genreOccurrences = new();
-            int spotifyMusicGenresLength = spotifyMusicGenres.Count;
-            for (int i = 0; i < genresLength; i++)
-            {
-                genres[i] = genres[i].ToLower();
-                string genre = genres[i];
-                for (int j = 0; j < spotifyMusicGenresLength; j++)
+            List<MusicGenre> supportedGenres = Enum.GetValues<MusicGenre>().ToList();
+            IEnumerable<MusicGenre> supportedGenresFromSpotify = spotifyGenres
+                .SelectMany(sg => supportedGenres.FindAll(spg =>
                 {
-                    string spotifyMusicGenre = spotifyMusicGenres[j].ToLower();
-                    if (!spotifyMusicGenre.Contains(genre))
-                    {
-                        continue;
-                    }
+                    bool supportedGenreDetected = sg.ToLower().Contains(spg.ToString().ToLower());
+                    return supportedGenreDetected;
+                }));
 
-                    int sorterIndex = genreOccurrences.FindIndex(g => g.Genre == genre);
-                    if (sorterIndex == -1)
-                    {
-                        genreOccurrences.Add(new GenresSorter(genre, 1));
-                    }
-                    else
-                    {
-                        genreOccurrences[sorterIndex].Occurrences++;
-                    }
-                }
-            }
-
-            GenresSorter sorter = genreOccurrences.MaxBy(go => go.Occurrences);
-            if (sorter == null)
+            Dictionary<MusicGenre, int> genreOccurrenceDictionary = new();
+            foreach (MusicGenre genre in supportedGenresFromSpotify)
             {
-                return default;
+                if (!genreOccurrenceDictionary.ContainsKey(genre))
+                {
+                    genreOccurrenceDictionary.Add(genre, 0);
+                }
+
+                genreOccurrenceDictionary[genre]++;
             }
 
-            return (MusicGenre)Enum.Parse(typeof(MusicGenre), sorter.Genre, true);
+            return !genreOccurrenceDictionary.Keys.Any() ? MusicGenre.Unsupported :
+                genreOccurrenceDictionary.MaxBy(god => god.Value).Key;
         }
 
         private static int GetSpeedFromGenre(MusicGenre genre)
@@ -243,6 +227,7 @@ namespace LaserAPI.Logic
                 MusicGenre.Trance => 7,
                 MusicGenre.Rock => 6,
                 MusicGenre.House => 6,
+                MusicGenre.Unsupported => 6,
                 _ => throw new ArgumentOutOfRangeException(nameof(genre), genre, null)
             };
         }
