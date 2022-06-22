@@ -13,12 +13,10 @@ namespace LaserAPI.Controllers
     [ApiController]
     public class LasershowGeneratorController : ControllerBase
     {
-        private readonly LaserShowGeneratorLogic _lasershowGeneratorLogic;
         private readonly ControllerResultHandler _controllerResultHandler;
 
-        public LasershowGeneratorController(LaserShowGeneratorLogic lasershowGeneratorLogic, ControllerResultHandler controllerResultHandler)
+        public LasershowGeneratorController(ControllerResultHandler controllerResultHandler)
         {
-            _lasershowGeneratorLogic = lasershowGeneratorLogic;
             _controllerResultHandler = controllerResultHandler;
         }
 
@@ -27,7 +25,7 @@ namespace LaserAPI.Controllers
         {
             IEnumerable<string> Action()
             {
-                MMDeviceCollection devices = _lasershowGeneratorLogic.LaserShowGeneratorAlgorithm.GetDevices();
+                MMDeviceCollection devices = LaserShowGeneratorAlgorithm.GetDevices();
                 return devices.Select(d => d.FriendlyName);
             }
 
@@ -38,7 +36,7 @@ namespace LaserAPI.Controllers
         [HttpGet("status")]
         public ActionResult<LaserGeneratorStatusViewmodel> GetStatus()
         {
-            return _controllerResultHandler.Execute(() => _lasershowGeneratorLogic.LaserShowGeneratorAlgorithm.GetStatus);
+            return _controllerResultHandler.Execute(() => LaserShowGeneratorAlgorithm.GetStatus);
         }
 
         [HttpPost("start")]
@@ -46,8 +44,8 @@ namespace LaserAPI.Controllers
         {
             void Action()
             {
-                _lasershowGeneratorLogic.LaserShowGeneratorAlgorithm.SetSongData(songData);
-                _lasershowGeneratorLogic.LaserShowGeneratorAlgorithm.Start(deviceName);
+                LaserShowGeneratorAlgorithm.SetSongData(songData);
+                LaserShowGeneratorAlgorithm.Start(deviceName);
             }
 
             _controllerResultHandler.Execute(Action);
@@ -56,13 +54,13 @@ namespace LaserAPI.Controllers
         [HttpPost("stop")]
         public void Stop()
         {
-            _controllerResultHandler.Execute(_lasershowGeneratorLogic.LaserShowGeneratorAlgorithm.Stop);
+            _controllerResultHandler.Execute(LaserShowGeneratorAlgorithm.Stop);
         }
 
         [HttpPost("data")]
         public void SetSongData([FromBody] SongData songData)
         {
-            _controllerResultHandler.Execute(() => _lasershowGeneratorLogic.LaserShowGeneratorAlgorithm.SetSongData(songData));
+            _controllerResultHandler.Execute(() => LaserShowGeneratorAlgorithm.SetSongData(songData));
         }
     }
 }

@@ -49,7 +49,7 @@ namespace LaserAPITests.Tests.Logic
 
                 preMadeAnimation.PatternAnimations.ForEach(pa =>
                 {
-                    Assert.IsTrue();
+                    Assert.IsTrue(true); //todo do something
                     pa.AnimationSettings.ForEach(ast => { Assert.IsTrue(ast.PatternAnimationUuid == pa.Uuid); });
                 });
             }
