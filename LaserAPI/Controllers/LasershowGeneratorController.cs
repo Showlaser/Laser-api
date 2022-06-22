@@ -23,7 +23,7 @@ namespace LaserAPI.Controllers
         [HttpGet("devices")]
         public ActionResult<IEnumerable<string>> GetDevices()
         {
-            IEnumerable<string> Action()
+            static IEnumerable<string> Action()
             {
                 MMDeviceCollection devices = LaserShowGeneratorAlgorithm.GetDevices();
                 return devices.Select(d => d.FriendlyName);

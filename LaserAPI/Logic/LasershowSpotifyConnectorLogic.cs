@@ -46,5 +46,10 @@ namespace LaserAPI.Logic
         {
             return await _lasershowSpotifyConnectorDal.All();
         }
+
+        public async Task<LasershowSpotifyConnectorDto> Find(string spotifyId)
+        {
+            return await _lasershowSpotifyConnectorDal.Find(spotifyId);
+        }
     }
 }
