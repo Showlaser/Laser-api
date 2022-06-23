@@ -33,6 +33,12 @@ namespace LaserAPI.Dal
             return await _context.LasershowSpotifyConnector.AnyAsync(c => c.LasershowUuid == lasershowUuid);
         }
 
+        public async Task<LasershowSpotifyConnectorDto> Find(string spotifyId)
+        {
+            return await _context.LasershowSpotifyConnector.FirstOrDefaultAsync(lsc =>
+                lsc.SpotifySongs.Any(ss => ss.SpotifySongId == spotifyId));
+        }
+
         public async Task<bool> SongsExistsInAnotherLasershow(List<string> spotifySongIds, Guid currentLasershowUuid)
         {
             return await _context.LasershowSpotifyConnector.AnyAsync(lsc =>
