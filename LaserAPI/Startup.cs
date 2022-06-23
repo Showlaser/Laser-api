@@ -161,7 +161,7 @@ namespace LaserAPI
                 .FirstOrDefault()
                 ?.Address.ToString();
             */
-            string currentIpAddress = "192.168.1.31";
+            string currentIpAddress = "172.25.147.4";
             if (string.IsNullOrEmpty(currentIpAddress))
             {
                 throw new ConnectionAbortedException("This computer is not connected to a local network. This application need access to an LAN network to function.");
