@@ -1,24 +1,45 @@
-﻿using System.Threading.Tasks;
-using LaserAPI.Logic;
+﻿using LaserAPI.Logic;
+using LaserAPI.Models.Dto.LasershowSpotify;
 using LaserAPI.Models.FromFrontend.LasershowGenerator;
+using System.Threading.Tasks;
 
 namespace LaserAPI.Models.Helper
 {
     public class LasershowGeneratorConnectedSongSelector
     {
-        private readonly LasershowSpotifyConnectorLogic _lasershowSpotifyConnectorLogic;
+        private readonly bool _algorithmIsRunning;
 
-        public LasershowGeneratorConnectedSongSelector(LasershowSpotifyConnectorLogic lasershowSpotifyConnectorLogic)
+        public void Start(SongData songData, string deviceName)
         {
-            _lasershowSpotifyConnectorLogic = lasershowSpotifyConnectorLogic;
+            LaserShowGeneratorAlgorithm.SetSongData(songData);
+            LaserShowGeneratorAlgorithm.Start(deviceName);
         }
 
-        public async Task Select(SongData songData)
+        public void Stop()
         {
-            var result = await _lasershowSpotifyConnectorLogic.Find(songData.SongId);
-            result[0].SpotifySongs[0].SpotifySongId
+            LaserShowGeneratorAlgorithm.Stop();
+        }
 
-            songData.
+        public async Task Select(SongData songData, LasershowSpotifyConnectorLogic lasershowSpotifyConnectorLogic)
+        {
+            LasershowSpotifyConnectorDto existingSpotifyConnector = await lasershowSpotifyConnectorLogic.Find(songData.SongId);
+            if (existingSpotifyConnector == null)
+            {
+                await GenerateLiveLaserShow();
+            }
+            else
+            {
+                await PlayConnectedSong();
+            }
+        }
+
+        public async Task GenerateLiveLaserShow()
+        {
+        }
+
+        public async Task PlayConnectedSong()
+        {
+
         }
     }
 }

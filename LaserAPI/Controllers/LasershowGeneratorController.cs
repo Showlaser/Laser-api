@@ -14,10 +14,13 @@ namespace LaserAPI.Controllers
     public class LasershowGeneratorController : ControllerBase
     {
         private readonly ControllerResultHandler _controllerResultHandler;
+        private readonly LasershowGeneratorConnectedSongSelector _lasershowGeneratorConnectedSongSelector;
 
-        public LasershowGeneratorController(ControllerResultHandler controllerResultHandler)
+        public LasershowGeneratorController(ControllerResultHandler controllerResultHandler,
+            LasershowGeneratorConnectedSongSelector lasershowGeneratorConnectedSongSelector)
         {
             _controllerResultHandler = controllerResultHandler;
+            _lasershowGeneratorConnectedSongSelector = lasershowGeneratorConnectedSongSelector;
         }
 
         [HttpGet("devices")]
@@ -42,19 +45,13 @@ namespace LaserAPI.Controllers
         [HttpPost("start")]
         public void Start([FromBody] SongData songData, [FromQuery] string deviceName)
         {
-            void Action()
-            {
-                LaserShowGeneratorAlgorithm.SetSongData(songData);
-                LaserShowGeneratorAlgorithm.Start(deviceName);
-            }
-
-            _controllerResultHandler.Execute(Action);
+            _controllerResultHandler.Execute(() => _lasershowGeneratorConnectedSongSelector.Start(songData, deviceName));
         }
 
         [HttpPost("stop")]
         public void Stop()
         {
-            _controllerResultHandler.Execute(LaserShowGeneratorAlgorithm.Stop);
+            _controllerResultHandler.Execute(_lasershowGeneratorConnectedSongSelector.Stop);
         }
 
         [HttpPost("data")]

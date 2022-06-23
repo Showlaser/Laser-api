@@ -31,12 +31,15 @@ namespace LaserAPI.Controllers
         }
 
         [HttpPost("serial")]
-        public ActionResult SendSerialMessageToLaser([FromQuery] string comport, [FromQuery] string message)
+        public ActionResult SendSerialMessageToLaser([FromQuery] string comport, [FromQuery] string ip)
         {
             void Action()
             {
                 LaserConnectionLogic.ConnectSerial(comport);
-                LaserConnectionLogic.SetLaserSettingsBySerial(message);
+                LaserConnectionLogic.SetLaserSettingsBySerial(Newtonsoft.Json.JsonConvert.SerializeObject(new
+                {
+                    ip
+                }));
             }
 
             return _controllerResultHandler.Execute(Action);

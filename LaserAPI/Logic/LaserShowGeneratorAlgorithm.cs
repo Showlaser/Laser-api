@@ -16,7 +16,7 @@ namespace LaserAPI.Logic
 {
     public class LaserShowGeneratorAlgorithm
     {
-        private static AudioAnalyser _audioAnalyser = new ();
+        private static readonly AudioAnalyser _audioAnalyser = new();
         private static double[] _spectrumData;
         private static SongData _songData = new();
         private static AlgorithmSettings _algorithmSettings = new();
@@ -26,7 +26,7 @@ namespace LaserAPI.Logic
         private static AnimationDto _generatedLaserShow = new();
         private static readonly Stopwatch Stopwatch = new();
 
-        public LaserShowGeneratorAlgorithm(AudioAnalyser audioAnalyser)
+        public static void Setup()
         {
             _generatedLaserShow.PatternAnimations = new List<PatternAnimationDto>();
             List<Type> types = AppDomain.CurrentDomain.GetAssemblies()
@@ -158,14 +158,26 @@ namespace LaserAPI.Logic
 
         private static void OnAnimationDisplay()
         {
-            AnimationDto animation = GenerateLaserAnimation();
-            AnimationLogic.PlayAnimation(animation);
-
-            if (_songData.SaveLasershow)
+            if (!Animations.Any())
             {
-                PatternAnimationDto patternAnimation = animation.PatternAnimations[0];
-                patternAnimation.StartTimeOffset = Convert.ToInt32(Stopwatch.ElapsedMilliseconds);
-                _generatedLaserShow.PatternAnimations.Add(patternAnimation);
+                Setup();
+            }
+
+            try
+            {
+                AnimationDto animation = GenerateLaserAnimation();
+                AnimationLogic.PlayAnimation(animation);
+
+                if (_songData.SaveLasershow)
+                {
+                    PatternAnimationDto patternAnimation = animation.PatternAnimations[0];
+                    patternAnimation.StartTimeOffset = Convert.ToInt32(Stopwatch.ElapsedMilliseconds);
+                    _generatedLaserShow.PatternAnimations.Add(patternAnimation);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
         }
 
@@ -210,7 +222,7 @@ namespace LaserAPI.Logic
                 genreOccurrenceDictionary[genre]++;
             }
 
-            return genreOccurrenceDictionary.Keys.Any() ? 
+            return genreOccurrenceDictionary.Keys.Any() ?
                 genreOccurrenceDictionary.MaxBy(god => god.Value).Key :
                 MusicGenre.Unsupported;
         }
@@ -236,8 +248,8 @@ namespace LaserAPI.Logic
         {
             return genre.ToString().ToLower() switch
             {
-                "hardstyle" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.02 },
-                "hardcore" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.02 },
+                "hardstyle" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.015 },
+                "hardcore" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.015 },
                 "classic" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
                 "techno" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
                 "metal" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },

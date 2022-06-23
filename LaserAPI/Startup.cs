@@ -1,9 +1,9 @@
-using System;
 using LaserAPI.Dal;
 using LaserAPI.Interfaces.Dal;
 using LaserAPI.Logic;
 using LaserAPI.Logic.Fft_algorithm;
 using LaserAPI.Logic.Game;
+using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.Helper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Connections;
@@ -12,11 +12,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.Json.Serialization;
 using System.Timers;
-using LaserAPI.Models.Dto.Animations;
 using Timer = System.Timers.Timer;
 
 namespace LaserAPI
@@ -58,6 +58,7 @@ namespace LaserAPI
             services.AddScoped<ZoneLogic>();
             services.AddSingleton<AudioAnalyser>();
             services.AddSingleton<LaserShowGeneratorAlgorithm>();
+            services.AddSingleton<LasershowGeneratorConnectedSongSelector>();
             services.AddScoped<GameLogic>();
             services.AddTransient<ControllerResultHandler>();
             services.AddSingleton<GameStateLogic>();
@@ -136,7 +137,7 @@ namespace LaserAPI
                 .GetRequiredService<IServiceScopeFactory>()
                 .CreateScope();
             ZoneLogic zoneLogic = serviceScope.ServiceProvider.GetService<ZoneLogic>();
-            var zones = zoneLogic.All().Result;
+            System.Collections.Generic.List<Models.Dto.Zones.ZoneDto> zones = zoneLogic.All().Result;
             ProjectionZonesLogic.Zones = zones;
         }
 
@@ -160,7 +161,7 @@ namespace LaserAPI
                 .FirstOrDefault()
                 ?.Address.ToString();
             */
-            string currentIpAddress = "172.25.147.3";
+            string currentIpAddress = "192.168.1.31";
             if (string.IsNullOrEmpty(currentIpAddress))
             {
                 throw new ConnectionAbortedException("This computer is not connected to a local network. This application need access to an LAN network to function.");

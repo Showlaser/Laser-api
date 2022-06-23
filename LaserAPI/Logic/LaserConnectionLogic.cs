@@ -165,6 +165,7 @@ namespace LaserAPI.Logic
 
         public static void SetLaserSettingsBySerial(string json)
         {
+            Console.WriteLine("Attempting to save settings");
             if (!SerialPort.IsOpen)
             {
                 throw new ConnectionAbortedException("No connection to the com device was available");
@@ -186,6 +187,8 @@ namespace LaserAPI.Logic
             {
                 throw new InvalidOperationException("The laser was not in settings mode!");
             }
+
+            Console.WriteLine("Settings saved!");
         }
     }
 }
