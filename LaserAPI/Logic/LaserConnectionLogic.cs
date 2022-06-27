@@ -14,7 +14,6 @@ namespace LaserAPI.Logic
     {
         public static string ComputerIpAddress { get; set; }
         public static LaserMessage PreviousMessage { get; set; } = new();
-        public static string ConnectionMethod { get; set; }
         public static string ComPort { get; set; }
         public static bool ConnectionPending { get; private set; }
         private static TcpListener _server;
@@ -113,29 +112,12 @@ namespace LaserAPI.Logic
                 }
             }
 
-            switch (ConnectionMethod)
+            if (TcpClient?.Connected is null || !TcpClient.Connected)
             {
-                case "Network":
-                {
-                    if (TcpClient?.Connected is null || !TcpClient.Connected)
-                    {
-                        NetworkConnect();
-                    }
-
-                    await SendNetworkDataToLaser(commando);
-                    break;
-                }
-                case "Usb":
-                {
-                    if (!SerialPort.IsOpen)
-                    {
-                        ConnectSerial(ComPort);
-                    }
-
-                    SendSerialDataToLaser(commando);
-                    break;
-                }
+                NetworkConnect();
             }
+
+            await SendNetworkDataToLaser(commando);
         }
 
         private static async Task SendNetworkDataToLaser(LaserCommando commando)
@@ -180,22 +162,6 @@ namespace LaserAPI.Logic
             SerialPort.PortName = portName;
             SerialPort.BaudRate = 9600;
             SerialPort.Open();
-        }
-
-        public static void SendSerialDataToLaser(LaserCommando commando)
-        {
-            try
-            {
-                byte[] messageBytes = Utf8Json.JsonSerializer.Serialize(commando);
-                SerialPort.Write(messageBytes, 0, messageBytes.Length);
-                _lastSendMessages = messageBytes;
-                LaserAvailableDateTime = DateTime.Now.AddMilliseconds(commando.DurationInMilliseconds);
-                PreviousMessage = commando.Messages[^1];
-            }
-            catch (Exception)
-            {
-                NetworkConnect();
-            }
         }
 
         public static void SetLaserSettingsBySerial(string json)
