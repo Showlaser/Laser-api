@@ -12,5 +12,6 @@ namespace LaserAPI.Models.FromFrontend.LasershowGenerator
         public bool SaveLasershow { get; set; }
         public MusicGenre MusicGenre { get; set; }
         public bool IsPlaying { get; set; }
+        public double ThreshHoldOffset { get; set; }
     }
 }

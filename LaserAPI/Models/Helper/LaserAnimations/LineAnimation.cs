@@ -39,7 +39,7 @@ namespace LaserAPI.Models.Helper.LaserAnimations
                                     GetPoint(-4000, 0),
                                     GetPoint(4000, 0),
                                 },
-                                patternAnimationUuid, options.CenterX, options.CenterY, options.Rotation, options.Scale, Convert.ToInt32(1800 / options.Speed)),
+                                patternAnimationUuid, options.CenterX, options.CenterY, options.Rotation, options.Scale, Convert.ToInt32(2200 / options.Speed)),
                         }
                     }
                 }

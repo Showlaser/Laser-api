@@ -51,7 +51,7 @@ namespace LaserAPI.Models.Helper.LaserAnimations
                             GetAnimationSetting(rotatedPoints,
                                 patternAnimationUuid, options.CenterX, options.CenterY, options.Rotation, options.Scale, 0),
                             GetAnimationSetting(rotatedPoints,
-                                patternAnimationUuid, options.CenterX, options.CenterY, options.Rotation, options.Scale, Convert.ToInt32(1800 / options.Speed)),
+                                patternAnimationUuid, options.CenterX, options.CenterY, options.Rotation, options.Scale, Convert.ToInt32(2200 / options.Speed)),
                         }
                     }
                 }

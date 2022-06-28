@@ -57,29 +57,6 @@ namespace LaserAPI.Controllers
             return _controllerResultHandler.Execute(Action);
         }
 
-        [HttpPost("connection-method")]
-        public void SetConnectionMethod([FromQuery] string connectionMethod, [FromQuery] string comPort)
-        {
-            void Action()
-            {
-                bool connectionMethodIsValid = connectionMethod == "Network" || connectionMethod == "Usb";
-                bool comPortIsValid = !string.IsNullOrEmpty(comPort) && comPort.Contains("COM");
-                if (!connectionMethodIsValid || !comPortIsValid)
-                {
-                    throw new InvalidDataException();
-                }
-
-                if (connectionMethod == "Usb")
-                {
-                    LaserConnectionLogic.ComPort = comPort;
-                }
-
-                LaserConnectionLogic.ConnectionMethod = connectionMethod;
-            }
-
-            _controllerResultHandler.Execute(Action);
-        }
-
         [HttpGet("current-com-device")]
         public ActionResult<string> GetCurrentComDevice()
         {

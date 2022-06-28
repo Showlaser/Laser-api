@@ -56,11 +56,6 @@ namespace LaserAPI.Logic
             try
             {
                 bool songChanged = _currentPlayingSongName != _songData.SongName && !string.IsNullOrEmpty(_currentPlayingSongName);
-                /* if (_songData.SaveLasershow && !_stopwatch.IsRunning)
-                  {
-                      _stopwatch.Start();
-                  }*/
-
                 if (!_songData.IsPlaying && Stopwatch.IsRunning)
                 {
                     Stopwatch.Stop();
@@ -149,7 +144,7 @@ namespace LaserAPI.Logic
 
             average /= frequencyRangeValues.Count;
 
-            bool displayAnimation = average > _algorithmSettings.Threshold;
+            bool displayAnimation = average > _algorithmSettings.Threshold + _songData.ThreshHoldOffset;
             if (displayAnimation && LaserConnectionLogic.LaserIsAvailable())
             {
                 OnAnimationDisplay();
@@ -248,14 +243,14 @@ namespace LaserAPI.Logic
         {
             return genre.ToString().ToLower() switch
             {
-                "hardstyle" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.015 },
-                "hardcore" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.015 },
+                "hardstyle" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.018 },
+                "hardcore" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.018 },
                 "classic" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
                 "techno" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
                 "metal" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
                 "trance" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
                 "rock" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
-                "house" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.01 },
+                "house" => new AlgorithmSettings { FrequencyRange = new Range(2, 3), Threshold = 0.018 },
                 _ => null
             };
         }
