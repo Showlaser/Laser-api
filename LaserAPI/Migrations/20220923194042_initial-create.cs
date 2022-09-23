@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using System;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace LaserAPI.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class initialcreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -22,12 +22,27 @@ namespace LaserAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "LasershowSpotifyConnector",
+                columns: table => new
+                {
+                    Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
+                    LasershowUuid = table.Column<Guid>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LasershowSpotifyConnector", x => x.Uuid);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Pattern",
                 columns: table => new
                 {
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Scale = table.Column<double>(type: "REAL", nullable: false)
+                    Scale = table.Column<double>(type: "REAL", nullable: false),
+                    XOffset = table.Column<int>(type: "INTEGER", nullable: false),
+                    YOffset = table.Column<int>(type: "INTEGER", nullable: false),
+                    Rotation = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,6 +84,25 @@ namespace LaserAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "LasershowSpotifyConnectorSongDto",
+                columns: table => new
+                {
+                    Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
+                    LasershowSpotifyConnectorUuid = table.Column<Guid>(type: "TEXT", nullable: false),
+                    SpotifySongId = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LasershowSpotifyConnectorSongDto", x => x.Uuid);
+                    table.ForeignKey(
+                        name: "FK_LasershowSpotifyConnectorSongDto_LasershowSpotifyConnector_LasershowSpotifyConnectorUuid",
+                        column: x => x.LasershowSpotifyConnectorUuid,
+                        principalTable: "LasershowSpotifyConnector",
+                        principalColumn: "Uuid",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Point",
                 columns: table => new
                 {
@@ -79,7 +113,8 @@ namespace LaserAPI.Migrations
                     RedLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
                     GreenLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
                     BlueLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
-                    Order = table.Column<int>(type: "INTEGER", nullable: false)
+                    ConnectedToPointOrderNr = table.Column<int>(type: "INTEGER", nullable: false),
+                    OrderNr = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -166,6 +201,11 @@ namespace LaserAPI.Migrations
                 column: "PatternAnimationSettingsUuid");
 
             migrationBuilder.CreateIndex(
+                name: "IX_LasershowSpotifyConnectorSongDto_LasershowSpotifyConnectorUuid",
+                table: "LasershowSpotifyConnectorSongDto",
+                column: "LasershowSpotifyConnectorUuid");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PatternAnimation_AnimationUuid",
                 table: "PatternAnimation",
                 column: "AnimationUuid");
@@ -192,6 +232,9 @@ namespace LaserAPI.Migrations
                 name: "AnimationPoint");
 
             migrationBuilder.DropTable(
+                name: "LasershowSpotifyConnectorSongDto");
+
+            migrationBuilder.DropTable(
                 name: "Point");
 
             migrationBuilder.DropTable(
@@ -199,6 +242,9 @@ namespace LaserAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "PatternAnimationSetting");
+
+            migrationBuilder.DropTable(
+                name: "LasershowSpotifyConnector");
 
             migrationBuilder.DropTable(
                 name: "Pattern");

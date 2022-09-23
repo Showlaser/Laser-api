@@ -1,10 +1,10 @@
-﻿using System.IO;
-using LaserAPI.Logic;
+﻿using LaserAPI.Logic;
 using LaserAPI.Models.Dto;
 using LaserAPI.Models.FromFrontend;
 using LaserAPI.Models.Helper;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 namespace LaserAPI.Controllers
 {
@@ -55,6 +55,27 @@ namespace LaserAPI.Controllers
             }
 
             return _controllerResultHandler.Execute(Action);
+        }
+
+        [HttpPost("connection-method")]
+        public void SetConnectionMethod([FromQuery] string connectionMethod, [FromQuery] string comPort)
+        {
+            void Action()
+            {
+                bool connectionMethodIsValid = connectionMethod == "Network" || connectionMethod == "Usb";
+                bool comPortIsValid = !string.IsNullOrEmpty(comPort) && comPort.Contains("COM");
+                if (!connectionMethodIsValid || !comPortIsValid)
+                {
+                    throw new InvalidDataException();
+                }
+
+                if (connectionMethod == "Usb")
+                {
+                    LaserConnectionLogic.ComPort = comPort;
+                }
+            }
+
+            _controllerResultHandler.Execute(Action);
         }
 
         [HttpGet("current-com-device")]
