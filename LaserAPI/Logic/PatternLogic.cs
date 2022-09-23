@@ -4,7 +4,6 @@ using LaserAPI.Models.Helper;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,28 +20,8 @@ namespace LaserAPI.Logic
             _laserLogic = laserLogic;
         }
 
-        private static bool ValidatePoints(List<PointDto> points)
-        {
-            return points.Any() && points.TrueForAll(p => p.PatternUuid != Guid.Empty &&
-                                                          p.Y.IsBetweenOrEqualTo(-4000, 4000) &&
-                                                          p.X.IsBetweenOrEqualTo(-4000, 4000) &&
-                                                          p.RedLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
-                                                          p.GreenLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
-                                                          p.BlueLaserPowerPwm.IsBetweenOrEqualTo(0, 255));
-        }
-
-        private static void ValidatePattern(PatternDto pattern)
-        {
-            bool patternValid = pattern != null && pattern.Scale.IsBetweenOrEqualTo(0.1, 1) && ValidatePoints(pattern.Points);
-            if (!patternValid)
-            {
-                throw new InvalidDataException(nameof(pattern));
-            };
-        }
-
         public async Task AddOrUpdate(PatternDto pattern)
         {
-            ValidatePattern(pattern);
             if (await _patternDal.Exists(pattern.Uuid))
             {
                 await _patternDal.Update(pattern);
@@ -54,8 +33,7 @@ namespace LaserAPI.Logic
 
         public async Task PlayPattern(PatternDto pattern)
         {
-            ValidatePattern(pattern);
-            pattern.Points = pattern.Points.OrderBy(p => p.Order).ToList();
+            pattern.Points = pattern.Points.OrderBy(p => p.OrderNr).ToList();
             IReadOnlyList<LaserMessage> messages = pattern.Points.Select(p =>
                 new LaserMessage(p.RedLaserPowerPwm, p.GreenLaserPowerPwm, p.BlueLaserPowerPwm, p.X, p.Y))
                 .ToList();
@@ -70,7 +48,6 @@ namespace LaserAPI.Logic
 
         public async Task Update(PatternDto pattern)
         {
-            ValidatePattern(pattern);
             await _patternDal.Update(pattern);
         }
 

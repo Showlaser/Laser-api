@@ -7,7 +7,10 @@ namespace LaserAPI.Models.Dto.Patterns
     {
         public Guid Uuid { get; set; }
         public string Name { get; set; }
-        public double Scale { get; set; } = 1;
+        public double Scale { get; set; }
+        public int XOffset { get; set; }
+        public int YOffset { get; set; }
+        public int Rotation { get; set; }
         public List<PointDto> Points { get; set; } = new();
     }
 }

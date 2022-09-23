@@ -1,10 +1,10 @@
-﻿using System.IO;
-using LaserAPI.Logic;
+﻿using LaserAPI.Logic;
 using LaserAPI.Models.Dto;
 using LaserAPI.Models.FromFrontend;
 using LaserAPI.Models.Helper;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 namespace LaserAPI.Controllers
 {
@@ -73,8 +73,6 @@ namespace LaserAPI.Controllers
                 {
                     LaserConnectionLogic.ComPort = comPort;
                 }
-
-                LaserConnectionLogic.ConnectionMethod = connectionMethod;
             }
 
             _controllerResultHandler.Execute(Action);
