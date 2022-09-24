@@ -113,7 +113,7 @@ namespace LaserAPI.Migrations
                     RedLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
                     GreenLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
                     BlueLaserPowerPwm = table.Column<int>(type: "INTEGER", nullable: false),
-                    ConnectedToPointOrderNr = table.Column<int>(type: "INTEGER", nullable: false),
+                    ConnectedToPointOrderNr = table.Column<int>(type: "INTEGER", nullable: true),
                     OrderNr = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>

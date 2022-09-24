@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LaserAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220923194042_initial-create")]
+    [Migration("20220924140104_initial-create")]
     partial class initialcreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -191,7 +191,7 @@ namespace LaserAPI.Migrations
                     b.Property<int>("BlueLaserPowerPwm")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ConnectedToPointOrderNr")
+                    b.Property<int?>("ConnectedToPointOrderNr")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("GreenLaserPowerPwm")

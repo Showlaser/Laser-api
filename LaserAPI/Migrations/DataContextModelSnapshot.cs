@@ -189,7 +189,7 @@ namespace LaserAPI.Migrations
                     b.Property<int>("BlueLaserPowerPwm")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ConnectedToPointOrderNr")
+                    b.Property<int?>("ConnectedToPointOrderNr")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("GreenLaserPowerPwm")
