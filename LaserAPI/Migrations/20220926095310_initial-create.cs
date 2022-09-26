@@ -39,6 +39,7 @@ namespace LaserAPI.Migrations
                 {
                     Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Image = table.Column<string>(type: "TEXT", nullable: true),
                     Scale = table.Column<double>(type: "REAL", nullable: false),
                     XOffset = table.Column<int>(type: "INTEGER", nullable: false),
                     YOffset = table.Column<int>(type: "INTEGER", nullable: false),
