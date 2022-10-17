@@ -10,18 +10,6 @@ namespace LaserAPI.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Animation",
-                columns: table => new
-                {
-                    Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Animation", x => x.Uuid);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "LasershowSpotifyConnector",
                 columns: table => new
                 {
@@ -61,27 +49,6 @@ namespace LaserAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Zone", x => x.Uuid);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PatternAnimation",
-                columns: table => new
-                {
-                    Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
-                    AnimationUuid = table.Column<Guid>(type: "TEXT", nullable: false),
-                    StartTimeOffset = table.Column<int>(type: "INTEGER", nullable: false),
-                    TimeLineId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PatternAnimation", x => x.Uuid);
-                    table.ForeignKey(
-                        name: "FK_PatternAnimation_Animation_AnimationUuid",
-                        column: x => x.AnimationUuid,
-                        principalTable: "Animation",
-                        principalColumn: "Uuid",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -150,6 +117,45 @@ namespace LaserAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Animation",
+                columns: table => new
+                {
+                    Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    PointUuid = table.Column<Guid>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Animation", x => x.Uuid);
+                    table.ForeignKey(
+                        name: "FK_Animation_Point_PointUuid",
+                        column: x => x.PointUuid,
+                        principalTable: "Point",
+                        principalColumn: "Uuid");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PatternAnimation",
+                columns: table => new
+                {
+                    Uuid = table.Column<Guid>(type: "TEXT", nullable: false),
+                    AnimationUuid = table.Column<Guid>(type: "TEXT", nullable: false),
+                    StartTimeOffset = table.Column<int>(type: "INTEGER", nullable: false),
+                    TimeLineId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PatternAnimation", x => x.Uuid);
+                    table.ForeignKey(
+                        name: "FK_PatternAnimation_Animation_AnimationUuid",
+                        column: x => x.AnimationUuid,
+                        principalTable: "Animation",
+                        principalColumn: "Uuid",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PatternAnimationSetting",
                 columns: table => new
                 {
@@ -197,6 +203,11 @@ namespace LaserAPI.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Animation_PointUuid",
+                table: "Animation",
+                column: "PointUuid");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AnimationPoint_PatternAnimationSettingsUuid",
                 table: "AnimationPoint",
                 column: "PatternAnimationSettingsUuid");
@@ -236,9 +247,6 @@ namespace LaserAPI.Migrations
                 name: "LasershowSpotifyConnectorSongDto");
 
             migrationBuilder.DropTable(
-                name: "Point");
-
-            migrationBuilder.DropTable(
                 name: "ZonePosition");
 
             migrationBuilder.DropTable(
@@ -248,9 +256,6 @@ namespace LaserAPI.Migrations
                 name: "LasershowSpotifyConnector");
 
             migrationBuilder.DropTable(
-                name: "Pattern");
-
-            migrationBuilder.DropTable(
                 name: "Zone");
 
             migrationBuilder.DropTable(
@@ -258,6 +263,12 @@ namespace LaserAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Animation");
+
+            migrationBuilder.DropTable(
+                name: "Point");
+
+            migrationBuilder.DropTable(
+                name: "Pattern");
         }
     }
 }
