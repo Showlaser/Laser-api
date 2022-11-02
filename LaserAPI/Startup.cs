@@ -34,7 +34,7 @@ namespace LaserAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            string connectionString = Configuration.GetConnectionString("DefaultConnection");
+            string connectionString = "Data Source=Application.db;Cache=Shared";
             services.AddDbContextPool<DataContext>(
                 dbContextOptions => dbContextOptions
                     .UseSqlite(connectionString, o =>
