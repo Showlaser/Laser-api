@@ -152,14 +152,10 @@ namespace LaserAPI
 
         private static void SetCurrentIpAddress()
         {
-            /*string currentIpAddress = NetworkInterface
-                .GetAllNetworkInterfaces()
-                .FirstOrDefault(n => NetworkInterfaceHasEthernetAccess(n) && !n.Description.ToLower()
-                    .Contains("virtual"))
-                ?.GetIPProperties()
-                .GatewayAddresses
-                .FirstOrDefault()
-                ?.Address.ToString();
+            /*System.Net.IPAddress? ip = NetworkInterface
+                .GetAllNetworkInterfaces().ToList().FindAll(n => NetworkInterfaceHasEthernetAccess(n) && !n.Description
+                    .ToLower()
+                    .Contains("virtual")).Select(ni => ni.GetIPProperties().UnicastAddresses[0]).FirstOrDefault()?.Address;
             */
             string currentIpAddress = "172.25.189.8";
             if (string.IsNullOrEmpty(currentIpAddress))
