@@ -10,7 +10,7 @@ namespace LaserAPI.Dal
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
         public virtual DbSet<AnimationDto> Animation { get; set; }
-        public virtual DbSet<PatternAnimationDto> PatternAnimation { get; set; }
+        public virtual DbSet<AnimationPatternDto> PatternAnimation { get; set; }
         public virtual DbSet<PatternAnimationSettingsDto> PatternAnimationSetting { get; set; }
         public virtual DbSet<AnimationPointDto> AnimationPoint { get; set; }
         public virtual DbSet<PatternDto> Pattern { get; set; }
@@ -37,12 +37,12 @@ namespace LaserAPI.Dal
             builder.Entity<AnimationDto>(e =>
             {
                 e.HasKey(a => a.Uuid);
-                e.HasMany(a => a.PatternAnimations)
+                e.HasMany(a => a.AnimationPatterns)
                     .WithOne()
                     .HasForeignKey(a => a.AnimationUuid);
             });
 
-            builder.Entity<PatternAnimationDto>(e =>
+            builder.Entity<AnimationPatternDto>(e =>
             {
                 e.HasKey(pa => pa.Uuid);
                 e.HasMany(a => a.AnimationSettings)

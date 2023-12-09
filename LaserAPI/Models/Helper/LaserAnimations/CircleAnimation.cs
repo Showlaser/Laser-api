@@ -37,7 +37,7 @@ namespace LaserAPI.Models.Helper.LaserAnimations
             {
                 Name = "PreMade circle",
                 Uuid = animationUuid,
-                PatternAnimations = new List<PatternAnimationDto>
+                AnimationPatterns = new List<AnimationPatternDto>
                 {
                     new()
                     {

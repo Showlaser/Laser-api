@@ -17,7 +17,7 @@ namespace LaserAPI.Models.Helper.LaserAnimations
             {
                 Name = "PreMade line",
                 Uuid = animationUuid,
-                PatternAnimations = new List<PatternAnimationDto>
+                AnimationPatterns = new List<AnimationPatternDto>
                 {
                     new()
                     {

@@ -28,7 +28,7 @@ namespace LaserAPI.Logic
 
         public static void Setup()
         {
-            _generatedLaserShow.PatternAnimations = new List<PatternAnimationDto>();
+            _generatedLaserShow.AnimationPatterns = new List<AnimationPatternDto>();
             List<Type> types = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(e => e.GetTypes())
                 .Where(e => typeof(IPreMadeLaserAnimation).IsAssignableFrom(e) && e.IsClass)
@@ -165,9 +165,9 @@ namespace LaserAPI.Logic
 
                 if (_songData.SaveLasershow)
                 {
-                    PatternAnimationDto patternAnimation = animation.PatternAnimations[0];
+                    AnimationPatternDto patternAnimation = animation.AnimationPatterns[0];
                     patternAnimation.StartTimeOffset = Convert.ToInt32(Stopwatch.ElapsedMilliseconds);
-                    _generatedLaserShow.PatternAnimations.Add(patternAnimation);
+                    _generatedLaserShow.AnimationPatterns.Add(patternAnimation);
                 }
             }
             catch (Exception e)

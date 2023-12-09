@@ -1,8 +1,6 @@
 ﻿using LaserAPI.Logic;
 using LaserAPI.Models.Dto.Animations;
-using LaserAPI.Models.FromFrontend.Animations;
 using LaserAPI.Models.Helper;
-using LaserAPI.Models.ToFrontend.Animations;
 using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using System;

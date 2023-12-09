@@ -26,7 +26,7 @@ namespace LaserAPI.Dal
         private async Task<AnimationDto> Find(Guid uuid)
         {
             return await _context.Animation
-                .Include(a => a.PatternAnimations)
+                .Include(a => a.AnimationPatterns)
                 .ThenInclude(pa => pa.AnimationSettings)
                 .ThenInclude(ast => ast.Points)
                 .SingleOrDefaultAsync(a => a.Uuid == uuid);
@@ -35,7 +35,7 @@ namespace LaserAPI.Dal
         public async Task<List<AnimationDto>> All()
         {
             return await _context.Animation
-                .Include(a => a.PatternAnimations)
+                .Include(a => a.AnimationPatterns)
                 .ThenInclude(pa => pa.AnimationSettings)
                 .ThenInclude(ast => ast.Points)
                 .ToListAsync();
@@ -48,7 +48,7 @@ namespace LaserAPI.Dal
 
         public async Task Update(AnimationDto animation)
         {
-            AnimationDto dbAnimation = await _context.Animation.Include(a => a.PatternAnimations)
+            AnimationDto dbAnimation = await _context.Animation.Include(a => a.AnimationPatterns)
                 .ThenInclude(pa => pa.AnimationSettings)
                 .ThenInclude(ast => ast.Points)
                 .AsNoTrackingWithIdentityResolution()
@@ -62,8 +62,8 @@ namespace LaserAPI.Dal
             dbAnimation.Name = animation.Name;
             _context.Animation.Update(dbAnimation);
 
-            _context.PatternAnimation.RemoveRange(dbAnimation.PatternAnimations);
-            await _context.PatternAnimation.AddRangeAsync(animation.PatternAnimations);
+            _context.PatternAnimation.RemoveRange(dbAnimation.AnimationPatterns);
+            await _context.PatternAnimation.AddRangeAsync(animation.AnimationPatterns);
             await _context.SaveChangesAsync();
         }
 
