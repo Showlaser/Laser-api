@@ -1,10 +1,10 @@
-﻿using System;
+﻿using LaserAPI.CustomExceptions;
+using LaserAPI.Models.Dto.Zones;
+using LaserAPI.Models.Helper;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using LaserAPI.CustomExceptions;
-using LaserAPI.Models.Dto.Zones;
-using LaserAPI.Models.Helper;
 
 namespace LaserAPI.Logic
 {
@@ -17,8 +17,8 @@ namespace LaserAPI.Logic
         {
             set
             {
-               _zonesLength = value.Count;
-               _zones = value;
+                _zonesLength = value.Count;
+                _zones = value;
             }
         }
 

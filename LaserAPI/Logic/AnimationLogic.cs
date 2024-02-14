@@ -4,9 +4,7 @@ using LaserAPI.Models.Helper;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
@@ -56,40 +54,14 @@ namespace LaserAPI.Logic
 
         public static async Task PlayAnimation(AnimationDto animation)
         {
-            int animationDuration = GetAnimationDuration(animation);
-            Stopwatch stopwatch = Stopwatch.StartNew();
 
-            while (stopwatch.ElapsedMilliseconds < animationDuration)
-            {
-                List<AnimationPatternDto> patternAnimationsToPlay =
-                    GetPatternAnimationsBetweenTimeMs(animation, stopwatch.ElapsedMilliseconds);
-                if (patternAnimationsToPlay == null)
-                {
-                    continue;
-                }
-
-                List<PatternAnimationSettingsDto> settingsToPlay = new(3);
-                int patternAnimationsLength = patternAnimationsToPlay.Count;
-
-                GetPatternAnimationSettingsToPlay(patternAnimationsLength, patternAnimationsToPlay,
-                    stopwatch.ElapsedMilliseconds, ref settingsToPlay);
-
-                if (settingsToPlay.Count == 0 || !LaserConnectionLogic.LaserIsAvailable())
-                {
-                    continue;
-                }
-
-                List<LaserMessage> messagesToPlay = GetAnimationPointsToPlay(settingsToPlay);
-                int duration = GetDurationFromSettings(settingsToPlay, patternAnimationsToPlay.SelectMany(pa => pa.AnimationSettings).ToList());
-                await LaserLogic.SendData(messagesToPlay, duration);
-            }
         }
 
         private static bool AnimationPatternKeyFramesAreValid(AnimationPatternKeyFrameDto keyFrames) =>
             keyFrames.Uuid != Guid.Empty &&
                 keyFrames.AnimationPatternUuid != Guid.Empty &&
                 keyFrames.TimeMs >= 0 &&
-                !string.IsNullOrEmpty(keyFrames.PropertyEdited);
+                Enum.IsDefined<PropertyEdited>(keyFrames.PropertyEdited);
 
         /// <summary>
         /// Method to check if the animation patterns in the animation are valid

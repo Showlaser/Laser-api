@@ -5,11 +5,11 @@ using Moq;
 
 namespace LaserAPITests.Mock
 {
-    internal class MockPatternLogic
+    internal class MockedPatternLogic
     {
         internal PatternLogic PatternLogic;
 
-        public MockPatternLogic()
+        public MockedPatternLogic()
         {
             MockedPattern mockedPattern = new();
             Mock<IPatternDal> patternDalMock = new();

@@ -3,7 +3,6 @@ using LaserAPI.Logic.Fft_algorithm;
 using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.FromFrontend.LasershowGenerator;
 using LaserAPI.Models.Helper;
-using LaserAPI.Models.Helper.LaserAnimations;
 using LaserAPI.Models.ToFrontend.LasershowGenerator;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
@@ -21,20 +20,13 @@ namespace LaserAPI.Logic
         private static SongData _songData = new();
         private static AlgorithmSettings _algorithmSettings = new();
         private static bool _fftIsActive;
-        private static readonly List<IPreMadeLaserAnimation> Animations = new();
         private static string _currentPlayingSongName = "";
         private static AnimationDto _generatedLaserShow = new();
         private static readonly Stopwatch Stopwatch = new();
 
         public static void Setup()
         {
-            _generatedLaserShow.AnimationPatterns = new List<AnimationPatternDto>();
-            List<Type> types = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(e => e.GetTypes())
-                .Where(e => typeof(IPreMadeLaserAnimation).IsAssignableFrom(e) && e.IsClass)
-                .ToList();
-
-            Animations.AddRange(types.Select(t => (IPreMadeLaserAnimation)Activator.CreateInstance(t)));
+            _generatedLaserShow.AnimationPatterns = [];
         }
 
         public static void SetSongData(SongData songData)
@@ -145,51 +137,6 @@ namespace LaserAPI.Logic
             average /= frequencyRangeValues.Count;
 
             bool displayAnimation = average > _algorithmSettings.Threshold + _songData.ThreshHoldOffset;
-            if (displayAnimation && LaserConnectionLogic.LaserIsAvailable())
-            {
-                OnAnimationDisplay();
-            }
-        }
-
-        private static void OnAnimationDisplay()
-        {
-            if (!Animations.Any())
-            {
-                Setup();
-            }
-
-            try
-            {
-                AnimationDto animation = GenerateLaserAnimation();
-                AnimationLogic.PlayAnimation(animation);
-
-                if (_songData.SaveLasershow)
-                {
-                    AnimationPatternDto patternAnimation = animation.AnimationPatterns[0];
-                    patternAnimation.StartTimeOffset = Convert.ToInt32(Stopwatch.ElapsedMilliseconds);
-                    _generatedLaserShow.AnimationPatterns.Add(patternAnimation);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
-
-        private static AnimationDto GenerateLaserAnimation()
-        {
-            PreMadeAnimationOptions options = new()
-            {
-                CenterX = new Random(Guid.NewGuid().GetHashCode()).Next(-1000, 1000),
-                CenterY = new Random(Guid.NewGuid().GetHashCode()).Next(-1000, 1000),
-                Rotation = new Random(Guid.NewGuid().GetHashCode()).Next(0, 361),
-                Scale = NumberHelper.GetRandomDouble(0.4, 1),
-                Speed = GetSpeedFromGenre(_songData.MusicGenre)
-            };
-
-            int patternIndex = new Random(Guid.NewGuid().GetHashCode()).Next(0, Animations.Count);
-            IPreMadeLaserAnimation preMadeAnimation = Animations[patternIndex];
-            return preMadeAnimation.GetAnimation(options);
         }
 
         /// <summary>

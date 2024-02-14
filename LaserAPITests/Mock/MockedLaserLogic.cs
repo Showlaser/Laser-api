@@ -2,11 +2,11 @@
 
 namespace LaserAPITests.Mock
 {
-    internal class MockLaserLogic
+    internal class MockedLaserLogic
     {
         internal LaserLogic LaserLogic;
 
-        public MockLaserLogic()
+        public MockedLaserLogic()
         {
             MockedZoneLogic mockedZoneLogic = new();
             LaserLogic mockedLaserLogic = new(mockedZoneLogic.ZoneLogic);

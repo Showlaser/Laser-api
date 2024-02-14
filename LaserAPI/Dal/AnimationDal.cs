@@ -27,8 +27,7 @@ namespace LaserAPI.Dal
         {
             return await _context.Animation
                 .Include(a => a.AnimationPatterns)
-                .ThenInclude(pa => pa.AnimationSettings)
-                .ThenInclude(ast => ast.Points)
+                .ThenInclude(pa => pa.AnimationPatternKeyFrames)
                 .SingleOrDefaultAsync(a => a.Uuid == uuid);
         }
 
@@ -36,8 +35,8 @@ namespace LaserAPI.Dal
         {
             return await _context.Animation
                 .Include(a => a.AnimationPatterns)
-                .ThenInclude(pa => pa.AnimationSettings)
-                .ThenInclude(ast => ast.Points)
+                .Include(a => a.AnimationPatterns)
+                .ThenInclude(pa => pa.AnimationPatternKeyFrames)
                 .ToListAsync();
         }
 
@@ -48,9 +47,9 @@ namespace LaserAPI.Dal
 
         public async Task Update(AnimationDto animation)
         {
-            AnimationDto dbAnimation = await _context.Animation.Include(a => a.AnimationPatterns)
-                .ThenInclude(pa => pa.AnimationSettings)
-                .ThenInclude(ast => ast.Points)
+            AnimationDto dbAnimation = await _context.Animation
+                .Include(a => a.AnimationPatterns)
+                .ThenInclude(pa => pa.AnimationPatternKeyFrames)
                 .AsNoTrackingWithIdentityResolution()
                 .SingleOrDefaultAsync(a => a.Uuid == animation.Uuid);
 

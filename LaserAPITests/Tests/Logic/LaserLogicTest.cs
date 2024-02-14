@@ -8,7 +8,7 @@ namespace LaserAPITests.Tests.Logic
     [TestClass]
     public class LaserLogicTest
     {
-        private readonly LaserLogic _laserLogic = new MockLaserLogic().LaserLogic;
+        private readonly LaserLogic _laserLogic = new MockedLaserLogic().LaserLogic;
 
         [TestMethod]
         public void LimitTotalLaserPowerNecessaryTest()

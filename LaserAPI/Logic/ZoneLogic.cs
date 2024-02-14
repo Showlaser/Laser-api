@@ -1,5 +1,4 @@
-﻿using LaserAPI.CustomExceptions;
-using LaserAPI.Interfaces.Dal;
+﻿using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Zones;
 using LaserAPI.Models.Helper;
 using System;
