@@ -3,7 +3,6 @@ using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.Dto.Lasershows;
 using LaserAPITests.MockedModels.Lasershow;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace LaserAPITests.Tests.Logic
@@ -11,36 +10,38 @@ namespace LaserAPITests.Tests.Logic
     [TestClass]
     public class LasershowRenderEngineTest
     {
-        /// <summary>
-        /// Given the lasershow animation is in the current timeline position
-        /// When I execute this method
-        /// Then I expect an array of lasershow animations that are within the provided timeline position
-        /// </summary>
         [TestMethod]
-        public void GetLasershowAnimationInTimelinePositionTest()
+        public void GetAnimationPatternDuration()
         {
-            LasershowDto mockedLasershow = new MockedLasershow().Lasershow;
-            IEnumerable<LasershowAnimationDto> lasershowAnimations = LasershowRenderEngine.GetLasershowAnimationEqualOrAfterTimelinePosition(mockedLasershow, 0);
-
-            Assert.IsTrue(lasershowAnimations.Any());
+            LasershowAnimationDto lasershowAnimation = new MockedLasershowAnimation().LasershowAnimation;
+            AnimationPatternDto animationPattern = lasershowAnimation.Animation.AnimationPatterns.First();
+            int durationInMs = LasershowRenderEngine.GetAnimationPatternDuration(animationPattern);
+            Assert.IsTrue(durationInMs > 0);
         }
 
-        /// <summary>
-        /// Given the lasershow animation is in the current timeline position
-        /// When
-        /// Then
-        /// </summary>
         [TestMethod]
-        public void GetLasershowAnimationsInTimelinePositionTest()
+        public void GetLasershowAnimationDuration()
         {
-            LasershowDto mockedLasershow = new MockedLasershow().Lasershow;
-            LasershowAnimationDto lasershowAnimation = mockedLasershow.LasershowAnimations.First();
-            IEnumerable<AnimationPatternDto> patterns = LasershowRenderEngine
-                .GetLasershowAnimationPatternsEqualOrAfterTimelinePosition(lasershowAnimation.Animation.AnimationPatterns, 0);
-
-            Assert.IsTrue(patterns.Any());
+            LasershowAnimationDto lasershowAnimation = new MockedLasershowAnimation().LasershowAnimation;
+            int durationInMs = LasershowRenderEngine.GetLasershowAnimationDuration(lasershowAnimation);
+            Assert.IsTrue(durationInMs > 0);
         }
 
+        [TestMethod]
+        public void GetLasershowAnimationDuration2()
+        {
+            LasershowAnimationDto lasershowAnimation = new MockedLasershowAnimation().LasershowAnimationList[1];
+            int durationInMs = LasershowRenderEngine.GetLasershowAnimationDuration(lasershowAnimation);
+            Assert.IsTrue(durationInMs > 100);
+        }
+
+        [TestMethod]
+        public void GetLasershowDuration()
+        {
+            LasershowDto lasershow = new MockedLasershow().Lasershow;
+            int durationInMs = LasershowRenderEngine.GetLasershowDuration(lasershow);
+            Assert.IsTrue(durationInMs > 100);
+        }
 
         [TestMethod]
         public void GetPointsToRender()

@@ -43,6 +43,39 @@ namespace LaserAPITests.MockedModels.AnimationPatternKeyFrames
                     TimeMs = 0,
                     PropertyEdited = PropertyEdited.Rotation,
                     PropertyValue = 0
+                },
+                // Starting new timems
+                new()
+                {
+                    Uuid = Guid.Parse("f3563d6c-6f13-4281-adc0-4a563794fc56"),
+                    AnimationPatternUuid = Guid.Parse("a9de1d0b-a623-433e-8a17-57555d3c5e4e"),
+                    TimeMs = 50,
+                    PropertyEdited = PropertyEdited.Scale,
+                    PropertyValue = 0
+                },
+                new()
+                {
+                    Uuid = Guid.Parse("1f4cfbff-2255-4746-bf17-9783528dd807"),
+                    AnimationPatternUuid = Guid.Parse("a9de1d0b-a623-433e-8a17-57555d3c5e4e"),
+                    TimeMs = 50,
+                    PropertyEdited = PropertyEdited.XOffset,
+                    PropertyValue = 0
+                },
+                new()
+                {
+                    Uuid = Guid.Parse("6054dff0-8b3b-45f2-a818-cbee267b988f"),
+                    AnimationPatternUuid = Guid.Parse("a9de1d0b-a623-433e-8a17-57555d3c5e4e"),
+                    TimeMs = 50,
+                    PropertyEdited = PropertyEdited.YOffset,
+                    PropertyValue = 0
+                },
+                new()
+                {
+                    Uuid = Guid.Parse("9cd32d90-409a-4542-aebb-294477da62b9"),
+                    AnimationPatternUuid = Guid.Parse("a9de1d0b-a623-433e-8a17-57555d3c5e4e"),
+                    TimeMs = 50,
+                    PropertyEdited = PropertyEdited.Rotation,
+                    PropertyValue = 0
                 }
             ];
         }

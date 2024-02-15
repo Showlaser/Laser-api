@@ -25,8 +25,19 @@ namespace LaserAPITests.MockedModels.Lasershow
                 TimeLineId = 0,
             };
 
+            LasershowAnimationDto lasershowAnimation2 = new()
+            {
+                Uuid = Guid.Parse("fa6952a5-754f-41f6-bf63-4eb2b4f5dc4c"),
+                LasershowUuid = Guid.Parse("cb10219c-2a18-430d-9fa5-abaff77e0430"),
+                Name = "LasershowAnimation2",
+                Animation = mockedAnimation.Animation,
+                StartTimeMs = 100,
+                TimeLineId = 0,
+            };
+
             LasershowAnimationList = [
-                LasershowAnimation
+                LasershowAnimation,
+                lasershowAnimation2
             ];
 
             Empty = new();
