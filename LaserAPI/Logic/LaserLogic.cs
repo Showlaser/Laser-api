@@ -1,23 +1,19 @@
-﻿using LaserAPI.Models.Dto.Zones;
+﻿using LaserAPI.Interfaces;
+using LaserAPI.Models.Dto.Zones;
+using LaserAPI.Models.FromFrontend.Points;
 using LaserAPI.Models.Helper;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
-    public class LaserLogic
+    public class LaserLogic(ZoneLogic zoneLogic, ILaserConnectionLogic laserConnectionLogic)
     {
-        private readonly ZoneLogic _zoneLogic;
-
-        public LaserLogic(ZoneLogic zoneLogic)
-        {
-            _zoneLogic = zoneLogic;
-        }
-
         public static async Task SendData(IReadOnlyList<LaserMessage> messages, int duration)
         {
-            List<LaserMessage> messagesToSend = new();
+            List<LaserMessage> messagesToSend = [];
 
             int messagesLength = messages.Count;
             for (int i = 0; i < messagesLength; i++)
@@ -40,8 +36,6 @@ namespace LaserAPI.Logic
                     messagesToSend.AddRange(zoneCrossingPoints);
                 }
             }
-
-            await LaserConnectionLogic.SendMessages(new LaserCommando(duration, messagesToSend.ToArray()));
         }
 
         /// <summary>
@@ -49,7 +43,7 @@ namespace LaserAPI.Logic
         /// </summary>
         /// <param name="message">The message to modify</param>
         /// <param name="maxPowerPwm">The max power allowed</param>
-        public static void LimitTotalLaserPowerIfNecessary(ref LaserMessage message, int maxPowerPwm)
+        private static void LimitTotalLaserPowerIfNecessary(ref LaserMessage message, int maxPowerPwm)
         {
             int combinedPower = message.RedLaser + message.GreenLaser + message.BlueLaser;
             if (combinedPower > maxPowerPwm)
@@ -62,6 +56,32 @@ namespace LaserAPI.Logic
                 message.GreenLaser = Math.Floor(maxPowerPwm * greenLaserPowerPercentage).ToInt();
                 message.BlueLaser = Math.Floor(maxPowerPwm * blueLaserPowerPercentage).ToInt();
             }
+        }
+
+        /// <summary>
+        /// The provided points from the front end
+        /// </summary>
+        /// <param name="points">The points to Render</param>
+        public async Task RenderProvidedPoints(List<PointWrapper> wrappedPoints)
+        {
+            List<PointWrapper> sortedPoints = wrappedPoints.OrderBy(p => p.PatternPoint.OrderNr).ToList();
+            List<PointWrapper> pointsToRender = [];
+
+            int pointsLength = sortedPoints.Count;
+            for (int i = 0; i < pointsLength; i++)
+            {
+                PointWrapper point = sortedPoints.ElementAt(i);
+                pointsToRender.Add(point);
+
+                bool dotsFormALine = point.PatternPoint.ConnectedToPointOrderNr != null && point.PatternPoint.ConnectedToPointOrderNr >= 0;
+                if (dotsFormALine)
+                {
+                    PointWrapper PointToConnectTo = sortedPoints[(int)point.PatternPoint.ConnectedToPointOrderNr];
+                    pointsToRender.Add(PointToConnectTo);
+                }
+            }
+
+            await laserConnectionLogic.SendData(pointsToRender);
         }
     }
 }

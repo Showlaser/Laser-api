@@ -14,27 +14,18 @@ namespace LaserAPI.Controllers
 {
     [Route("animation")]
     [ApiController]
-    public class AnimationController : ControllerBase
+    public class AnimationController(AnimationLogic animationLogic, ControllerResultHandler controllerResultHandler) : ControllerBase
     {
-        private readonly AnimationLogic _animationLogic;
-        private readonly ControllerResultHandler _controllerResultHandler;
-
-        public AnimationController(AnimationLogic animationLogic, ControllerResultHandler controllerResultHandler)
-        {
-            _animationLogic = animationLogic;
-            _controllerResultHandler = controllerResultHandler;
-        }
-
         [HttpPost]
         public async Task<ActionResult> AddOrUpdate([FromBody] Animation animation)
         {
             async Task Action()
             {
                 AnimationDto animationDto = animation.Adapt<AnimationDto>();
-                await _animationLogic.AddOrUpdate(animationDto);
+                await animationLogic.AddOrUpdate(animationDto);
             }
 
-            return await _controllerResultHandler.Execute(Action());
+            return await controllerResultHandler.Execute(Action());
         }
 
         [HttpPost("play")]
@@ -47,7 +38,7 @@ namespace LaserAPI.Controllers
                 await AnimationLogic.PlayAnimation(animationDto);
             }
 
-            return await _controllerResultHandler.Execute(Action());
+            return await controllerResultHandler.Execute(Action());
         }
 
         [HttpGet]
@@ -55,11 +46,11 @@ namespace LaserAPI.Controllers
         {
             async Task<List<AnimationViewModel>> Action()
             {
-                List<AnimationDto> animations = await _animationLogic.All();
+                List<AnimationDto> animations = await animationLogic.All();
                 return animations.Adapt<List<AnimationViewModel>>();
             }
 
-            return await _controllerResultHandler.Execute(Action());
+            return await controllerResultHandler.Execute(Action());
         }
 
         [HttpDelete("{uuid}")]
@@ -67,10 +58,10 @@ namespace LaserAPI.Controllers
         {
             async Task Action()
             {
-                await _animationLogic.Remove(uuid);
+                await animationLogic.Remove(uuid);
             }
 
-            return await _controllerResultHandler.Execute(Action());
+            return await controllerResultHandler.Execute(Action());
         }
     }
 }

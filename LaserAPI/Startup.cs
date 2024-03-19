@@ -1,4 +1,5 @@
 using LaserAPI.Dal;
+using LaserAPI.Interfaces;
 using LaserAPI.Interfaces.Dal;
 using LaserAPI.Logic;
 using LaserAPI.Logic.Fft_algorithm;
@@ -6,29 +7,19 @@ using LaserAPI.Logic.Game;
 using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.Helper;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Linq;
-using System.Net.NetworkInformation;
 using System.Text.Json.Serialization;
-using System.Timers;
-using Timer = System.Timers.Timer;
 
 namespace LaserAPI
 {
-    public class Startup
+    public class Startup(IConfiguration configuration)
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; } = configuration;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -62,6 +53,7 @@ namespace LaserAPI
             services.AddScoped<GameLogic>();
             services.AddTransient<ControllerResultHandler>();
             services.AddSingleton<GameStateLogic>();
+            services.AddSingleton<ILaserConnectionLogic, LaserConnectionLogic>();
             services.AddScoped<IPatternDal, PatternDal>();
             services.AddScoped<IAnimationDal, AnimationDal>();
             services.AddScoped<IZoneDal, ZoneDal>();
@@ -94,27 +86,14 @@ namespace LaserAPI
 
             CreateDatabaseIfNotExist(app);
             SetProjectionZones(app);
-            SetCurrentIpAddress();
 
-            Timer timer = new() { Interval = 10000 };
+            /*Timer timer = new() { Interval = 10000 };
             timer.Elapsed += delegate (object o, ElapsedEventArgs eventArgs)
             {
                 SaveGeneratedLaserShow(app);
-                CheckLaserConnectionState();
             };
 
-            timer.Start();
-        }
-
-        private static void CheckLaserConnectionState()
-        {
-            bool clientConnected = LaserConnectionLogic.TcpClient?.Connected is true;
-            if (!clientConnected && !LaserConnectionLogic.ConnectionPending)
-            {
-                LaserConnectionLogic.NetworkConnect();
-            }
-
-            //todo add connection alive check
+            timer.Start();*/
         }
 
         private static void SaveGeneratedLaserShow(IApplicationBuilder app)
@@ -139,34 +118,6 @@ namespace LaserAPI
             ZoneLogic zoneLogic = serviceScope.ServiceProvider.GetService<ZoneLogic>();
             System.Collections.Generic.List<Models.Dto.Zones.ZoneDto> zones = zoneLogic.All().Result;
             ProjectionZonesLogic.Zones = zones;
-        }
-
-        private static bool NetworkInterfaceHasEthernetAccess(NetworkInterface networkInterface)
-        {
-            return networkInterface.OperationalStatus == OperationalStatus.Up &&
-                   networkInterface.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
-                   networkInterface.NetworkInterfaceType == NetworkInterfaceType.Ethernet ||
-                   networkInterface.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 &&
-                   networkInterface.GetIPProperties().GatewayAddresses.Any();
-        }
-
-        private static void SetCurrentIpAddress()
-        {
-            /*System.Net.IPAddress? ip = NetworkInterface
-                .GetAllNetworkInterfaces().ToList().FindAll(n => NetworkInterfaceHasEthernetAccess(n) && !n.Description
-                    .ToLower()
-                    .Contains("virtual")).Select(ni => ni.GetIPProperties().UnicastAddresses[0]).FirstOrDefault()?.Address;
-            */
-            string currentIpAddress = "172.25.189.8";
-            if (string.IsNullOrEmpty(currentIpAddress))
-            {
-                throw new ConnectionAbortedException("This computer is not connected to a local network. This application need access to an LAN network to function.");
-
-                //string errorMessage = "Could not connect to client software, start it first before starting this application!";
-                //throw new NoClientSoftwareFoundException(errorMessage);
-            }
-
-            LaserConnectionLogic.ComputerIpAddress = currentIpAddress;
         }
 
         /// <summary>

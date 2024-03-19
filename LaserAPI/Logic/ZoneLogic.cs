@@ -84,7 +84,7 @@ namespace LaserAPI.Logic
                 })
                 .ToList();
             messages.Add(messages.First());
-            await LaserConnectionLogic.SendMessages(new LaserCommando(1000, messages.ToArray()));
+            //await LaserConnectionLogic.SendMessages(new LaserCommando(1000, messages.ToArray()));
         }
 
         public async Task Remove(Guid uuid)

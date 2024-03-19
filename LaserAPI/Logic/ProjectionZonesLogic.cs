@@ -34,7 +34,7 @@ namespace LaserAPI.Logic
             {
                 ZoneDto zone = _zones[i];
 
-                List<Point> zonePoints = new();
+                List<Point> zonePoints = [];
                 int zonePointLength = zone.Points.Count;
                 for (int j = 0; j < zonePointLength; j++)
                 {
@@ -65,7 +65,7 @@ namespace LaserAPI.Logic
                 throw new NoProjectionZonesSetException();
             }
 
-            List<LaserMessage> crossingPoints = new();
+            List<LaserMessage> crossingPoints = [];
             for (int i = 0; i < _zonesLength; i++)
             {
                 ZoneDto zone = _zones[i];
@@ -73,7 +73,7 @@ namespace LaserAPI.Logic
 
                 int zoneLinesHitLength = zoneLinesHit.Length;
                 LaserMessage messageWithLimitedPower = new(message.RedLaser, message.GreenLaser, message.BlueLaser, 0, 0);
-                LaserLogic.LimitTotalLaserPowerIfNecessary(ref messageWithLimitedPower, zone.MaxLaserPowerInZonePwm);
+                // LaserLogic.LimitTotalLaserPowerIfNecessary(ref messageWithLimitedPower, zone.MaxLaserPowerInZonePwm);
 
                 for (int j = 0; j < zoneLinesHitLength; j++)
                 {
@@ -135,7 +135,7 @@ namespace LaserAPI.Logic
         {
             if (points.Count == 0)
             {
-                return Array.Empty<LaserMessage>();
+                return [];
             }
 
             DistanceSorter[] distances = new DistanceSorter[points.Count];

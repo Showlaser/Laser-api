@@ -1,195 +1,101 @@
-﻿using LaserAPI.CustomExceptions;
+﻿using LaserAPI.Interfaces;
+using LaserAPI.Models.FromFrontend.Laser;
+using LaserAPI.Models.FromFrontend.Points;
 using LaserAPI.Models.Helper;
-using Microsoft.AspNetCore.Connections;
 using System;
-using System.IO.Ports;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
-    public static class LaserConnectionLogic
+    public class LaserConnectionLogic : ILaserConnectionLogic
     {
-        public static string ComputerIpAddress { get; set; }
-        public static LaserMessage PreviousMessage { get; set; } = new();
-        public static string ComPort { get; set; }
-        public static bool ConnectionPending { get; private set; }
-        private static TcpListener _server;
-        private static NetworkStream _stream;
-        public static TcpClient TcpClient { get; private set; }
-        private static readonly SerialPort SerialPort = new();
-        private static byte[] _lastSendMessages;
+        private readonly List<ConnectedLaser> _connectedLasers = [];
 
-        /// <summary>
-        /// The datetime when the laser will be available for executing messages
-        /// </summary>
-        public static DateTime LaserAvailableDateTime { get; private set; }
-
-        public static bool LaserIsAvailable() => DateTime.Now >= LaserAvailableDateTime;
-
-        public static void NetworkConnect()
+        public async Task Connect(string IPAddress, string laserId, string password)
         {
-            try
+            ConnectedLaser connectedLaserFromList = _connectedLasers.FirstOrDefault(cl => cl.IPAddress == IPAddress);
+            if (connectedLaserFromList == null)
             {
-                _server?.Server.Dispose();
-
-                IPAddress localAddress = IPAddress.Parse(ComputerIpAddress);
-                _server = new TcpListener(localAddress, 50000)
-                {
-                    Server =
-                    {
-                        SendTimeout = -1,
-                        ReceiveBufferSize = 10000
-                    }
-                };
-
-                ConnectionPending = true;
-                _server.Start();
-                Console.WriteLine("Waiting");
-
-                TcpClient = _server.AcceptTcpClient();
-                ConnectionPending = false;
-                Console.WriteLine("Connected with laser");
-                _stream = TcpClient.GetStream();
+                _connectedLasers.Remove(connectedLaserFromList);
             }
-            catch (Exception)
+
+            HttpClient httpClient = new()
             {
-                TcpClient?.Close();
+                BaseAddress = new Uri(IPAddress)
+            };
+
+            HttpResponseMessage response = await httpClient.GetAsync("connect");
+            response.EnsureSuccessStatusCode();
+
+            LaserTelemetry laserTelemetry = await response.Content.ReadFromJsonAsync<LaserTelemetry>();
+            ConnectedLaser connectedLaser = new()
+            {
+                LaserConnectionId = laserId,
+                Name = laserTelemetry.Name,
+                ModelType = laserTelemetry.ModelType,
+                Status = laserTelemetry.Status,
+                Online = true,
+                Password = password,
+            };
+
+            _connectedLasers.Add(connectedLaser);
+        }
+
+        public void Disconnect(string laserId)
+        {
+            ConnectedLaser connectedLaser = _connectedLasers.FirstOrDefault(cl => cl.LaserConnectionId == laserId);
+            if (connectedLaser != null)
+            {
+                _connectedLasers.Remove(connectedLaser);
             }
         }
 
-        private static bool MessagesFormADot(LaserCommando commando, int messagesLength)
+        public async Task<List<ConnectedLaser>> GetStatus()
         {
-            if (messagesLength == 0)
-            {
-                return false;
-            }
+            using HttpClient httpClient = new();
 
-            if (messagesLength == 1)
+            int length = _connectedLasers.Count;
+            for (int i = 0; i < length; i++)
             {
-                return true;
-            }
+                ConnectedLaser connectedLaser = _connectedLasers[i];
 
-            int closeToEachOtherCount = 0;
-            int valueToTrigger = Convert.ToInt32(messagesLength * 0.6);
-
-            for (int i = 1; i < messagesLength; i++)
-            {
-                LaserMessage previousMessage = commando.Messages[i - 1];
-                LaserMessage message = commando.Messages[i];
-                bool messagesAreCloseToEachOther = Math.Abs(previousMessage.X - message.X) < 20 &&
-                                                   Math.Abs(previousMessage.Y - message.Y) < 20;
-                if (messagesAreCloseToEachOther)
+                try
                 {
-                    closeToEachOtherCount++;
+                    HttpResponseMessage response = await httpClient.GetAsync($"{connectedLaser.IPAddress}/telemetry?password={connectedLaser.Password}");
+                    LaserTelemetry laserTelemetry = await response.Content.ReadFromJsonAsync<LaserTelemetry>();
+                    _connectedLasers[i].Status = laserTelemetry.Status;
+                    _connectedLasers[i].Online = true;
                 }
-
-                if (closeToEachOtherCount >= valueToTrigger)
+                catch (HttpRequestException)
                 {
-                    return true;
+                    _connectedLasers[i].Online = false;
+                    _connectedLasers[i].Status = Enums.LaserStatus.ConnectionLost;
                 }
             }
 
-            return false;
+            httpClient.Dispose();
+            return _connectedLasers;
         }
 
-        public static async Task SendMessages(LaserCommando commando)
+        public async Task SendData(List<PointWrapper> wrappedPoints)
         {
-            int messagesLength = commando.Messages.Length;
-            bool messagesInvalid = messagesLength <= 1 || MessagesFormADot(commando, messagesLength);
+            using HttpClient httpClient = new();
+            List<Task> tasks = [];
 
-            if (!commando.Stop)
+            foreach (ConnectedLaser connectedLaser in _connectedLasers.FindAll(cl => cl.Online))
             {
-                if (messagesInvalid)
-                {
-                    throw new UnsafePatternDetectedException("The pattern is unsafe to project and will not be projected.");
-                }
-                if (!LaserIsAvailable())
-                {
-                    return;
-                }
+                string url = $"{connectedLaser.IPAddress}/send?password={connectedLaser.Password}";
+                List<PointWrapper> wrappedPointToPlayOnLaser = wrappedPoints.FindAll(wp => wp.LaserToProjectOnUuid == connectedLaser.Uuid);
+
+                tasks.Add(httpClient.PostAsJsonAsync(url, wrappedPointToPlayOnLaser));
             }
 
-            if (TcpClient?.Connected is null || !TcpClient.Connected)
-            {
-                NetworkConnect();
-            }
-
-            await SendNetworkDataToLaser(commando);
-        }
-
-        private static async Task SendNetworkDataToLaser(LaserCommando commando)
-        {
-            try
-            {
-                byte[] messageBytes = Utf8Json.JsonSerializer.Serialize(commando);
-                int messageBytesLength = messageBytes.Length + 2;
-
-                byte[] bytes = new byte[messageBytesLength];
-                bytes[0] = Convert.ToByte('(');
-                bytes[messageBytesLength - 1] = Convert.ToByte(')');
-
-                for (int i = 1; i < messageBytesLength - 1; i++)
-                {
-                    bytes[i] = messageBytes[i - 1];
-                }
-
-                _lastSendMessages = bytes;
-                LaserAvailableDateTime = DateTime.Now.AddMilliseconds(commando.DurationInMilliseconds);
-                await _stream.WriteAsync(_lastSendMessages);
-                PreviousMessage = commando.Messages[^1];
-            }
-            catch (Exception)
-            {
-                NetworkConnect();
-            }
-        }
-
-        public static string[] GetAvailableComDevices()
-        {
-            return SerialPort.GetPortNames();
-        }
-
-        public static void ConnectSerial(string portName)
-        {
-            if (SerialPort.IsOpen)
-            {
-                return;
-            }
-
-            SerialPort.PortName = portName;
-            SerialPort.BaudRate = 9600;
-            SerialPort.Open();
-        }
-
-        public static void SetLaserSettingsBySerial(string json)
-        {
-            Console.WriteLine("Attempting to save settings");
-            if (!SerialPort.IsOpen)
-            {
-                throw new ConnectionAbortedException("No connection to the com device was available");
-            }
-
-            SerialPort.WriteLine(json);
-
-            string returnMessage = "";
-            int iterations = 0;
-            while (!returnMessage.Contains("Settings ip is:") && iterations < 25)
-            {
-                returnMessage = SerialPort.ReadLine();
-                iterations++;
-                Thread.Sleep(500);
-            }
-
-            SerialPort.Close();
-            if (!returnMessage.Contains("Settings ip is:"))
-            {
-                throw new InvalidOperationException("The laser was not in settings mode!");
-            }
-
-            Console.WriteLine("Settings saved!");
+            await Task.WhenAll(tasks);
+            httpClient.Dispose();
         }
     }
 }

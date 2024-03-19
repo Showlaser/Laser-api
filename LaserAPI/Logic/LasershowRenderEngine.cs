@@ -87,15 +87,23 @@ namespace LaserAPI.Logic
             return previousNextAndCurrentKeyFramePerProperty;
         }
 
+        private static IEnumerable<PointDto> GetPatternPointsByTimelinePosition(PatternDto pattern,
+            PreviousCurrentAndNextKeyFramePerProperty previousCurrentAndNextKeyFramePerProperty, int timelinePositionMs)
+        {
+            List<PointDto> points = [];
+            return [];
+        }
+
         public static IEnumerable<PointDto> GetPointsToRender(LasershowDto lasershow, int timelinePosition)
         {
             IEnumerable<LasershowAnimationDto> lasershowAnimations = GetLasershowAnimationsInTimelinePosition(lasershow, timelinePosition);
             IEnumerable<AnimationPatternDto> animationPatternsToPlay = GetAnimationPatternsEqualOrAfterTimelinePosition(lasershowAnimations, timelinePosition);
 
-            List<PointDto> pointsToRender = new();
+            List<PointDto> pointsToRender = [];
             foreach (AnimationPatternDto pattern in animationPatternsToPlay)
             {
-                //pattern.
+                PreviousCurrentAndNextKeyFramePerProperty previousCurrentAndNextKeyFrame =
+                    GetPreviousCurrentAndNextKeyFramePerProperty(pattern, timelinePosition);
             }
 
             return [];

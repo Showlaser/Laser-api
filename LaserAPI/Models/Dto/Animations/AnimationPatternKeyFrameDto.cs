@@ -1,15 +1,8 @@
-﻿using System;
+﻿using LaserAPI.Models.Helper;
+using System;
 
 namespace LaserAPI.Models.Dto.Animations
 {
-    public enum PropertyEdited
-    {
-        Scale,
-        XOffset,
-        YOffset,
-        Rotation
-    }
-
     public class AnimationPatternKeyFrameDto
     {
         public Guid Uuid { get; set; }

@@ -42,7 +42,23 @@ namespace LaserAPI.Dal
 
             builder.Entity<AnimationPatternDto>(e =>
             {
-                e.HasKey(pa => pa.Uuid);
+                e.HasKey(ap => ap.Uuid);
+                e.HasMany(ap => ap.AnimationPatternKeyFrames)
+                .WithOne()
+                .HasForeignKey(ap => ap.AnimationPatternUuid);
+            });
+
+            builder.Entity<AnimationPatternDto>(e =>
+            {
+                e.HasKey(ap => ap.Uuid);
+                e.HasMany(ap => ap.AnimationPatternKeyFrames)
+                .WithOne()
+                .HasForeignKey(ap => ap.AnimationPatternUuid);
+            });
+
+            builder.Entity<AnimationPatternKeyFrameDto>(e =>
+            {
+                e.HasKey(apkf => apkf.Uuid);
             });
 
             builder.Entity<ZoneDto>(e =>
