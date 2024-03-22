@@ -7,6 +7,7 @@ namespace LaserAPI.Models.ToFrontend.Lasershow
     {
         public Guid Uuid { get; set; }
         public Guid LasershowUuid { get; set; }
+        public Guid AnimationUuid { get; set; }
         public string Name { get; set; }
         public AnimationViewModel Animation { get; set; }
         public int StartTimeMs { get; set; }

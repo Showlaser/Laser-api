@@ -13,7 +13,7 @@ namespace LaserAPITests.Tests.Logic
     [TestClass]
     public class ZoneLogicTest
     {
-        private readonly List<ZoneDto> _zones;
+        private readonly List<SafetyZoneDto> _zones;
         private readonly ZoneLogic _zoneLogic;
 
         public ZoneLogicTest()
@@ -111,35 +111,6 @@ namespace LaserAPITests.Tests.Logic
         }
 
         [TestMethod]
-        public void GetPointsClosestToPreviousSendMessageTest()
-        {
-            LaserConnectionLogic.PreviousMessage = new LaserMessage(0, 0, 0, -4000, 4000);
-            List<LaserMessage> pointsToSort = new()
-            {
-                new LaserMessage(0, 0, 0, -400, 4000),
-                new LaserMessage(0, 0, 0, -4000, 4000),
-                new LaserMessage(0, 0, 0, 400, 4000),
-            };
-            List<LaserMessage> expectedOrder = new()
-            {
-                new LaserMessage(0, 0, 0, -4000, 4000),
-                new LaserMessage(0, 0, 0, -400, 4000),
-                new LaserMessage(0, 0, 0, 400, 4000),
-            };
-
-            LaserMessage previousMessage = new(0, 0, 0, -4000, 4000);
-            LaserMessage[] sortedPoints = ProjectionZonesLogic.SortPointsFromClosestToPreviousSendMessageToFarthest(pointsToSort, previousMessage);
-            for (int i = 0; i < sortedPoints.Length; i++)
-            {
-                LaserMessage message = sortedPoints[i];
-                LaserMessage expectedMessage = expectedOrder[i];
-                Point sortedPoint = new(message.X, message.Y);
-                Point expectedPoint = new(expectedMessage.X, expectedMessage.Y);
-                Assert.IsTrue(sortedPoint.X == expectedPoint.X && sortedPoint.Y == expectedPoint.Y);
-            }
-        }
-
-        [TestMethod]
         public void IsInsidePolygonTest()
         {
             Point[] polygon = {
@@ -187,7 +158,7 @@ namespace LaserAPITests.Tests.Logic
         public void GetZoneWherePathIsInsideTest()
         {
             LaserMessage previousMessage = new(0, 0, 0, 500, 0);
-            ZoneDto zone = ProjectionZonesLogic.GetZoneWherePathIsInside(new LaserMessage(0, 0, 0, 500, 0), previousMessage);
+            SafetyZoneDto zone = ProjectionZonesLogic.GetZoneWherePathIsInside(new LaserMessage(0, 0, 0, 500, 0), previousMessage);
             Assert.IsTrue(zone.Uuid == Guid.Parse("fc220bc5-68ff-45d8-8e51-d884687e324b"));
         }
     }

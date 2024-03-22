@@ -7,9 +7,9 @@ namespace LaserAPI.Interfaces.Dal
 {
     public interface IZoneDal
     {
-        public Task Add(ZoneDto zone);
-        public Task<List<ZoneDto>> All();
-        public Task Update(ZoneDto zone);
+        public Task Add(SafetyZoneDto zone);
+        public Task<List<SafetyZoneDto>> All();
+        public Task Update(SafetyZoneDto zone);
         public Task<bool> Exists(Guid uuid);
         public Task Remove(Guid uuid);
     }

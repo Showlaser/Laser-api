@@ -1,4 +1,5 @@
 ﻿using LaserAPI.Models.Dto.Animations;
+using LaserAPI.Models.Dto.Lasershows;
 using LaserAPI.Models.Dto.LasershowSpotify;
 using LaserAPI.Models.Dto.Patterns;
 using LaserAPI.Models.Dto.Zones;
@@ -13,9 +14,11 @@ namespace LaserAPI.Dal
         public virtual DbSet<AnimationPatternDto> PatternAnimation { get; set; }
         public virtual DbSet<PatternDto> Pattern { get; set; }
         public virtual DbSet<PointDto> Point { get; set; }
-        public virtual DbSet<ZoneDto> Zone { get; set; }
-        public virtual DbSet<ZonesPositionDto> ZonePosition { get; set; }
+        public virtual DbSet<SafetyZoneDto> Zone { get; set; }
+        public virtual DbSet<SafetyZonePointDto> ZonePosition { get; set; }
         public virtual DbSet<LasershowSpotifyConnectorDto> LasershowSpotifyConnector { get; set; }
+        public virtual DbSet<LasershowDto> Lasershow { get; set; }
+        public virtual DbSet<LasershowAnimationDto> LasershowAnimation { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -46,14 +49,8 @@ namespace LaserAPI.Dal
                 e.HasMany(ap => ap.AnimationPatternKeyFrames)
                 .WithOne()
                 .HasForeignKey(ap => ap.AnimationPatternUuid);
-            });
 
-            builder.Entity<AnimationPatternDto>(e =>
-            {
-                e.HasKey(ap => ap.Uuid);
-                e.HasMany(ap => ap.AnimationPatternKeyFrames)
-                .WithOne()
-                .HasForeignKey(ap => ap.AnimationPatternUuid);
+                e.Ignore(ap => ap.Pattern);
             });
 
             builder.Entity<AnimationPatternKeyFrameDto>(e =>
@@ -61,15 +58,15 @@ namespace LaserAPI.Dal
                 e.HasKey(apkf => apkf.Uuid);
             });
 
-            builder.Entity<ZoneDto>(e =>
+            builder.Entity<SafetyZoneDto>(e =>
             {
                 e.HasKey(z => z.Uuid);
                 e.HasMany(z => z.Points)
                     .WithOne()
-                    .HasForeignKey(p => p.ZoneUuid);
+                    .HasForeignKey(p => p.SafetyZoneUuid);
             });
 
-            builder.Entity<ZonesPositionDto>(e =>
+            builder.Entity<SafetyZonePointDto>(e =>
             {
                 e.HasKey(zp => zp.Uuid);
             });
@@ -85,6 +82,20 @@ namespace LaserAPI.Dal
             builder.Entity<LasershowSpotifyConnectorSongDto>(e =>
             {
                 e.HasKey(lscs => lscs.Uuid);
+            });
+
+            builder.Entity<LasershowDto>(e =>
+            {
+                e.HasKey(e => e.Uuid);
+                e.HasMany(e => e.LasershowAnimations)
+                .WithOne()
+                .HasForeignKey(e => e.LasershowUuid);
+            });
+
+            builder.Entity<LasershowAnimationDto>(e =>
+            {
+                e.HasKey(la => la.Uuid);
+                e.Ignore(la => la.Animation);
             });
         }
     }

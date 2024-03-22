@@ -9,20 +9,11 @@ using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
-    public class AnimationLogic
+    public class AnimationLogic(IAnimationDal _animationDal, LaserLogic _laserLogic)
     {
-        private readonly IAnimationDal _animationDal;
-        private readonly LaserLogic _laserLogic;
-
-        public AnimationLogic(IAnimationDal animationDal, LaserLogic laserLogic)
-        {
-            _animationDal = animationDal;
-            _laserLogic = laserLogic;
-        }
-
         public async Task AddOrUpdate(AnimationDto animation)
         {
-            if (!AnimationPatternsAreValid(animation))
+            if (!AnimationIsValid(animation))
             {
                 throw new InvalidDataException();
             }
@@ -68,16 +59,25 @@ namespace LaserAPI.Logic
         /// </summary>
         /// <param name="animation">The animation</param>
         /// <returns>True if all items in the animationPatterns have a valid value</returns>
-        public static bool AnimationPatternsAreValid(AnimationDto animation) =>
+        private static bool AnimationPatternsAreValid(AnimationDto animation) =>
             animation.AnimationPatterns.TrueForAll(ap =>
             {
                 return ap.Uuid != Guid.Empty &&
                 ap.AnimationUuid != Guid.Empty &&
+                ap.PatternUuid != Guid.Empty &&
                 !string.IsNullOrEmpty(ap.Name) &&
                 PatternLogic.PatternIsValid(ap.Pattern) &&
                 ap.AnimationPatternKeyFrames.TrueForAll(AnimationPatternKeyFramesAreValid) &&
                 ap.StartTimeMs >= 0 &&
                 ap.TimeLineId.IsBetweenOrEqualTo(0, 3);
             });
+
+        public static bool AnimationIsValid(AnimationDto animation)
+        {
+            return !string.IsNullOrEmpty(animation.Name) &&
+                animation.Uuid != Guid.Empty &&
+                !string.IsNullOrEmpty(animation.Image) &&
+                AnimationPatternsAreValid(animation);
+        }
     }
 }

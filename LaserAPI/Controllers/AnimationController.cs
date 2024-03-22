@@ -14,7 +14,7 @@ namespace LaserAPI.Controllers
 {
     [Route("animation")]
     [ApiController]
-    public class AnimationController(AnimationLogic animationLogic, ControllerResultHandler controllerResultHandler) : ControllerBase
+    public class AnimationController(AnimationLogic _animationLogic, ControllerResultHandler _controllerResultHandler) : ControllerBase
     {
         [HttpPost]
         public async Task<ActionResult> AddOrUpdate([FromBody] Animation animation)
@@ -22,10 +22,10 @@ namespace LaserAPI.Controllers
             async Task Action()
             {
                 AnimationDto animationDto = animation.Adapt<AnimationDto>();
-                await animationLogic.AddOrUpdate(animationDto);
+                await _animationLogic.AddOrUpdate(animationDto);
             }
 
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpPost("play")]
@@ -38,7 +38,7 @@ namespace LaserAPI.Controllers
                 await AnimationLogic.PlayAnimation(animationDto);
             }
 
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpGet]
@@ -46,11 +46,11 @@ namespace LaserAPI.Controllers
         {
             async Task<List<AnimationViewModel>> Action()
             {
-                List<AnimationDto> animations = await animationLogic.All();
+                List<AnimationDto> animations = await _animationLogic.All();
                 return animations.Adapt<List<AnimationViewModel>>();
             }
 
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpDelete("{uuid}")]
@@ -58,10 +58,10 @@ namespace LaserAPI.Controllers
         {
             async Task Action()
             {
-                await animationLogic.Remove(uuid);
+                await _animationLogic.Remove(uuid);
             }
 
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
     }
 }

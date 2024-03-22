@@ -21,12 +21,12 @@ namespace LaserAPI.Logic
                 LaserMessage message = messages[i];
                 LaserMessage previousMessage = i == 0 ? message : messages[i - 1];
 
-                ZoneDto zoneWherePathIsInside = ProjectionZonesLogic.GetZoneWherePathIsInside(message, previousMessage);
+                SafetyZoneDto zoneWherePathIsInside = ProjectionZonesLogic.GetZoneWherePathIsInside(message, previousMessage);
                 bool positionIsInProjectionZone = zoneWherePathIsInside != null;
 
                 if (positionIsInProjectionZone)
                 {
-                    LimitTotalLaserPowerIfNecessary(ref message, zoneWherePathIsInside.MaxLaserPowerInZonePwm);
+                    LimitTotalLaserPowerIfNecessary(ref message, zoneWherePathIsInside.MaxLaserPowerInZonePercentage);
                     messagesToSend.Add(message);
                 }
 

@@ -8,6 +8,6 @@ namespace LaserAPI.Models.FromFrontend.Animations
         public Guid AnimationPatternUuid { get; set; }
         public int TimeMs { get; set; }
         public string PropertyEdited { get; set; }
-        public int PropertyValue { get; set; }
+        public double PropertyValue { get; set; }
     }
 }

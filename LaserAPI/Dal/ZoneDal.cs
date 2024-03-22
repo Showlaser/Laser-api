@@ -17,27 +17,29 @@ namespace LaserAPI.Dal
             _context = context;
         }
 
-        public async Task Add(ZoneDto zone)
+        public async Task Add(SafetyZoneDto zone)
         {
             await _context.Zone.AddAsync(zone);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<ZoneDto>> All()
+        public async Task<List<SafetyZoneDto>> All()
         {
             return await _context.Zone
                 .Include(e => e.Points)
                 .ToListAsync();
         }
 
-        public async Task Update(ZoneDto zone)
+        public async Task Update(SafetyZoneDto zone)
         {
-            ZoneDto zoneToUpdate = await _context.Zone
+            SafetyZoneDto zoneToUpdate = await _context.Zone
                 .Include(z => z.Points)
                 .SingleOrDefaultAsync(z => z.Uuid == zone.Uuid);
 
             zoneToUpdate.Name = zone.Name;
-            zoneToUpdate.MaxLaserPowerInZonePwm = zone.MaxLaserPowerInZonePwm;
+            zoneToUpdate.AppliedOnShowLaserUuid = zone.AppliedOnShowLaserUuid;
+            zoneToUpdate.Description = zone.Description;
+            zoneToUpdate.MaxLaserPowerInZonePercentage = zone.MaxLaserPowerInZonePercentage;
             _context.ZonePosition.RemoveRange(zoneToUpdate.Points);
             await _context.ZonePosition.AddRangeAsync(zone.Points);
             _context.Zone.Update(zoneToUpdate);
@@ -51,15 +53,10 @@ namespace LaserAPI.Dal
 
         public async Task Remove(Guid uuid)
         {
-            ZoneDto zoneToUpdate = await _context.Zone
+            SafetyZoneDto zoneToUpdate = await _context.Zone
                 .Where(z => z.Uuid == uuid)
                 .Include(z => z.Points)
-                .FirstOrDefaultAsync();
-
-            if (zoneToUpdate == null)
-            {
-                throw new KeyNotFoundException();
-            }
+                .FirstOrDefaultAsync() ?? throw new KeyNotFoundException();
 
             _context.Zone.Remove(zoneToUpdate);
             await _context.SaveChangesAsync();

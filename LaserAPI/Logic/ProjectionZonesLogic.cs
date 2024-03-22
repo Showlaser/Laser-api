@@ -11,9 +11,9 @@ namespace LaserAPI.Logic
     public static class ProjectionZonesLogic
     {
         private static int _zonesLength;
-        private static List<ZoneDto> _zones;
+        private static List<SafetyZoneDto> _zones;
 
-        public static List<ZoneDto> Zones
+        public static List<SafetyZoneDto> Zones
         {
             set
             {
@@ -28,17 +28,17 @@ namespace LaserAPI.Logic
         /// <param name="message">The laser message</param>
         /// <param name="previousMessage">The previous message send</param>
         /// <returns>The zone where the laser path is in, if the path is not within a zone null is returned</returns>
-        public static ZoneDto GetZoneWherePathIsInside(LaserMessage message, LaserMessage previousMessage)
+        public static SafetyZoneDto GetZoneWherePathIsInside(LaserMessage message, LaserMessage previousMessage)
         {
             for (int i = 0; i < _zonesLength; i++)
             {
-                ZoneDto zone = _zones[i];
+                SafetyZoneDto zone = _zones[i];
 
                 List<Point> zonePoints = [];
                 int zonePointLength = zone.Points.Count;
                 for (int j = 0; j < zonePointLength; j++)
                 {
-                    ZonesPositionDto zonePoint = zone.Points[j];
+                    SafetyZonePointDto zonePoint = zone.Points[j];
                     zonePoints.Add(new Point(zonePoint.X, zonePoint.Y));
                 }
 
@@ -68,7 +68,7 @@ namespace LaserAPI.Logic
             List<LaserMessage> crossingPoints = [];
             for (int i = 0; i < _zonesLength; i++)
             {
-                ZoneDto zone = _zones[i];
+                SafetyZoneDto zone = _zones[i];
                 ZoneLine[] zoneLinesHit = GetZoneLineHitByPath(zone, message, previousMessage);
 
                 int zoneLinesHitLength = zoneLinesHit.Length;
@@ -96,7 +96,7 @@ namespace LaserAPI.Logic
         /// <param name="zone">The zone to check</param>
         /// <param name="message">The new location for the laser</param>
         /// <returns>The zones that are crossed</returns>
-        public static ZoneLine[] GetZoneLineHitByPath(ZoneDto zone, LaserMessage message, LaserMessage previousMessage)
+        public static ZoneLine[] GetZoneLineHitByPath(SafetyZoneDto zone, LaserMessage message, LaserMessage previousMessage)
         {
             int zonePositionsLength = zone.Points.Count;
             List<ZoneLine> points = new(zonePositionsLength);
@@ -104,9 +104,9 @@ namespace LaserAPI.Logic
             for (int i = 0; i < zonePositionsLength; i++)
             {
                 // these two positions form a connected line
-                ZonesPositionDto position = zone.Points[i];
+                SafetyZonePointDto position = zone.Points[i];
                 int secondZoneIndex = i == zonePositionsLength - 1 ? 0 : i + 1;
-                ZonesPositionDto secondPosition = zone.Points[secondZoneIndex];
+                SafetyZonePointDto secondPosition = zone.Points[secondZoneIndex];
 
                 Point zonePoint1 = new(position.X, position.Y);
                 Point zonePoint2 = new(secondPosition.X, secondPosition.Y);

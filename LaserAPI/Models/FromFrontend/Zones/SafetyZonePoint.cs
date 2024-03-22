@@ -2,12 +2,12 @@
 
 namespace LaserAPI.Models.FromFrontend.Zones
 {
-    public class ZonesPosition
+    public class SafetyZonePoint
     {
         public Guid Uuid { get; set; }
-        public Guid ZoneUuid { get; set; }
+        public Guid SafetyZoneUuid { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
-        public int Order { get; set; }
+        public int OrderNr { get; set; }
     }
 }

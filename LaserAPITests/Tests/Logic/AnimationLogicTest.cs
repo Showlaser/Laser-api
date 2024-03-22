@@ -12,10 +12,10 @@ namespace LaserAPITests.Tests.Logic
         private readonly AnimationLogic _animationLogic = new MockedAnimationLogic().AnimationLogic;
 
         [TestMethod]
-        public void AnimationPatternsAreValidTest()
+        public void AnimationIsValidTest()
         {
             AnimationDto animation = new MockedAnimation().Animation;
-            AnimationLogic.AnimationPatternsAreValid(animation);
+            AnimationLogic.AnimationIsValid(animation);
         }
     }
 }

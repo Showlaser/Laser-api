@@ -3,6 +3,7 @@ using System;
 using LaserAPI.Dal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LaserAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240322101339_22-03-2024-2")]
+    partial class _220320242
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
@@ -74,8 +77,8 @@ namespace LaserAPI.Migrations
                     b.Property<int>("PropertyEdited")
                         .HasColumnType("INTEGER");
 
-                    b.Property<double>("PropertyValue")
-                        .HasColumnType("REAL");
+                    b.Property<int>("PropertyValue")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TimeMs")
                         .HasColumnType("INTEGER");
@@ -142,6 +145,8 @@ namespace LaserAPI.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Uuid");
+
+                    b.HasIndex("AnimationUuid");
 
                     b.HasIndex("LasershowUuid");
 
@@ -308,11 +313,19 @@ namespace LaserAPI.Migrations
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Lasershows.LasershowAnimationDto", b =>
                 {
+                    b.HasOne("LaserAPI.Models.Dto.Animations.AnimationDto", "Animation")
+                        .WithMany()
+                        .HasForeignKey("AnimationUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("LaserAPI.Models.Dto.Lasershows.LasershowDto", null)
                         .WithMany("LasershowAnimations")
                         .HasForeignKey("LasershowUuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Animation");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Patterns.PointDto", b =>

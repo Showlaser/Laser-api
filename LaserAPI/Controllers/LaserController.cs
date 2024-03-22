@@ -9,17 +9,17 @@ namespace LaserAPI.Controllers
 {
     [Route("laser")]
     [ApiController]
-    public class LaserController(LaserLogic laserLogic, ControllerResultHandler controllerResultHandler) : ControllerBase
+    public class LaserController(LaserLogic _laserLogic, ControllerResultHandler _controllerResultHandler) : ControllerBase
     {
         [HttpPost]
         public async Task<ActionResult> ProjectPoints([FromBody] List<PointWrapper> points)
         {
             async Task Action()
             {
-                await laserLogic.RenderProvidedPoints(points);
+                await _laserLogic.RenderProvidedPoints(points);
             }
 
-            return await controllerResultHandler.Execute(Action());
+            return await _controllerResultHandler.Execute(Action());
         }
     }
 }

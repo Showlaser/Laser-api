@@ -1,9 +1,11 @@
 ﻿using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Animations;
+using LaserAPI.Models.Dto.Patterns;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Dal
@@ -33,11 +35,27 @@ namespace LaserAPI.Dal
 
         public async Task<List<AnimationDto>> All()
         {
-            return await _context.Animation
-                .Include(a => a.AnimationPatterns)
+            List<AnimationDto> animations = await _context.Animation
                 .Include(a => a.AnimationPatterns)
                 .ThenInclude(pa => pa.AnimationPatternKeyFrames)
-                .ToListAsync();
+                .Include(pa => pa.AnimationPatterns).ToListAsync();
+
+            IEnumerable<Guid> patternUuids = animations.SelectMany(a => a.AnimationPatterns.Select(ap => ap.PatternUuid));
+            List<PatternDto> patterns = await _context.Pattern.Where(p => patternUuids.Contains(p.Uuid)).ToListAsync();
+
+            int animationsLength = animations.Count;
+            for (int i = 0; i < animationsLength; i++)
+            {
+                AnimationDto animation = animations[i];
+                int animationPatternsLength = animation.AnimationPatterns.Count;
+                for (int j = 0; j < animationPatternsLength; j++)
+                {
+                    AnimationPatternDto animationPattern = animation.AnimationPatterns[j];
+                    animationPattern.Pattern = patterns.Single(p => p.Uuid == animationPattern.PatternUuid);
+                }
+            }
+
+            return animations;
         }
 
         public async Task<bool> Exists(Guid uuid)
@@ -51,14 +69,10 @@ namespace LaserAPI.Dal
                 .Include(a => a.AnimationPatterns)
                 .ThenInclude(pa => pa.AnimationPatternKeyFrames)
                 .AsNoTrackingWithIdentityResolution()
-                .SingleOrDefaultAsync(a => a.Uuid == animation.Uuid);
-
-            if (dbAnimation == null)
-            {
-                throw new NoNullAllowedException();
-            }
+                .SingleOrDefaultAsync(a => a.Uuid == animation.Uuid) ?? throw new NoNullAllowedException();
 
             dbAnimation.Name = animation.Name;
+            dbAnimation.Image = animation.Image;
             _context.Animation.Update(dbAnimation);
 
             _context.PatternAnimation.RemoveRange(dbAnimation.AnimationPatterns);

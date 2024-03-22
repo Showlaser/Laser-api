@@ -85,7 +85,7 @@ namespace LaserAPI
             });
 
             CreateDatabaseIfNotExist(app);
-            SetProjectionZones(app);
+            // SetProjectionZones(app);
 
             /*Timer timer = new() { Interval = 10000 };
             timer.Elapsed += delegate (object o, ElapsedEventArgs eventArgs)
@@ -116,7 +116,7 @@ namespace LaserAPI
                 .GetRequiredService<IServiceScopeFactory>()
                 .CreateScope();
             ZoneLogic zoneLogic = serviceScope.ServiceProvider.GetService<ZoneLogic>();
-            System.Collections.Generic.List<Models.Dto.Zones.ZoneDto> zones = zoneLogic.All().Result;
+            System.Collections.Generic.List<Models.Dto.Zones.SafetyZoneDto> zones = zoneLogic.All().Result;
             ProjectionZonesLogic.Zones = zones;
         }
 
