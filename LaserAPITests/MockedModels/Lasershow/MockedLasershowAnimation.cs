@@ -22,7 +22,7 @@ namespace LaserAPITests.MockedModels.Lasershow
                 Name = "LasershowAnimation",
                 Animation = mockedAnimation.Animation,
                 StartTimeMs = 0,
-                TimeLineId = 0,
+                TimelineId = 0,
             };
 
             LasershowAnimationDto lasershowAnimation2 = new()
@@ -32,7 +32,7 @@ namespace LaserAPITests.MockedModels.Lasershow
                 Name = "LasershowAnimation2",
                 Animation = mockedAnimation.Animation,
                 StartTimeMs = 100,
-                TimeLineId = 0,
+                TimelineId = 0,
             };
 
             LasershowAnimationList = [

@@ -24,7 +24,11 @@ namespace LaserAPI.Dal
                 .ToListAsync();
 
             IEnumerable<Guid> animationUuids = lasershows.SelectMany(l => l.LasershowAnimations.Select(la => la.AnimationUuid));
-            List<AnimationDto> animations = await _context.Animation.Where(a => animationUuids.Contains(a.Uuid)).ToListAsync();
+            List<AnimationDto> animations = await _context.Animation.Where(a => animationUuids.Contains(a.Uuid))
+                .Include(a => a.AnimationPatterns)
+                .ThenInclude(ap => ap.Pattern)
+                .ThenInclude(p => p.Points)
+                .ToListAsync();
 
             int lasershowsLength = lasershows.Count;
             for (int i = 0; i < lasershowsLength; i++)

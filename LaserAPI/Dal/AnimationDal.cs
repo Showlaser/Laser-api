@@ -41,7 +41,7 @@ namespace LaserAPI.Dal
                 .Include(pa => pa.AnimationPatterns).ToListAsync();
 
             IEnumerable<Guid> patternUuids = animations.SelectMany(a => a.AnimationPatterns.Select(ap => ap.PatternUuid));
-            List<PatternDto> patterns = await _context.Pattern.Where(p => patternUuids.Contains(p.Uuid)).ToListAsync();
+            List<PatternDto> patterns = await _context.Pattern.Where(p => patternUuids.Contains(p.Uuid)).Include(p => p.Points).ToListAsync();
 
             int animationsLength = animations.Count;
             for (int i = 0; i < animationsLength; i++)

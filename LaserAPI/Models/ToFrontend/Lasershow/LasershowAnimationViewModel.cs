@@ -11,6 +11,6 @@ namespace LaserAPI.Models.ToFrontend.Lasershow
         public string Name { get; set; }
         public AnimationViewModel Animation { get; set; }
         public int StartTimeMs { get; set; }
-        public int TimeLineId { get; set; }
+        public int TimelineId { get; set; }
     }
 }

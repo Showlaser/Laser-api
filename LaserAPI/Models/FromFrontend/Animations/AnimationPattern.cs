@@ -13,6 +13,6 @@ namespace LaserAPI.Models.FromFrontend.Animations
         public string Name { get; set; }
         public List<AnimationPatternKeyFrame> AnimationPatternKeyFrames { get; set; }
         public int StartTimeMs { get; set; }
-        public int TimeLineId { get; set; }
+        public int TimelineId { get; set; }
     }
 }

@@ -20,7 +20,7 @@ namespace LaserAPI.Logic
             la.Uuid != Guid.Empty &&
             la.AnimationUuid != Guid.Empty &&
             la.LasershowUuid == lasershowDto.Uuid &&
-            la.TimeLineId.IsBetweenOrEqualTo(0, 3) &&
+            la.TimelineId.IsBetweenOrEqualTo(0, 3) &&
             la.StartTimeMs >= 0 &&
             AnimationLogic.AnimationIsValid(la.Animation));
 

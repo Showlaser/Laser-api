@@ -69,7 +69,7 @@ namespace LaserAPI.Logic
                 PatternLogic.PatternIsValid(ap.Pattern) &&
                 ap.AnimationPatternKeyFrames.TrueForAll(AnimationPatternKeyFramesAreValid) &&
                 ap.StartTimeMs >= 0 &&
-                ap.TimeLineId.IsBetweenOrEqualTo(0, 3);
+                ap.TimelineId.IsBetweenOrEqualTo(0, 3);
             });
 
         public static bool AnimationIsValid(AnimationDto animation)
