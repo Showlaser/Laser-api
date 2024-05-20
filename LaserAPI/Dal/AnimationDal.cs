@@ -68,7 +68,6 @@ namespace LaserAPI.Dal
             AnimationDto dbAnimation = await _context.Animation
                 .Include(a => a.AnimationPatterns)
                 .ThenInclude(pa => pa.AnimationPatternKeyFrames)
-                .AsNoTrackingWithIdentityResolution()
                 .SingleOrDefaultAsync(a => a.Uuid == animation.Uuid) ?? throw new NoNullAllowedException();
 
             dbAnimation.Name = animation.Name;

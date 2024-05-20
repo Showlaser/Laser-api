@@ -1,4 +1,5 @@
 ﻿using LaserAPI.Interfaces.Dal;
+using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.Dto.Patterns;
 using LaserAPI.Models.Helper;
 using System;
@@ -9,17 +10,8 @@ using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
-    public class PatternLogic
+    public class PatternLogic(IPatternDal _patternDal, IAnimationDal _animationDal, LaserLogic _laserLogic)
     {
-        private readonly IPatternDal _patternDal;
-        private readonly LaserLogic _laserLogic;
-
-        public PatternLogic(IPatternDal patternDal, LaserLogic laserLogic)
-        {
-            _patternDal = patternDal;
-            _laserLogic = laserLogic;
-        }
-
         private static bool PointsAreValid(PointDto points)
         {
             return points.Uuid != Guid.Empty &&
@@ -81,6 +73,15 @@ namespace LaserAPI.Logic
             {
                 throw new NoNullAllowedException(nameof(uuid));
             }
+
+            List<AnimationDto> allAnimations = await _animationDal.All();
+            List<AnimationDto> animationsToRemovePatternFrom = allAnimations.FindAll(a => a.AnimationPatterns.Any(ap => ap.Pattern.Uuid == uuid));
+            foreach (AnimationDto animation in animationsToRemovePatternFrom)
+            {
+                animation.AnimationPatterns.RemoveAll(ap => ap.Pattern.Uuid == uuid);
+                await _animationDal.Update(animation);
+            }
+
             await _patternDal.Remove(uuid);
         }
     }

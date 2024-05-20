@@ -1,6 +1,7 @@
 ﻿using LaserAPI.Interfaces.Dal;
 using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.Dto.Lasershows;
+using LaserAPI.Models.Dto.Patterns;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -25,20 +26,22 @@ namespace LaserAPI.Dal
 
             IEnumerable<Guid> animationUuids = lasershows.SelectMany(l => l.LasershowAnimations.Select(la => la.AnimationUuid));
             List<AnimationDto> animations = await _context.Animation.Where(a => animationUuids.Contains(a.Uuid))
-                .Include(a => a.AnimationPatterns)
-                .ThenInclude(ap => ap.Pattern)
-                .ThenInclude(p => p.Points)
-                .ToListAsync();
+                 .Include(a => a.AnimationPatterns)
+                 .ThenInclude(pa => pa.AnimationPatternKeyFrames)
+                 .Include(pa => pa.AnimationPatterns).ToListAsync();
 
-            int lasershowsLength = lasershows.Count;
-            for (int i = 0; i < lasershowsLength; i++)
+            IEnumerable<Guid> patternUuids = animations.SelectMany(a => a.AnimationPatterns.Select(ap => ap.PatternUuid));
+            List<PatternDto> patterns = await _context.Pattern.Where(p => patternUuids.Contains(p.Uuid)).Include(p => p.Points).ToListAsync();
+
+            int animationsLength = animations.Count;
+            for (int i = 0; i < animationsLength; i++)
             {
-                LasershowDto lasershow = lasershows[i];
-                int lasershowAnimationsLength = lasershow.LasershowAnimations.Count;
-                for (int j = 0; j < lasershowAnimationsLength; j++)
+                AnimationDto animation = animations[i];
+                int animationPatternsLength = animation.AnimationPatterns.Count;
+                for (int j = 0; j < animationPatternsLength; j++)
                 {
-                    LasershowAnimationDto lasershowAnimation = lasershow.LasershowAnimations[j];
-                    lasershowAnimation.Animation = animations.Single(p => p.Uuid == lasershowAnimation.AnimationUuid);
+                    AnimationPatternDto animationPattern = animation.AnimationPatterns[j];
+                    animationPattern.Pattern = patterns.Single(p => p.Uuid == animationPattern.PatternUuid);
                 }
             }
 
