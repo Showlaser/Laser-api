@@ -11,14 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LaserAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240321121424_2103202404")]
-    partial class _2103202404
+    [Migration("20240526195407_initial-create")]
+    partial class initialcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.AnimationDto", b =>
                 {
@@ -49,20 +49,18 @@ namespace LaserAPI.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("PatternUuid")
+                    b.Property<Guid>("PatternUuid")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("StartTimeMs")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("TimeLineId")
+                    b.Property<int>("TimelineId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Uuid");
 
                     b.HasIndex("AnimationUuid");
-
-                    b.HasIndex("PatternUuid");
 
                     b.ToTable("PatternAnimation");
                 });
@@ -79,8 +77,8 @@ namespace LaserAPI.Migrations
                     b.Property<int>("PropertyEdited")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("PropertyValue")
-                        .HasColumnType("INTEGER");
+                    b.Property<double>("PropertyValue")
+                        .HasColumnType("REAL");
 
                     b.Property<int>("TimeMs")
                         .HasColumnType("INTEGER");
@@ -125,6 +123,51 @@ namespace LaserAPI.Migrations
                     b.ToTable("LasershowSpotifyConnectorSongDto");
                 });
 
+            modelBuilder.Entity("LaserAPI.Models.Dto.Lasershows.LasershowAnimationDto", b =>
+                {
+                    b.Property<Guid>("Uuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("AnimationUuid")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("LasershowUuid")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("StartTimeMs")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TimelineId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Uuid");
+
+                    b.HasIndex("LasershowUuid");
+
+                    b.ToTable("LasershowAnimation");
+                });
+
+            modelBuilder.Entity("LaserAPI.Models.Dto.Lasershows.LasershowDto", b =>
+                {
+                    b.Property<Guid>("Uuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Uuid");
+
+                    b.ToTable("Lasershow");
+                });
+
             modelBuilder.Entity("LaserAPI.Models.Dto.Patterns.PatternDto", b =>
                 {
                     b.Property<Guid>("Uuid")
@@ -163,8 +206,8 @@ namespace LaserAPI.Migrations
                     b.Property<int>("BlueLaserPowerPwm")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ConnectedToPointOrderNr")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("ConnectedToPointUuid")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("GreenLaserPowerPwm")
                         .HasColumnType("INTEGER");
@@ -198,6 +241,9 @@ namespace LaserAPI.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("AppliedOnShowLaserUuid")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("MaxLaserPowerInZonePercentage")
@@ -243,12 +289,6 @@ namespace LaserAPI.Migrations
                         .HasForeignKey("AnimationUuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("LaserAPI.Models.Dto.Patterns.PatternDto", "Pattern")
-                        .WithMany()
-                        .HasForeignKey("PatternUuid");
-
-                    b.Navigation("Pattern");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.AnimationPatternKeyFrameDto", b =>
@@ -265,6 +305,15 @@ namespace LaserAPI.Migrations
                     b.HasOne("LaserAPI.Models.Dto.LasershowSpotify.LasershowSpotifyConnectorDto", null)
                         .WithMany("SpotifySongs")
                         .HasForeignKey("LasershowSpotifyConnectorUuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LaserAPI.Models.Dto.Lasershows.LasershowAnimationDto", b =>
+                {
+                    b.HasOne("LaserAPI.Models.Dto.Lasershows.LasershowDto", null)
+                        .WithMany("LasershowAnimations")
+                        .HasForeignKey("LasershowUuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -300,6 +349,11 @@ namespace LaserAPI.Migrations
             modelBuilder.Entity("LaserAPI.Models.Dto.LasershowSpotify.LasershowSpotifyConnectorDto", b =>
                 {
                     b.Navigation("SpotifySongs");
+                });
+
+            modelBuilder.Entity("LaserAPI.Models.Dto.Lasershows.LasershowDto", b =>
+                {
+                    b.Navigation("LasershowAnimations");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Patterns.PatternDto", b =>

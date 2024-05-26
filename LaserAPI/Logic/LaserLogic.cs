@@ -73,10 +73,10 @@ namespace LaserAPI.Logic
                 PointWrapper point = sortedPoints.ElementAt(i);
                 pointsToRender.Add(point);
 
-                bool dotsFormALine = point.PatternPoint.ConnectedToPointOrderNr != null && point.PatternPoint.ConnectedToPointOrderNr >= 0;
+                bool dotsFormALine = point.PatternPoint.ConnectedToPointUuid != null && point.PatternPoint.ConnectedToPointUuid != Guid.Empty;
                 if (dotsFormALine)
                 {
-                    PointWrapper PointToConnectTo = sortedPoints[(int)point.PatternPoint.ConnectedToPointOrderNr];
+                    PointWrapper PointToConnectTo = sortedPoints.Single(sp => point.PatternPoint.ConnectedToPointUuid == sp.PatternPoint.Uuid);
                     pointsToRender.Add(PointToConnectTo);
                 }
             }

@@ -11,7 +11,7 @@ namespace LaserAPI.Models.FromFrontend.Patterns
         public int RedLaserPowerPwm { get; set; }
         public int GreenLaserPowerPwm { get; set; }
         public int BlueLaserPowerPwm { get; set; }
-        public int? ConnectedToPointOrderNr { get; set; }
+        public Guid ConnectedToPointUuid { get; set; }
         public int OrderNr { get; set; }
     }
 }

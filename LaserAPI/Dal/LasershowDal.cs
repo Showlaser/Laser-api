@@ -78,7 +78,6 @@ namespace LaserAPI.Dal
         {
             LasershowDto dbLasershow = await _context.Lasershow
                 .Include(e => e.LasershowAnimations)
-                .AsNoTrackingWithIdentityResolution()
                 .SingleOrDefaultAsync(e => e.Uuid == lasershow.Uuid) ?? throw new KeyNotFoundException();
 
             dbLasershow.Name = lasershow.Name;

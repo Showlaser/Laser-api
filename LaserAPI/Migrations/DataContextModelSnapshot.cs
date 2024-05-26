@@ -15,7 +15,7 @@ namespace LaserAPI.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.AnimationDto", b =>
                 {
@@ -203,8 +203,8 @@ namespace LaserAPI.Migrations
                     b.Property<int>("BlueLaserPowerPwm")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ConnectedToPointOrderNr")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("ConnectedToPointUuid")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("GreenLaserPowerPwm")
                         .HasColumnType("INTEGER");
