@@ -45,6 +45,18 @@ namespace LaserAPI.Dal
                 }
             }
 
+            int lasershowsLength = lasershows.Count;
+            for (int i = 0; i < lasershowsLength; i++)
+            {
+                LasershowDto lasershow = lasershows[i];
+                int lasershowAnimationsLength = lasershow.LasershowAnimations.Count;
+                for (int j = 0; j < lasershowAnimationsLength; j++)
+                {
+                    LasershowAnimationDto lasershowAnimation = lasershow.LasershowAnimations[j];
+                    lasershowAnimation.Animation = animations.Single(a => a.Uuid == lasershowAnimation.AnimationUuid);
+                }
+            }
+
             return lasershows;
         }
 
