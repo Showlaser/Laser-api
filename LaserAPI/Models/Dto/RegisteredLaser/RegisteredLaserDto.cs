@@ -1,17 +1,15 @@
 ﻿using LaserAPI.Enums;
 using System;
 
-namespace LaserAPI.Models.Helper
+namespace LaserAPI.Models.Dto.RegisteredLaser
 {
-    public class ConnectedLaser
+    public class RegisteredLaserDto
     {
         public Guid Uuid { get; set; }
-        public string LaserConnectionId { get; set; }
+        public string LaserId { get; set; }
         public string Name { get; set; }
         public string ModelType { get; set; }
         public LaserStatus Status { get; set; }
-        public bool Online { get; set; }
         public string IPAddress { get; set; }
-        public string Password { get; set; }
     }
 }

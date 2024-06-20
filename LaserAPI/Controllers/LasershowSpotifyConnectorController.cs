@@ -11,17 +11,11 @@ namespace LaserAPI.Controllers
 {
     [Route("spotify-connector")]
     [ApiController]
-    public class LasershowSpotifyConnectorController : ControllerBase
+    public class LasershowSpotifyConnectorController(LasershowSpotifyConnectorLogic lasershowSpotifyConnectorLogic,
+        ControllerResultHandler controllerResultHandler) : ControllerBase
     {
-        private readonly LasershowSpotifyConnectorLogic _lasershowSpotifyConnectorLogic;
-        private readonly ControllerResultHandler _controllerResultHandler;
-
-        public LasershowSpotifyConnectorController(LasershowSpotifyConnectorLogic lasershowSpotifyConnectorLogic,
-            ControllerResultHandler controllerResultHandler)
-        {
-            _lasershowSpotifyConnectorLogic = lasershowSpotifyConnectorLogic;
-            _controllerResultHandler = controllerResultHandler;
-        }
+        private readonly LasershowSpotifyConnectorLogic _lasershowSpotifyConnectorLogic = lasershowSpotifyConnectorLogic;
+        private readonly ControllerResultHandler _controllerResultHandler = controllerResultHandler;
 
         [HttpPost]
         public async Task<ActionResult> AddOrUpdate([FromBody] LasershowSpotifyConnectorViewmodel connector)

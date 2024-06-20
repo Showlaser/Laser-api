@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
-    public class AnimationLogic(IAnimationDal _animationDal, LaserLogic _laserLogic)
+    public class AnimationLogic(IAnimationDal _animationDal)
     {
         public async Task AddOrUpdate(AnimationDto animation)
         {
@@ -41,11 +41,6 @@ namespace LaserAPI.Logic
             }
 
             await _animationDal.Remove(uuid);
-        }
-
-        public static async Task PlayAnimation(AnimationDto animation)
-        {
-
         }
 
         private static bool AnimationPatternKeyFramesAreValid(AnimationPatternKeyFrameDto keyFrames) =>

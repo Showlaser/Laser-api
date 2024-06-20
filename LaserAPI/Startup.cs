@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Text.Json.Serialization;
+using System.Timers;
 
 namespace LaserAPI
 {
@@ -42,7 +43,6 @@ namespace LaserAPI
 
         private static void AddDependencyInjection(ref IServiceCollection services)
         {
-            services.AddScoped<LaserLogic>();
             services.AddScoped<PatternLogic>();
             services.AddScoped<AnimationLogic>();
             services.AddScoped<LasershowLogic>();
@@ -54,7 +54,7 @@ namespace LaserAPI
             services.AddScoped<GameLogic>();
             services.AddTransient<ControllerResultHandler>();
             services.AddSingleton<GameStateLogic>();
-            services.AddSingleton<ILaserConnectionLogic, LaserConnectionLogic>();
+            services.AddScoped<ILaserConnectionLogic, LaserConnectionLogic>();
             services.AddScoped<IPatternDal, PatternDal>();
             services.AddScoped<IAnimationDal, AnimationDal>();
             services.AddScoped<IZoneDal, ZoneDal>();
@@ -89,13 +89,13 @@ namespace LaserAPI
             CreateDatabaseIfNotExist(app);
             // SetProjectionZones(app);
 
-            /*Timer timer = new() { Interval = 10000 };
+            Timer timer = new() { Interval = 30000 };
             timer.Elapsed += delegate (object o, ElapsedEventArgs eventArgs)
             {
-                SaveGeneratedLaserShow(app);
+                _ = LaserConnectionLogic.GetStatus();
             };
 
-            timer.Start();*/
+            timer.Start();
         }
 
         private static void SaveGeneratedLaserShow(IApplicationBuilder app)

@@ -7,7 +7,6 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Controllers
@@ -23,19 +22,6 @@ namespace LaserAPI.Controllers
             {
                 AnimationDto animationDto = animation.Adapt<AnimationDto>();
                 await _animationLogic.AddOrUpdate(animationDto);
-            }
-
-            return await _controllerResultHandler.Execute(Action());
-        }
-
-        [HttpPost("play")]
-        public async Task<ActionResult> PlayAnimation([FromBody] Animation animation)
-        {
-            async Task Action()
-            {
-                Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
-                AnimationDto animationDto = animation.Adapt<AnimationDto>();
-                await AnimationLogic.PlayAnimation(animationDto);
             }
 
             return await _controllerResultHandler.Execute(Action());

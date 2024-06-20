@@ -2,6 +2,7 @@
 using LaserAPI.Models.Dto.Lasershows;
 using LaserAPI.Models.Dto.LasershowSpotify;
 using LaserAPI.Models.Dto.Patterns;
+using LaserAPI.Models.Dto.RegisteredLaser;
 using LaserAPI.Models.Dto.Zones;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,7 @@ namespace LaserAPI.Dal
         public virtual DbSet<LasershowSpotifyConnectorDto> LasershowSpotifyConnector { get; set; }
         public virtual DbSet<LasershowDto> Lasershow { get; set; }
         public virtual DbSet<LasershowAnimationDto> LasershowAnimation { get; set; }
+        public virtual DbSet<RegisteredLaserDto> RegisteredLaser { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -96,6 +98,11 @@ namespace LaserAPI.Dal
             {
                 e.HasKey(la => la.Uuid);
                 e.Ignore(la => la.Animation);
+            });
+
+            builder.Entity<RegisteredLaserDto>(e =>
+            {
+                e.HasKey(la => la.Uuid);
             });
         }
     }

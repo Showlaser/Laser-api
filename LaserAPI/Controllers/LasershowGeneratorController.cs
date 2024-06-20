@@ -11,17 +11,11 @@ namespace LaserAPI.Controllers
 {
     [Route("lasershow-generator")]
     [ApiController]
-    public class LasershowGeneratorController : ControllerBase
+    public class LasershowGeneratorController(ControllerResultHandler controllerResultHandler,
+        LasershowGeneratorConnectedSongSelector lasershowGeneratorConnectedSongSelector) : ControllerBase
     {
-        private readonly ControllerResultHandler _controllerResultHandler;
-        private readonly LasershowGeneratorConnectedSongSelector _lasershowGeneratorConnectedSongSelector;
-
-        public LasershowGeneratorController(ControllerResultHandler controllerResultHandler,
-            LasershowGeneratorConnectedSongSelector lasershowGeneratorConnectedSongSelector)
-        {
-            _controllerResultHandler = controllerResultHandler;
-            _lasershowGeneratorConnectedSongSelector = lasershowGeneratorConnectedSongSelector;
-        }
+        private readonly ControllerResultHandler _controllerResultHandler = controllerResultHandler;
+        private readonly LasershowGeneratorConnectedSongSelector _lasershowGeneratorConnectedSongSelector = lasershowGeneratorConnectedSongSelector;
 
         [HttpGet("devices")]
         public ActionResult<IEnumerable<string>> GetDevices()

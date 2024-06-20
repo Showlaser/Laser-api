@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
-    public class PatternLogic(IPatternDal _patternDal, IAnimationDal _animationDal, LaserLogic _laserLogic)
+    public class PatternLogic(IPatternDal _patternDal, IAnimationDal _animationDal)
     {
         private static bool PointsAreValid(PointDto points)
         {
@@ -45,16 +45,6 @@ namespace LaserAPI.Logic
             }
 
             await _patternDal.Add(pattern);
-        }
-
-        public async Task PlayPattern(PatternDto pattern)
-        {
-            pattern.Points = pattern.Points.OrderBy(p => p.OrderNr).ToList();
-            IReadOnlyList<LaserMessage> messages = pattern.Points.Select(p =>
-                new LaserMessage(p.RedLaserPowerPwm, p.GreenLaserPowerPwm, p.BlueLaserPowerPwm, p.X, p.Y))
-                .ToList();
-
-            await LaserLogic.SendData(messages, 1000);
         }
 
         public async Task<List<PatternDto>> All()
