@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0-windows7.0</TargetFramework>
-    <Nullable>enable</Nullable>
+	  <TargetFramework>net9.0</TargetFramework>
+	  <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
 
