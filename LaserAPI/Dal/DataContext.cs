@@ -3,7 +3,6 @@ using LaserAPI.Models.Dto.Lasershows;
 using LaserAPI.Models.Dto.LasershowSpotify;
 using LaserAPI.Models.Dto.Patterns;
 using LaserAPI.Models.Dto.RegisteredLaser;
-using LaserAPI.Models.Dto.Zones;
 using Microsoft.EntityFrameworkCore;
 
 namespace LaserAPI.Dal
@@ -15,8 +14,6 @@ namespace LaserAPI.Dal
         public virtual DbSet<AnimationPatternDto> PatternAnimation { get; set; }
         public virtual DbSet<PatternDto> Pattern { get; set; }
         public virtual DbSet<PointDto> Point { get; set; }
-        public virtual DbSet<SafetyZoneDto> Zone { get; set; }
-        public virtual DbSet<SafetyZonePointDto> ZonePosition { get; set; }
         public virtual DbSet<LasershowSpotifyConnectorDto> LasershowSpotifyConnector { get; set; }
         public virtual DbSet<LasershowDto> Lasershow { get; set; }
         public virtual DbSet<LasershowAnimationDto> LasershowAnimation { get; set; }
@@ -58,19 +55,6 @@ namespace LaserAPI.Dal
             builder.Entity<AnimationPatternKeyFrameDto>(e =>
             {
                 e.HasKey(apkf => apkf.Uuid);
-            });
-
-            builder.Entity<SafetyZoneDto>(e =>
-            {
-                e.HasKey(z => z.Uuid);
-                e.HasMany(z => z.Points)
-                    .WithOne()
-                    .HasForeignKey(p => p.SafetyZoneUuid);
-            });
-
-            builder.Entity<SafetyZonePointDto>(e =>
-            {
-                e.HasKey(zp => zp.Uuid);
             });
 
             builder.Entity<LasershowSpotifyConnectorDto>(e =>

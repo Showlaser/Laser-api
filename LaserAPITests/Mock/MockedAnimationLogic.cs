@@ -8,9 +8,8 @@ namespace LaserAPITests.Mock
 
         public MockedAnimationLogic()
         {
-            MockedLaserLogic mockedLaserLogic = new();
             MockedAnimationDal mockedAnimationDal = new();
-            AnimationLogic mockedAnimationLogic = new(mockedAnimationDal.AnimationDal, mockedLaserLogic.LaserLogic);
+            AnimationLogic mockedAnimationLogic = new(mockedAnimationDal.AnimationDal);
 
             AnimationLogic = mockedAnimationLogic;
         }

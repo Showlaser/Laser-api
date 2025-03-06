@@ -47,7 +47,6 @@ namespace LaserAPI
             services.AddScoped<AnimationLogic>();
             services.AddScoped<LasershowLogic>();
             services.AddScoped<LasershowSpotifyConnectorLogic>();
-            services.AddScoped<ZoneLogic>();
             services.AddSingleton<AudioAnalyser>();
             services.AddSingleton<LaserShowGeneratorAlgorithm>();
             services.AddSingleton<LasershowGeneratorConnectedSongSelector>();
@@ -57,9 +56,9 @@ namespace LaserAPI
             services.AddScoped<ILaserConnectionLogic, LaserConnectionLogic>();
             services.AddScoped<IPatternDal, PatternDal>();
             services.AddScoped<IAnimationDal, AnimationDal>();
-            services.AddScoped<IZoneDal, ZoneDal>();
             services.AddScoped<ILasershowDal, LasershowDal>();
             services.AddScoped<ILasershowSpotifyConnectorDal, LasershowSpotifyConnectorDal>();
+            services.AddScoped<IRegisteredLaserDal, RegisteredLaserDal>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -110,16 +109,6 @@ namespace LaserAPI
                 animationLogic.AddOrUpdate(GeneratedLaserShowsQueue.LaserShowToSave).Wait();
                 GeneratedLaserShowsQueue.LaserShowToSave = new AnimationDto();
             }
-        }
-
-        private static void SetProjectionZones(IApplicationBuilder app)
-        {
-            IServiceScope serviceScope = app.ApplicationServices
-                .GetRequiredService<IServiceScopeFactory>()
-                .CreateScope();
-            ZoneLogic zoneLogic = serviceScope.ServiceProvider.GetService<ZoneLogic>();
-            System.Collections.Generic.List<Models.Dto.Zones.SafetyZoneDto> zones = zoneLogic.All().Result;
-            ProjectionZonesLogic.Zones = zones;
         }
 
         /// <summary>
