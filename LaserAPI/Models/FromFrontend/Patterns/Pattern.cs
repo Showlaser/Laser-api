@@ -7,7 +7,11 @@ namespace LaserAPI.Models.FromFrontend.Patterns
     {
         public Guid Uuid { get; set; }
         public string Name { get; set; }
+        public string Image { get; set; }
         public double Scale { get; set; }
+        public int XOffset { get; set; }
+        public int YOffset { get; set; }
+        public int Rotation { get; set; }
         public List<PatternPoint> Points { get; set; }
     }
 }

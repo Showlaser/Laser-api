@@ -7,7 +7,6 @@ namespace LaserAPI
     {
         public static void Main(string[] args)
         {
-            //BenchmarkDotNet.Reports.Summary[]? summary = BenchmarkRunner.Run(typeof(Program).Assembly);
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -16,6 +15,7 @@ namespace LaserAPI
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls("http://localhost:5004");
                 });
     }
 }

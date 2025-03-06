@@ -15,7 +15,7 @@ namespace LaserAPITests.Tests.Logic
     [TestClass]
     public class PatternLogicTests
     {
-        private readonly PatternLogic _patternLogic = new MockPatternLogic().PatternLogic;
+        private readonly PatternLogic _patternLogic = new MockedPatternLogic().PatternLogic;
         private readonly MockedPattern _pattern = new();
 
         [TestMethod]

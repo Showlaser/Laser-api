@@ -44,6 +44,10 @@ namespace LaserAPI.Models.Helper
             {
                 return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
             }
+            catch (UnsafePatternDetectedException)
+            {
+                return new StatusCodeResult(StatusCodes.Status406NotAcceptable);
+            }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
@@ -66,9 +70,8 @@ namespace LaserAPI.Models.Helper
             {
                 return new NotFoundResult();
             }
-            catch (DbUpdateException e)
+            catch (DbUpdateException)
             {
-                Console.WriteLine(e);
                 return new StatusCodeResult(StatusCodes.Status304NotModified);
             }
             catch (DuplicateNameException)
@@ -78,6 +81,10 @@ namespace LaserAPI.Models.Helper
             catch (SecurityException)
             {
                 return new UnauthorizedResult();
+            }
+            catch (UnsafePatternDetectedException)
+            {
+                return new StatusCodeResult(StatusCodes.Status406NotAcceptable);
             }
             catch (Exception exception)
             {
@@ -113,6 +120,10 @@ namespace LaserAPI.Models.Helper
             {
                 return new UnauthorizedResult();
             }
+            catch (UnsafePatternDetectedException)
+            {
+                return new StatusCodeResult(StatusCodes.Status406NotAcceptable);
+            }
             catch (Exception exception)
             {
                 Console.WriteLine(exception);
@@ -145,6 +156,10 @@ namespace LaserAPI.Models.Helper
             catch (SecurityException)
             {
                 return new UnauthorizedResult();
+            }
+            catch (UnsafePatternDetectedException)
+            {
+                return new StatusCodeResult(StatusCodes.Status406NotAcceptable);
             }
             catch (Exception exception)
             {

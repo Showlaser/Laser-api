@@ -7,24 +7,14 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Controllers
 {
     [Route("animation")]
     [ApiController]
-    public class AnimationController : ControllerBase
+    public class AnimationController(AnimationLogic _animationLogic, ControllerResultHandler _controllerResultHandler) : ControllerBase
     {
-        private readonly AnimationLogic _animationLogic;
-        private readonly ControllerResultHandler _controllerResultHandler;
-
-        public AnimationController(AnimationLogic animationLogic, ControllerResultHandler controllerResultHandler)
-        {
-            _animationLogic = animationLogic;
-            _controllerResultHandler = controllerResultHandler;
-        }
-
         [HttpPost]
         public async Task<ActionResult> AddOrUpdate([FromBody] Animation animation)
         {
@@ -32,19 +22,6 @@ namespace LaserAPI.Controllers
             {
                 AnimationDto animationDto = animation.Adapt<AnimationDto>();
                 await _animationLogic.AddOrUpdate(animationDto);
-            }
-
-            return await _controllerResultHandler.Execute(Action());
-        }
-
-        [HttpPost("play")]
-        public async Task<ActionResult> PlayAnimation([FromBody] Animation animation)
-        {
-            async Task Action()
-            {
-                Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
-                AnimationDto animationDto = animation.Adapt<AnimationDto>();
-                await _animationLogic.PlayAnimation(animationDto);
             }
 
             return await _controllerResultHandler.Execute(Action());

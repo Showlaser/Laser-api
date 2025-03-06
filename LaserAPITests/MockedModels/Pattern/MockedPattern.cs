@@ -15,12 +15,12 @@ namespace LaserAPITests.MockedModels.Pattern
 
         public MockedPattern()
         {
-            PatternDto? pattern = new PatternDto
+            PatternDto? pattern = new()
             {
                 Scale = 1.0,
                 Uuid = Guid.Parse("ca1529e8-ac96-4cfb-93fb-1bb075969766"),
-                Points = new List<PointDto>
-                {
+                Points =
+                [
                     new()
                     {
                         Uuid = Guid.Parse("81fb5f2d-5b16-4bfa-a1cf-f595ad1ce20a"),
@@ -35,14 +35,14 @@ namespace LaserAPITests.MockedModels.Pattern
                         X = -4000,
                         Y = 4000,
                     }
-                }
+                ]
             };
 
-            PatternDto? pattern2 = new PatternDto
+            PatternDto? pattern2 = new()
             {
                 Scale = 0.5,
-                Points = new List<PointDto>
-                {
+                Points =
+                [
                     new()
                     {
                         Uuid = Guid.Parse("1fa48d00-47cb-4987-a9c7-a8c8d1af236d"),
@@ -55,15 +55,15 @@ namespace LaserAPITests.MockedModels.Pattern
                         X = -4000,
                         Y = 4000,
                     }
-                }
+                ]
             };
 
             Pattern = pattern;
-            PatternList = new List<PatternDto>
-            {
+            PatternList =
+            [
                 pattern,
                 pattern2
-            };
+            ];
 
             Empty = new PatternDto
             {
@@ -80,7 +80,7 @@ namespace LaserAPITests.MockedModels.Pattern
             EmptyPoints = new PatternDto
             {
                 Scale = 0.5,
-                Points = new List<PointDto>()
+                Points = []
             };
         }
     }

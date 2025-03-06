@@ -7,6 +7,7 @@ namespace LaserAPI.Models.FromFrontend.Animations
     {
         public Guid Uuid { get; set; }
         public string Name { get; set; }
-        public List<PatternAnimation> PatternAnimations { get; set; }
+        public string Image { get; set; }
+        public List<AnimationPattern> AnimationPatterns { get; set; }
     }
 }

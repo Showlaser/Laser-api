@@ -42,6 +42,11 @@ namespace LaserAPI.Dal
 
             patternToUpdate.Name = pattern.Name;
             patternToUpdate.Scale = pattern.Scale;
+            patternToUpdate.Rotation = pattern.Rotation;
+            patternToUpdate.XOffset = pattern.XOffset;
+            patternToUpdate.YOffset = pattern.YOffset;
+            patternToUpdate.Image = pattern.Image;
+
             _context.Point.RemoveRange(patternToUpdate.Points);
             await _context.Point.AddRangeAsync(pattern.Points);
 

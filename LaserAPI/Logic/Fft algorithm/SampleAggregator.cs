@@ -1,7 +1,7 @@
 ﻿using NAudio.Dsp;
 using System;
 
-namespace LaserAPI.Logic.Fft_algoritm
+namespace LaserAPI.Logic.Fft_algorithm
 {
     public class SampleAggregator
     {

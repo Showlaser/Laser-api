@@ -1,49 +1,43 @@
 ﻿using LaserAPI.Interfaces.Dal;
+using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.Dto.Patterns;
 using LaserAPI.Models.Helper;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Logic
 {
-    public class PatternLogic
+    public class PatternLogic(IPatternDal _patternDal, IAnimationDal _animationDal)
     {
-        private readonly IPatternDal _patternDal;
-        private readonly LaserLogic _laserLogic;
-
-        public PatternLogic(IPatternDal patternDal, LaserLogic laserLogic)
+        private static bool PointsAreValid(PointDto points)
         {
-            _patternDal = patternDal;
-            _laserLogic = laserLogic;
+            return points.Uuid != Guid.Empty &&
+                points.PatternUuid != Guid.Empty &&
+                points.RedLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
+                points.GreenLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
+                points.BlueLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
+                points.OrderNr >= 0 &&
+                points.X.IsBetweenOrEqualTo(-4000, 4000) &&
+                points.Y.IsBetweenOrEqualTo(-4000, 4000);
         }
 
-        private static bool ValidatePoints(List<PointDto> points)
+        public static bool PatternIsValid(PatternDto pattern)
         {
-            return points.Any() && points.TrueForAll(p => p.PatternUuid != Guid.Empty &&
-                                                          p.Y.IsBetweenOrEqualTo(-4000, 4000) &&
-                                                          p.X.IsBetweenOrEqualTo(-4000, 4000) &&
-                                                          p.RedLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
-                                                          p.GreenLaserPowerPwm.IsBetweenOrEqualTo(0, 255) &&
-                                                          p.BlueLaserPowerPwm.IsBetweenOrEqualTo(0, 255));
-        }
-
-        private static void ValidatePattern(PatternDto pattern)
-        {
-            bool patternValid = pattern != null && pattern.Scale.IsBetweenOrEqualTo(0.1, 1) && ValidatePoints(pattern.Points);
-            if (!patternValid)
-            {
-                throw new InvalidDataException(nameof(pattern));
-            };
+            return pattern.Uuid != Guid.Empty &&
+                !string.IsNullOrEmpty(pattern.Name) &&
+                !string.IsNullOrEmpty(pattern.Image) &&
+                pattern.Points.TrueForAll(PointsAreValid) &&
+                pattern.Scale.IsBetweenOrEqualTo(0.1, 10) &&
+                pattern.XOffset.IsBetweenOrEqualTo(-4000, 4000) &&
+                pattern.YOffset.IsBetweenOrEqualTo(-4000, 4000) &&
+                pattern.Rotation.IsBetweenOrEqualTo(-360, 360);
         }
 
         public async Task AddOrUpdate(PatternDto pattern)
         {
-            ValidatePattern(pattern);
             if (await _patternDal.Exists(pattern.Uuid))
             {
                 await _patternDal.Update(pattern);
@@ -53,37 +47,6 @@ namespace LaserAPI.Logic
             await _patternDal.Add(pattern);
         }
 
-        public async Task PlayPattern(PatternDto pattern)
-        {
-            ValidatePattern(pattern);
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            pattern.Points = pattern.Points.OrderBy(p => p.Order).ToList();
-
-            while (stopwatch.ElapsedMilliseconds < 500)
-            {
-                List<LaserMessage> messages = new();
-
-                int pointsLength = pattern.Points.Count;
-                for (int index = 0; index < pointsLength; index++)
-                {
-                    PointDto point = pattern.Points[index];
-                    messages.Add(new LaserMessage
-                    {
-                        RedLaser = point.RedLaserPowerPwm,
-                        GreenLaser = point.GreenLaserPowerPwm,
-                        BlueLaser = point.BlueLaserPowerPwm,
-                        X = point.X,
-                        Y = point.Y,
-                    });
-                }
-
-                await _laserLogic.SendData(messages);
-                messages.Clear();
-            }
-
-            stopwatch.Stop();
-        }
-
         public async Task<List<PatternDto>> All()
         {
             return await _patternDal.All();
@@ -91,7 +54,6 @@ namespace LaserAPI.Logic
 
         public async Task Update(PatternDto pattern)
         {
-            ValidatePattern(pattern);
             await _patternDal.Update(pattern);
         }
 
@@ -101,6 +63,15 @@ namespace LaserAPI.Logic
             {
                 throw new NoNullAllowedException(nameof(uuid));
             }
+
+            List<AnimationDto> allAnimations = await _animationDal.All();
+            List<AnimationDto> animationsToRemovePatternFrom = allAnimations.FindAll(a => a.AnimationPatterns.Any(ap => ap.Pattern.Uuid == uuid));
+            foreach (AnimationDto animation in animationsToRemovePatternFrom)
+            {
+                animation.AnimationPatterns.RemoveAll(ap => ap.Pattern.Uuid == uuid);
+                await _animationDal.Update(animation);
+            }
+
             await _patternDal.Remove(uuid);
         }
     }

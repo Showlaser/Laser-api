@@ -22,7 +22,7 @@ namespace LaserAPITests.Tests.Logic
 
             foreach (string? genre in genres)
             {
-                MusicGenre value = LaserShowGeneratorLogic.GetMusicGenreFromSpotifyGenre(new List<string> { genre });
+                MusicGenre value = LaserShowGeneratorAlgorithm.GetMusicGenreFromSpotifyGenre(new List<string> { genre });
                 Assert.IsNotNull(value);
                 Assert.IsTrue(value.ToString().Length > 2);
             }
@@ -31,7 +31,7 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void GetFftFrequencyRangeByGenreTest()
         {
-            AlgorithmSettings settings = LaserShowGeneratorLogic.GetAlgorithmSettingsByGenre(MusicGenre.Hardcore);
+            AlgorithmSettings settings = LaserShowGeneratorAlgorithm.GetAlgorithmSettingsByGenre(MusicGenre.Hardcore);
             Assert.IsNotNull(settings);
             Assert.IsTrue(settings.FrequencyRange.Start.Value == 2);
             Assert.IsTrue(settings.FrequencyRange.End.Value == 3);

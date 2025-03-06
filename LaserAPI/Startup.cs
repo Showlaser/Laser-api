@@ -1,9 +1,10 @@
-using LaserAPI.CustomExceptions;
 using LaserAPI.Dal;
+using LaserAPI.Interfaces;
 using LaserAPI.Interfaces.Dal;
 using LaserAPI.Logic;
 using LaserAPI.Logic.Fft_algorithm;
 using LaserAPI.Logic.Game;
+using LaserAPI.Models.Dto.Animations;
 using LaserAPI.Models.Helper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,29 +13,20 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
 using System.Text.Json.Serialization;
 using System.Timers;
-using Timer = System.Timers.Timer;
 
 namespace LaserAPI
 {
-    public class Startup
+    public class Startup(IConfiguration configuration)
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; } = configuration;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            string connectionString = Configuration.GetConnectionString("DefaultConnection");
+            string connectionString = "Data Source=Application.db;Cache=Shared";
             services.AddDbContextPool<DataContext>(
                 dbContextOptions => dbContextOptions
                     .UseSqlite(connectionString, o =>
@@ -51,18 +43,22 @@ namespace LaserAPI
 
         private static void AddDependencyInjection(ref IServiceCollection services)
         {
-            services.AddScoped<LaserLogic>();
             services.AddScoped<PatternLogic>();
             services.AddScoped<AnimationLogic>();
-            services.AddScoped<ZoneLogic>();
-            services.AddScoped<AudioAnalyser>();
-            services.AddScoped<LaserShowGeneratorLogic>();
+            services.AddScoped<LasershowLogic>();
+            services.AddScoped<LasershowSpotifyConnectorLogic>();
+            services.AddSingleton<AudioAnalyser>();
+            services.AddSingleton<LaserShowGeneratorAlgorithm>();
+            services.AddSingleton<LasershowGeneratorConnectedSongSelector>();
             services.AddScoped<GameLogic>();
             services.AddTransient<ControllerResultHandler>();
             services.AddSingleton<GameStateLogic>();
+            services.AddScoped<ILaserConnectionLogic, LaserConnectionLogic>();
             services.AddScoped<IPatternDal, PatternDal>();
             services.AddScoped<IAnimationDal, AnimationDal>();
-            services.AddScoped<IZoneDal, ZoneDal>();
+            services.AddScoped<ILasershowDal, LasershowDal>();
+            services.AddScoped<ILasershowSpotifyConnectorDal, LasershowSpotifyConnectorDal>();
+            services.AddScoped<IRegisteredLaserDal, RegisteredLaserDal>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,7 +72,7 @@ namespace LaserAPI
             app.UseRouting();
             app.UseCors(builder =>
             {
-                builder.WithOrigins("http://localhost:3000")
+                builder.WithOrigins("http://localhost:3000", "https://localhost:3000")
                     .AllowCredentials()
                     .AllowAnyHeader()
                     .AllowAnyMethod();
@@ -90,38 +86,28 @@ namespace LaserAPI
             });
 
             CreateDatabaseIfNotExist(app);
-            SetCurrentIpAddress();
+            // SetProjectionZones(app);
 
-            Timer timer = new() { Interval = 10000 };
+            Timer timer = new() { Interval = 30000 };
             timer.Elapsed += delegate (object o, ElapsedEventArgs eventArgs)
             {
-                bool clientConnected = LaserConnectionLogic.TcpClient?.Connected is true;
-                if (!clientConnected && !LaserConnectionLogic.ConnectionPending)
-                {
-                    LaserConnectionLogic.NetworkConnect();
-                }
-
-                //todo add connection alive check
+                _ = LaserConnectionLogic.GetStatus();
             };
 
-            //timer.Start();
+            timer.Start();
         }
 
-        private static void SetCurrentIpAddress()
+        private static void SaveGeneratedLaserShow(IApplicationBuilder app)
         {
-            System.Net.IPAddress currentIpAddress = NetworkInterface
-                .GetAllNetworkInterfaces()
-                .Where(n => n.OperationalStatus == OperationalStatus.Up)
-                .Where(n => n.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                .FirstOrDefault(n => n.GetIPProperties().GatewayAddresses
-                    .Any())
-                .GetIPProperties().UnicastAddresses.FirstOrDefault().Address;
-            LaserConnectionLogic.ComputerIpAddress = currentIpAddress.ToString();
-
-            if (string.IsNullOrEmpty(LaserConnectionLogic.ComputerIpAddress))
+            bool generatedLaserShowIsWaitingInQueue = GeneratedLaserShowsQueue.LaserShowToSave.Uuid != Guid.Empty;
+            if (generatedLaserShowIsWaitingInQueue)
             {
-                string errorMessage = "Could not connect to client software, start it first before starting this application!";
-                throw new NoClientSoftwareFoundException(errorMessage);
+                IServiceScope serviceScope = app.ApplicationServices
+                    .GetRequiredService<IServiceScopeFactory>()
+                    .CreateScope();
+                AnimationLogic animationLogic = serviceScope.ServiceProvider.GetService<AnimationLogic>();
+                animationLogic.AddOrUpdate(GeneratedLaserShowsQueue.LaserShowToSave).Wait();
+                GeneratedLaserShowsQueue.LaserShowToSave = new AnimationDto();
             }
         }
 

@@ -16,8 +16,17 @@ namespace LaserAPI.Models.Helper
             return data >= min && data <= max;
         }
 
+        public static int GetDifferenceBetweenTwoNumbers(int nr1, int nr2) =>
+            GetHighestNumber(nr1, nr2) - GetLowestNumber(nr1, nr2);
+
         public static bool IsBetweenOrEqualTo(this int source, int min, int max) =>
             source >= min && source <= max;
+
+        public static double GetRandomDouble(double minimum, double maximum)
+        {
+            Random random = new();
+            return random.NextDouble() * (maximum - minimum) + minimum;
+        }
 
         public static int ToInt(this double source) => Convert.ToInt32(source);
         public static double ToDouble(this int source) => Convert.ToDouble(source);

@@ -1,5 +1,4 @@
-﻿using LaserAPI.Logic.Fft_algoritm;
-using NAudio.CoreAudioApi;
+﻿using NAudio.CoreAudioApi;
 using NAudio.Dsp;
 using NAudio.Wave;
 using System;

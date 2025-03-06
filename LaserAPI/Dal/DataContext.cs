@@ -1,6 +1,8 @@
 ﻿using LaserAPI.Models.Dto.Animations;
+using LaserAPI.Models.Dto.Lasershows;
+using LaserAPI.Models.Dto.LasershowSpotify;
 using LaserAPI.Models.Dto.Patterns;
-using LaserAPI.Models.Dto.Zones;
+using LaserAPI.Models.Dto.RegisteredLaser;
 using Microsoft.EntityFrameworkCore;
 
 namespace LaserAPI.Dal
@@ -9,13 +11,13 @@ namespace LaserAPI.Dal
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
         public virtual DbSet<AnimationDto> Animation { get; set; }
-        public virtual DbSet<PatternAnimationDto> PatternAnimation { get; set; }
-        public virtual DbSet<PatternAnimationSettingsDto> PatternAnimationSetting { get; set; }
-        public virtual DbSet<AnimationPointDto> AnimationPoint { get; set; }
+        public virtual DbSet<AnimationPatternDto> PatternAnimation { get; set; }
         public virtual DbSet<PatternDto> Pattern { get; set; }
         public virtual DbSet<PointDto> Point { get; set; }
-        public virtual DbSet<ZoneDto> Zone { get; set; }
-        public virtual DbSet<ZonesPositionDto> ZonePosition { get; set; }
+        public virtual DbSet<LasershowSpotifyConnectorDto> LasershowSpotifyConnector { get; set; }
+        public virtual DbSet<LasershowDto> Lasershow { get; set; }
+        public virtual DbSet<LasershowAnimationDto> LasershowAnimation { get; set; }
+        public virtual DbSet<RegisteredLaserDto> RegisteredLaser { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -35,43 +37,56 @@ namespace LaserAPI.Dal
             builder.Entity<AnimationDto>(e =>
             {
                 e.HasKey(a => a.Uuid);
-                e.HasMany(a => a.PatternAnimations)
+                e.HasMany(a => a.AnimationPatterns)
                     .WithOne()
                     .HasForeignKey(a => a.AnimationUuid);
             });
 
-            builder.Entity<PatternAnimationDto>(e =>
+            builder.Entity<AnimationPatternDto>(e =>
             {
-                e.HasKey(pa => pa.Uuid);
-                e.HasMany(a => a.AnimationSettings)
+                e.HasKey(ap => ap.Uuid);
+                e.HasMany(ap => ap.AnimationPatternKeyFrames)
+                .WithOne()
+                .HasForeignKey(ap => ap.AnimationPatternUuid);
+
+                e.Ignore(ap => ap.Pattern);
+            });
+
+            builder.Entity<AnimationPatternKeyFrameDto>(e =>
+            {
+                e.HasKey(apkf => apkf.Uuid);
+            });
+
+            builder.Entity<LasershowSpotifyConnectorDto>(e =>
+            {
+                e.HasKey(lsc => lsc.Uuid);
+                e.HasMany(lsc => lsc.SpotifySongs)
                     .WithOne()
-                    .HasForeignKey(a => a.PatternAnimationUuid);
+                    .HasForeignKey(lscs => lscs.LasershowSpotifyConnectorUuid);
             });
 
-            builder.Entity<PatternAnimationSettingsDto>(e =>
+            builder.Entity<LasershowSpotifyConnectorSongDto>(e =>
             {
-                e.HasKey(pas => pas.Uuid);
-                e.HasMany(a => a.Points)
-                    .WithOne()
-                    .HasForeignKey(a => a.PatternAnimationSettingsUuid);
+                e.HasKey(lscs => lscs.Uuid);
             });
 
-            builder.Entity<AnimationPointDto>(e =>
+            builder.Entity<LasershowDto>(e =>
             {
-                e.HasKey(p => p.Uuid);
+                e.HasKey(e => e.Uuid);
+                e.HasMany(e => e.LasershowAnimations)
+                .WithOne()
+                .HasForeignKey(e => e.LasershowUuid);
             });
 
-            builder.Entity<ZoneDto>(e =>
+            builder.Entity<LasershowAnimationDto>(e =>
             {
-                e.HasKey(z => z.Uuid);
-                e.HasMany(z => z.Points)
-                    .WithOne()
-                    .HasForeignKey(p => p.ZoneUuid);
+                e.HasKey(la => la.Uuid);
+                e.Ignore(la => la.Animation);
             });
 
-            builder.Entity<ZonesPositionDto>(e =>
+            builder.Entity<RegisteredLaserDto>(e =>
             {
-                e.HasKey(zp => zp.Uuid);
+                e.HasKey(la => la.Uuid);
             });
         }
     }

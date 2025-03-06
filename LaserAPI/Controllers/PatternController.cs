@@ -31,7 +31,7 @@ namespace LaserAPI.Controllers
             async Task Action()
             {
                 PatternDto patternDto = pattern.Adapt<PatternDto>();
-                await _patternLogic.PlayPattern(patternDto);
+                // TODO add function call
             }
 
             return await _controllerResultHandler.Execute(Action());

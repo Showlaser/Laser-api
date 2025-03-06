@@ -1,7 +1,7 @@
 ﻿using NAudio.Dsp;
 using System.Diagnostics;
 
-namespace LaserAPI.Logic.Fft_algoritm
+namespace LaserAPI.Logic.Fft_algorithm
 {
     public class FftEventArgs
     {

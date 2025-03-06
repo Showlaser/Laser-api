@@ -1,6 +1,7 @@
 ﻿using LaserAPI.Logic;
 using LaserAPI.Models.FromFrontend.LasershowGenerator;
 using LaserAPI.Models.Helper;
+using LaserAPI.Models.ToFrontend.LasershowGenerator;
 using Microsoft.AspNetCore.Mvc;
 using NAudio.CoreAudioApi;
 using System.Collections.Generic;
@@ -10,51 +11,46 @@ namespace LaserAPI.Controllers
 {
     [Route("lasershow-generator")]
     [ApiController]
-    public class LasershowGeneratorController : ControllerBase
+    public class LasershowGeneratorController(ControllerResultHandler controllerResultHandler,
+        LasershowGeneratorConnectedSongSelector lasershowGeneratorConnectedSongSelector) : ControllerBase
     {
-        private readonly LaserShowGeneratorLogic _laserShowGeneratorLogic;
-        private readonly ControllerResultHandler _controllerResultHandler;
-
-        public LasershowGeneratorController(LaserShowGeneratorLogic laserShowGeneratorLogic, ControllerResultHandler controllerResultHandler)
-        {
-            _laserShowGeneratorLogic = laserShowGeneratorLogic;
-            _controllerResultHandler = controllerResultHandler;
-        }
+        private readonly ControllerResultHandler _controllerResultHandler = controllerResultHandler;
+        private readonly LasershowGeneratorConnectedSongSelector _lasershowGeneratorConnectedSongSelector = lasershowGeneratorConnectedSongSelector;
 
         [HttpGet("devices")]
         public ActionResult<IEnumerable<string>> GetDevices()
         {
-            IEnumerable<string> Action()
+            static IEnumerable<string> Action()
             {
-                MMDeviceCollection devices = _laserShowGeneratorLogic.GetDevices();
+                MMDeviceCollection devices = LaserShowGeneratorAlgorithm.GetDevices();
                 return devices.Select(d => d.FriendlyName);
             }
 
             return _controllerResultHandler.Execute(Action);
         }
 
+        [HttpGet("status")]
+        public ActionResult<LaserGeneratorStatusViewmodel> GetStatus()
+        {
+            return _controllerResultHandler.Execute(() => LaserShowGeneratorAlgorithm.GetStatus);
+        }
+
         [HttpPost("start")]
         public void Start([FromBody] SongData songData, [FromQuery] string deviceName)
         {
-            void Action()
-            {
-                _laserShowGeneratorLogic.SetSongData(songData);
-                _laserShowGeneratorLogic.Start(deviceName);
-            }
-
-            _controllerResultHandler.Execute(Action);
+            _controllerResultHandler.Execute(() => _lasershowGeneratorConnectedSongSelector.Start(songData, deviceName));
         }
 
         [HttpPost("stop")]
         public void Stop()
         {
-            _controllerResultHandler.Execute(_laserShowGeneratorLogic.Stop);
+            _controllerResultHandler.Execute(_lasershowGeneratorConnectedSongSelector.Stop);
         }
 
         [HttpPost("data")]
         public void SetSongData([FromBody] SongData songData)
         {
-            _controllerResultHandler.Execute(() => _laserShowGeneratorLogic.SetSongData(songData));
+            _controllerResultHandler.Execute(() => LaserShowGeneratorAlgorithm.SetSongData(songData));
         }
     }
 }
