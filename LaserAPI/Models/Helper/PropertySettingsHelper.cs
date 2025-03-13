@@ -7,7 +7,8 @@ namespace LaserAPI.Models.Helper
         Scale,
         XOffset,
         YOffset,
-        Rotation
+        Rotation,
+        Undefined
     }
 
     public enum PropertyType
