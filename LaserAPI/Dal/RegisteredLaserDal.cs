@@ -14,11 +14,6 @@ namespace LaserAPI.Dal
             await _context.SaveChangesAsync();
         }
 
-        public async Task<RegisteredLaserDto> Find(string laserId)
-        {
-            return await _context.RegisteredLaser.FirstOrDefaultAsync(rl => rl.LaserId == laserId);
-        }
-
         public async Task Remove(Guid uuid)
         {
             RegisteredLaserDto registeredLaserDto = await _context.RegisteredLaser.SingleAsync(rl => rl.Uuid == uuid);

@@ -14,6 +14,13 @@ namespace LaserAPI.Interfaces
         public Task Connect(RegisteredLaserDto registeredLaser);
 
         /// <summary>
+        /// Adopts the laser and sends a request connection to the laser
+        /// </summary>
+        /// <param name="registeredLaser"></param>
+        /// <returns></returns>
+        public Task<bool> Adopt(RegisteredLaserDto registeredLaser);
+
+        /// <summary>
         /// Sends a data request to the lasers to send telemetry data back, the result is returned
         /// </summary>
         /// <returns>A list with telemetry data</returns>

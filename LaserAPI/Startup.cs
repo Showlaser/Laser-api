@@ -13,8 +13,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Net.Sockets;
+using System.Net;
+using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using System.Timers;
+using LaserAPI.Models.FromLaser;
 
 namespace LaserAPI
 {
@@ -39,6 +44,30 @@ namespace LaserAPI
                     opts.JsonSerializerOptions.Converters.Add(enumConverter);
                 });
             AddDependencyInjection(ref services);
+            Task.Run(() => ListenForBroadcasts());
+        }
+
+        private void ListenForBroadcasts()
+        {
+            int listenPort = 8888;
+            using (UdpClient udpClient = new(listenPort))
+            {
+                IPEndPoint remoteEndPoint = new(IPAddress.Any, 0);
+                Console.WriteLine($"Listening for UDP broadcasts on port {listenPort}...");
+
+                while (true)
+                {
+                    byte[] receivedBytes = udpClient.Receive(ref remoteEndPoint);
+                    string message = Encoding.UTF8.GetString(receivedBytes);
+                    UDPBroadcast broadcast = Newtonsoft.Json.JsonConvert.DeserializeObject<UDPBroadcast>(message);
+
+                    if (!LaserConnectionLogicState.AdoptionPending.Exists(ap => ap.Uuid == broadcast.Uuid)) {
+                        LaserConnectionLogicState.AdoptionPending.Add(broadcast);
+                    }
+
+                    Console.WriteLine($"[{DateTime.Now}] {remoteEndPoint}: {message}");
+                }
+            }
         }
 
         private static void AddDependencyInjection(ref IServiceCollection services)

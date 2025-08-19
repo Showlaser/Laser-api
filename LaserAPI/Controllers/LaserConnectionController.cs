@@ -1,4 +1,5 @@
-﻿using LaserAPI.Logic;
+﻿using LaserAPI.Interfaces;
+using LaserAPI.Logic;
 using LaserAPI.Models.Dto.RegisteredLaser;
 using LaserAPI.Models.FromFrontend.Points;
 using LaserAPI.Models.FromLaser;
@@ -13,7 +14,7 @@ namespace LaserAPI.Controllers
 {
     [Route("laserconnection")]
     [ApiController]
-    public class LaserConnectionController(LaserConnectionLogic _laserConnectionLogic, ControllerResultHandler _controllerResultHandler) : ControllerBase
+    public class LaserConnectionController(ILaserConnectionLogic _laserConnectionLogic, ControllerResultHandler _controllerResultHandler) : ControllerBase
     {
         [HttpPost("connect")]
         public async Task<ActionResult> Connect([FromBody] RegisteredLaser registeredLaser)
