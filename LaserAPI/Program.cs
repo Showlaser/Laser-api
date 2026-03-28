@@ -15,7 +15,7 @@ namespace LaserAPI
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls("http://localhost:5004");
+                    webBuilder.UseUrls("http://*:5004");
                 });
     }
 }

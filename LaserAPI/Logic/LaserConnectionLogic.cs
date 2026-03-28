@@ -29,12 +29,20 @@ namespace LaserAPI.Logic
             try
             {
                 using HttpClient httpClient = new();
-                string json = Newtonsoft.Json.JsonConvert.SerializeObject(registeredLaser);
+                string json = JsonConvert.SerializeObject(registeredLaser);
                 StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
                 HttpResponseMessage response = await httpClient.PostAsync($"http://{registeredLaser.IPAddress}/adopt", content);
                 response.EnsureSuccessStatusCode();
 
-                return true;
+                LaserConnectionLogicState.AdoptionPending.RemoveAll(laser => laser.Uuid == registeredLaser.Uuid);
+                RegisteredLaserDto registeredLaserDto = await _registeredLaserDal.Find(registeredLaser.Uuid);
+                if (registeredLaserDto == null)
+                {
+                    await _registeredLaserDal.Add(registeredLaser);
+                    return true;
+                }
+
+                return false;
             }
             catch (Exception)
             {
@@ -44,25 +52,15 @@ namespace LaserAPI.Logic
 
        public async Task Connect(RegisteredLaserDto registeredLaser)
         {
-           /* RegisteredLaserDto registerLaserFromDb = await _registeredLaserDal.Find(registeredLaser.LaserId);
+            RegisteredLaserDto registerLaserFromDb = await _registeredLaserDal.Find(registeredLaser.Uuid);
             int connectedLaserFromListIndex = LaserConnectionLogicState.ConnectedLasers.FindIndex(cl => cl.IPAddress == registerLaserFromDb.IPAddress);
             if (connectedLaserFromListIndex != -1)
             {
                 LaserConnectionLogicState.ConnectedLasers[connectedLaserFromListIndex].Status = registeredLaser.Status;
+                LaserConnectionLogicState.ConnectedLasers[connectedLaserFromListIndex].IPAddress = registeredLaser.IPAddress;
             }
 
-            RegisteredLaserDto connectedLaser = new()
-            {
-                Uuid = Guid.NewGuid(),
-                LaserId = registeredLaser.LaserId,
-                Name = registeredLaser.Name,
-                ModelType = registeredLaser.ModelType,
-                Status = registeredLaser.Status,
-                IPAddress = registeredLaser.IPAddress,
-            };
-
-            LaserConnectionLogicState.ConnectedLasers.Add(connectedLaser);
-            await _registeredLaserDal.Add(registeredLaser);*/
+            LaserConnectionLogicState.ConnectedLasers.Add(registerLaserFromDb);
         }
 
         /// <summary>
@@ -72,9 +70,13 @@ namespace LaserAPI.Logic
         /// <returns>The results of all the lasers in the connected lasers list</returns>
         public static async Task<List<RegisteredLaserDto>> GetStatus()
         {
-            using HttpClient httpClient = new();
-
             int length = LaserConnectionLogicState.ConnectedLasers.Count;
+            if (length == 0)
+            {
+                return LaserConnectionLogicState.ConnectedLasers;
+            }
+
+            using HttpClient httpClient = new();
             for (int i = 0; i < length; i++)
             {
                 RegisteredLaserDto connectedLaser = LaserConnectionLogicState.ConnectedLasers[i];
@@ -83,9 +85,7 @@ namespace LaserAPI.Logic
                     HttpResponseMessage response = await httpClient.GetAsync($"{connectedLaser.IPAddress}/telemetry");
                     LaserTelemetry laserTelemetry = await response.Content.ReadFromJsonAsync<LaserTelemetry>();
                 }
-                catch (HttpRequestException)
-                {
-                }
+                catch (HttpRequestException) {}
             }
 
             httpClient.Dispose();

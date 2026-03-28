@@ -5,6 +5,7 @@ using LaserAPI.Logic;
 using LaserAPI.Logic.Fft_algorithm;
 using LaserAPI.Logic.Game;
 using LaserAPI.Models.Dto.Animations;
+using LaserAPI.Models.FromLaser;
 using LaserAPI.Models.Helper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,13 +14,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using LaserAPI.Models.FromLaser;
 
 namespace LaserAPI
 {
@@ -75,6 +76,7 @@ namespace LaserAPI
             services.AddScoped<PatternLogic>();
             services.AddScoped<AnimationLogic>();
             services.AddScoped<LasershowLogic>();
+            services.AddScoped<LaserConnectionLogic>();
             services.AddScoped<LasershowSpotifyConnectorLogic>();
             services.AddSingleton<AudioAnalyser>();
             services.AddSingleton<LaserShowGeneratorAlgorithm>();
@@ -117,27 +119,13 @@ namespace LaserAPI
             CreateDatabaseIfNotExist(app);
             // SetProjectionZones(app);
 
-            Timer timer = new() { Interval = 30000 };
+            System.Timers.Timer timer = new() { Interval = 30000 };
             timer.Elapsed += delegate (object o, ElapsedEventArgs eventArgs)
             {
                 _ = LaserConnectionLogic.GetStatus();
             };
 
             timer.Start();
-        }
-
-        private static void SaveGeneratedLaserShow(IApplicationBuilder app)
-        {
-            bool generatedLaserShowIsWaitingInQueue = GeneratedLaserShowsQueue.LaserShowToSave.Uuid != Guid.Empty;
-            if (generatedLaserShowIsWaitingInQueue)
-            {
-                IServiceScope serviceScope = app.ApplicationServices
-                    .GetRequiredService<IServiceScopeFactory>()
-                    .CreateScope();
-                AnimationLogic animationLogic = serviceScope.ServiceProvider.GetService<AnimationLogic>();
-                animationLogic.AddOrUpdate(GeneratedLaserShowsQueue.LaserShowToSave).Wait();
-                GeneratedLaserShowsQueue.LaserShowToSave = new AnimationDto();
-            }
         }
 
         /// <summary>

@@ -30,7 +30,7 @@ namespace LaserAPI.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Task<bool>> Adopt([FromBody] RegisteredLaser registeredLaser)
+        public async Task<ActionResult<bool>> Adopt([FromBody] RegisteredLaser registeredLaser)
         {
             async Task<bool> Action()
             {
@@ -38,7 +38,7 @@ namespace LaserAPI.Controllers
                 return await _laserConnectionLogic.Adopt(registeredLaserDto);
             }
 
-            return _controllerResultHandler.Execute(Action);
+            return await _controllerResultHandler.Execute(Action());
         }
     }
 }
