@@ -1,4 +1,4 @@
-﻿using LaserAPI.Models.Helper;
+using LaserAPI.Models.Helper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data;
 
@@ -14,9 +14,21 @@ namespace LaserAPITests.Tests.Helper
         }
 
         [TestMethod]
+        public void DoubleIsBetweenOrEqualToLowerBoundIsInclusiveTest()
+        {
+            Assert.IsTrue(0.1.IsBetweenOrEqualTo(0.1, 1));
+        }
+
+        [TestMethod]
+        public void DoubleIsBetweenOrEqualToUpperBoundIsInclusiveTest()
+        {
+            Assert.IsTrue(1.0.IsBetweenOrEqualTo(0.1, 1));
+        }
+
+        [TestMethod]
         public void DoubleIsBetweenOrEqualToNullTest()
         {
-            Assert.ThrowsException<NoNullAllowedException>(() => double.NaN.IsBetweenOrEqualTo(0.1, 1));
+            Assert.Throws<NoNullAllowedException>(() => double.NaN.IsBetweenOrEqualTo(0.1, 1));
         }
 
         [TestMethod]
@@ -38,6 +50,13 @@ namespace LaserAPITests.Tests.Helper
         }
 
         [TestMethod]
+        public void IntIsBetweenOrEqualToBoundsAreInclusiveTest()
+        {
+            Assert.IsTrue(0.IsBetweenOrEqualTo(0, 5));
+            Assert.IsTrue(5.IsBetweenOrEqualTo(0, 5));
+        }
+
+        [TestMethod]
         public void IntIsBetweenOrEqualToToHighTest()
         {
             Assert.IsFalse(5.IsBetweenOrEqualTo(0, 1));
@@ -52,29 +71,55 @@ namespace LaserAPITests.Tests.Helper
         [TestMethod]
         public void GetLowestNumberTest()
         {
-            int lowestNumber = NumberHelper.GetLowestNumber(-4000, 4000);
-            Assert.IsTrue(lowestNumber < 4000);
+            Assert.AreEqual(-4000, NumberHelper.GetLowestNumber(-4000, 4000));
         }
 
         [TestMethod]
         public void GetLowestNumberReverseOrderTest()
         {
-            int lowestNumberReverseOrder = NumberHelper.GetLowestNumber(-4000, 4000);
-            Assert.IsTrue(lowestNumberReverseOrder < 4000);
+            Assert.AreEqual(-4000, NumberHelper.GetLowestNumber(4000, -4000));
         }
 
         [TestMethod]
         public void GetHighestNumberTest()
         {
-            int highestNumber = NumberHelper.GetHighestNumber(-4000, 4000);
-            Assert.IsTrue(highestNumber > -4000);
+            Assert.AreEqual(4000, NumberHelper.GetHighestNumber(-4000, 4000));
         }
 
         [TestMethod]
         public void GetHighestNumberReverseOrderTest()
         {
-            int highestNumberReverseOrder = NumberHelper.GetHighestNumber(-4000, 4000);
-            Assert.IsTrue(highestNumberReverseOrder > -4000);
+            Assert.AreEqual(4000, NumberHelper.GetHighestNumber(4000, -4000));
+        }
+
+        [TestMethod]
+        public void GetDifferenceBetweenTwoNumbersTest()
+        {
+            Assert.AreEqual(8000, NumberHelper.GetDifferenceBetweenTwoNumbers(-4000, 4000));
+        }
+
+        [TestMethod]
+        public void GetDifferenceBetweenTwoNumbersReverseOrderTest()
+        {
+            Assert.AreEqual(8000, NumberHelper.GetDifferenceBetweenTwoNumbers(4000, -4000));
+        }
+
+        [TestMethod]
+        public void MapScalesValueIntoNewRangeTest()
+        {
+            Assert.AreEqual(50, 5.Map(0, 10, 0, 100));
+        }
+
+        [TestMethod]
+        public void MapHandlesLowerBoundTest()
+        {
+            Assert.AreEqual(0, 0.Map(0, 10, 0, 100));
+        }
+
+        [TestMethod]
+        public void MapHandlesUpperBoundTest()
+        {
+            Assert.AreEqual(100, 10.Map(0, 10, 0, 100));
         }
     }
 }

@@ -16,7 +16,8 @@ namespace LaserAPI.Logic
                 !string.IsNullOrEmpty(lasershowDto.Image) &&
                 !string.IsNullOrEmpty(lasershowDto.Name);
 
-            bool lasershowAnimationsAreValid = lasershowDto.LasershowAnimations.TrueForAll(la =>
+            bool lasershowAnimationsAreValid = lasershowDto.LasershowAnimations != null &&
+            lasershowDto.LasershowAnimations.TrueForAll(la =>
             la.Uuid != Guid.Empty &&
             la.AnimationUuid != Guid.Empty &&
             la.LasershowUuid == lasershowDto.Uuid &&

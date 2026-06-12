@@ -1,4 +1,4 @@
-﻿using LaserAPI.Logic;
+using LaserAPI.Logic;
 using LaserAPI.Models.Dto.Patterns;
 using LaserAPITests.Mock;
 using LaserAPITests.MockedModels.Pattern;
@@ -18,34 +18,43 @@ namespace LaserAPITests.Tests.Logic
         private readonly PatternLogic _patternLogic = new MockedPatternLogic().PatternLogic;
         private readonly MockedPattern _pattern = new();
 
+        /// <summary>
+        /// Returns a fully valid pattern. Individual tests mutate a single property to
+        /// assert that exactly that boundary is what makes the pattern invalid.
+        /// </summary>
+        private static PatternDto ValidPattern()
+        {
+            Guid patternUuid = Guid.NewGuid();
+            return new PatternDto
+            {
+                Uuid = patternUuid,
+                Name = "Pattern",
+                Image = "image",
+                Scale = 1.0,
+                XOffset = 0,
+                YOffset = 0,
+                Rotation = 0,
+                Points =
+                [
+                    new()
+                    {
+                        Uuid = Guid.NewGuid(),
+                        PatternUuid = patternUuid,
+                        X = 0,
+                        Y = 0,
+                        RedLaserPowerPwm = 0,
+                        GreenLaserPowerPwm = 0,
+                        BlueLaserPowerPwm = 0,
+                        OrderNr = 0
+                    }
+                ]
+            };
+        }
+
         [TestMethod]
         public async Task AddTest()
         {
             await _patternLogic.AddOrUpdate(_pattern.Pattern);
-        }
-
-        [TestMethod]
-        public void AddTestEmpty()
-        {
-            Assert.ThrowsExceptionAsync<NoNullAllowedException>(async () => await _patternLogic.AddOrUpdate(_pattern.Empty));
-        }
-
-        [TestMethod]
-        public void AddTestScaleToHigh()
-        {
-            Assert.ThrowsExceptionAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_pattern.ScaleToHigh));
-        }
-
-        [TestMethod]
-        public void AddTestScaleToLow()
-        {
-            Assert.ThrowsExceptionAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_pattern.ScaleToLow));
-        }
-
-        [TestMethod]
-        public void AddTestEmptyPoints()
-        {
-            Assert.ThrowsExceptionAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_pattern.EmptyPoints));
         }
 
         [TestMethod]
@@ -62,33 +71,111 @@ namespace LaserAPITests.Tests.Logic
         }
 
         [TestMethod]
-        public void UpdateTestEmpty()
+        public async Task RemoveWithEmptyGuidThrowsTest()
         {
-            Assert.ThrowsExceptionAsync<NoNullAllowedException>(async () => await _patternLogic.Update(_pattern.Empty));
+            await Assert.ThrowsAsync<NoNullAllowedException>(async () => await _patternLogic.Remove(Guid.Empty));
         }
 
         [TestMethod]
-        public void UpdateTestScaleToHigh()
+        public async Task AddOrUpdateWithInvalidPatternThrowsTest()
         {
-            Assert.ThrowsExceptionAsync<InvalidDataException>(async () => await _patternLogic.Update(_pattern.ScaleToHigh));
+            await Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.AddOrUpdate(_pattern.Empty));
         }
 
         [TestMethod]
-        public void UpdateTestScaleToLow()
+        public async Task UpdateWithInvalidPatternThrowsTest()
         {
-            Assert.ThrowsExceptionAsync<InvalidDataException>(async () => await _patternLogic.Update(_pattern.ScaleToLow));
+            await Assert.ThrowsAsync<InvalidDataException>(async () => await _patternLogic.Update(_pattern.Empty));
         }
 
         [TestMethod]
-        public void UpdateTestEmptyPoints()
+        public void PatternIsValidTest()
         {
-            Assert.ThrowsExceptionAsync<InvalidDataException>(async () => await _patternLogic.Update(_pattern.EmptyPoints));
+            Assert.IsTrue(PatternLogic.PatternIsValid(ValidPattern()));
         }
 
         [TestMethod]
-        public void RemoveTest()
+        public void PatternIsValidScaleBoundsAreInclusiveTest()
         {
-            Assert.ThrowsExceptionAsync<NoNullAllowedException>(async () => await _patternLogic.Remove(Guid.Empty));
+            PatternDto low = ValidPattern();
+            low.Scale = 0.1;
+            PatternDto high = ValidPattern();
+            high.Scale = 10;
+
+            Assert.IsTrue(PatternLogic.PatternIsValid(low));
+            Assert.IsTrue(PatternLogic.PatternIsValid(high));
+        }
+
+        [TestMethod]
+        public void PatternIsInvalidWhenScaleTooHighTest()
+        {
+            PatternDto pattern = ValidPattern();
+            pattern.Scale = 10.1;
+            Assert.IsFalse(PatternLogic.PatternIsValid(pattern));
+        }
+
+        [TestMethod]
+        public void PatternIsInvalidWhenScaleTooLowTest()
+        {
+            PatternDto pattern = ValidPattern();
+            pattern.Scale = 0.05;
+            Assert.IsFalse(PatternLogic.PatternIsValid(pattern));
+        }
+
+        [TestMethod]
+        public void PatternIsInvalidWhenUuidIsEmptyTest()
+        {
+            PatternDto pattern = ValidPattern();
+            pattern.Uuid = Guid.Empty;
+            Assert.IsFalse(PatternLogic.PatternIsValid(pattern));
+        }
+
+        [TestMethod]
+        public void PatternIsInvalidWhenNameIsEmptyTest()
+        {
+            PatternDto pattern = ValidPattern();
+            pattern.Name = "";
+            Assert.IsFalse(PatternLogic.PatternIsValid(pattern));
+        }
+
+        [TestMethod]
+        public void PatternIsInvalidWhenImageIsEmptyTest()
+        {
+            PatternDto pattern = ValidPattern();
+            pattern.Image = "";
+            Assert.IsFalse(PatternLogic.PatternIsValid(pattern));
+        }
+
+        [TestMethod]
+        public void PatternIsInvalidWhenRotationOutOfRangeTest()
+        {
+            PatternDto pattern = ValidPattern();
+            pattern.Rotation = 361;
+            Assert.IsFalse(PatternLogic.PatternIsValid(pattern));
+        }
+
+        [TestMethod]
+        public void PatternIsInvalidWhenXOffsetOutOfRangeTest()
+        {
+            PatternDto pattern = ValidPattern();
+            pattern.XOffset = 4001;
+            Assert.IsFalse(PatternLogic.PatternIsValid(pattern));
+        }
+
+        [TestMethod]
+        public void PatternIsInvalidWhenPointPwmOutOfRangeTest()
+        {
+            PatternDto pattern = ValidPattern();
+            pattern.Points[0].RedLaserPowerPwm = 256;
+            Assert.IsFalse(PatternLogic.PatternIsValid(pattern));
+        }
+
+        [TestMethod]
+        public void PatternIsInvalidWhenPointCoordinateOutOfRangeTest()
+        {
+            PatternDto pattern = ValidPattern();
+            pattern.Points[0].X = 4001;
+            Assert.IsFalse(PatternLogic.PatternIsValid(pattern));
         }
     }
 }

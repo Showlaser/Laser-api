@@ -5,6 +5,7 @@ using LaserAPI.Models.Helper;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -38,6 +39,11 @@ namespace LaserAPI.Logic
 
         public async Task AddOrUpdate(PatternDto pattern)
         {
+            if (!PatternIsValid(pattern))
+            {
+                throw new InvalidDataException();
+            }
+
             if (await _patternDal.Exists(pattern.Uuid))
             {
                 await _patternDal.Update(pattern);
@@ -54,6 +60,11 @@ namespace LaserAPI.Logic
 
         public async Task Update(PatternDto pattern)
         {
+            if (!PatternIsValid(pattern))
+            {
+                throw new InvalidDataException();
+            }
+
             await _patternDal.Update(pattern);
         }
 
