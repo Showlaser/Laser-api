@@ -103,7 +103,7 @@ namespace LaserAPI
             app.UseRouting();
             app.UseCors(builder =>
             {
-                builder.WithOrigins("http://localhost:3000", "https://localhost:3000")
+                builder.WithOrigins("http://127.0.0.1:3000", "https://127.0.0.1:3000")
                     .AllowCredentials()
                     .AllowAnyHeader()
                     .AllowAnyMethod();
