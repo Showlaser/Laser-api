@@ -100,6 +100,10 @@ namespace LaserAPI
                 app.UseDeveloperExceptionPage();
             }
 
+            // Serve the built React frontend (wwwroot) so the API can host the UI itself.
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
             app.UseRouting();
             app.UseCors(builder =>
             {
@@ -114,6 +118,8 @@ namespace LaserAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                // Any non-API route falls back to the SPA so client-side routing works on refresh.
+                endpoints.MapFallbackToFile("index.html");
             });
 
             CreateDatabaseIfNotExist(app);

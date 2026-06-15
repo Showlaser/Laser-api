@@ -32,4 +32,15 @@
     <Folder Include="Migrations\" />
   </ItemGroup>
 
+  <!--
+    Option B: build the React frontend into wwwroot on Release builds. `dotnet publish`
+    defaults to Release, so the UI is baked in automatically when distributing, while
+    everyday Debug builds (dotnet build / run) stay fast and skip this step.
+    Runs in BeforeBuild so wwwroot is populated before static assets are collected.
+    Requires Node/npm and an installed Laser-frontend (npm install) on the build machine.
+  -->
+  <Target Name="BuildFrontend" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
+    <Exec Command="npm run build:api" WorkingDirectory="$(MSBuildProjectDirectory)\..\..\Laser-frontend" />
+  </Target>
+
 </Project>
