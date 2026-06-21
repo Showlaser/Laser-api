@@ -3,6 +3,7 @@ using System;
 using LaserAPI.Dal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LaserAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260611224334_AnimationPatternAndLasershowAnimationRelations")]
+    partial class AnimationPatternAndLasershowAnimationRelations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
@@ -244,26 +247,11 @@ namespace LaserAPI.Migrations
                     b.Property<string>("IPAddress")
                         .HasColumnType("TEXT");
 
-                    b.Property<byte>("MaxPowerPerlaserInPercentage")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("ModelType")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
-
-                    b.Property<byte>("ProjectionBottomInPercentage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<byte>("ProjectionLeftInPercentage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<byte>("ProjectionRightInPercentage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<byte>("ProjectionTopInPercentage")
-                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
@@ -13,23 +13,37 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Mapster" Version="7.4.0" />
-    <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="4.1.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2">
+    <PackageReference Include="Mapster" Version="10.0.6" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="NAudio" Version="2.2.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="System.IO.Ports" Version="9.0.2" />
+    <!-- Override the transitive SQLitePCLRaw to the 3.0.x native that bundles
+         SQLite >= 3.50.2, fixing CVE-2025-6965 (GHSA-2m69-gcr7-jv3q). The 2.1.x
+         line pulled in by Microsoft.Data.Sqlite 10.0.5 ships an unpatched SQLite. -->
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
+    <PackageReference Include="NAudio" Version="2.3.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.IO.Ports" Version="10.0.5" />
     <PackageReference Include="Utf8Json" Version="1.3.7" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Migrations\" />
   </ItemGroup>
+
+  <!--
+    Option B: build the React frontend into wwwroot on Release builds. `dotnet publish`
+    defaults to Release, so the UI is baked in automatically when distributing, while
+    everyday Debug builds (dotnet build / run) stay fast and skip this step.
+    Runs in BeforeBuild so wwwroot is populated before static assets are collected.
+    Requires Node/npm and an installed Laser-frontend (npm install) on the build machine.
+  -->
+  <Target Name="BuildFrontend" BeforeTargets="BeforeBuild" Condition="'$(Configuration)' == 'Release'">
+    <Exec Command="npm run build:api" WorkingDirectory="$(MSBuildProjectDirectory)\..\..\Laser-frontend" />
+  </Target>
 
 </Project>

@@ -2,6 +2,8 @@
 using LaserAPI.Models.Dto.RegisteredLaser;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Dal
@@ -14,9 +16,14 @@ namespace LaserAPI.Dal
             await _context.SaveChangesAsync();
         }
 
-        public async Task<RegisteredLaserDto> Find(string laserId)
+        public async Task<List<RegisteredLaserDto>> All()
         {
-            return await _context.RegisteredLaser.FirstOrDefaultAsync(rl => rl.LaserId == laserId);
+            return await _context.RegisteredLaser.ToListAsync();
+        }
+
+        public async Task<RegisteredLaserDto> Find(Guid uuid)
+        {
+            return await _context.RegisteredLaser.SingleOrDefaultAsync(u => u.Uuid == uuid);
         }
 
         public async Task Remove(Guid uuid)

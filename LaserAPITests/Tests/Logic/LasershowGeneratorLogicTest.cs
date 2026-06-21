@@ -12,20 +12,33 @@ namespace LaserAPITests.Tests.Logic
         [TestMethod]
         public void GetMusicGenreFromSpotifyGenreTest()
         {
-            List<string> genres = new()
+            Dictionary<string, MusicGenre> genreBySpotifyName = new()
             {
-                "house",
-                "Hardstyle",
-                "Hardcore",
-                "CLASSIC"
+                { "house", MusicGenre.House },
+                { "Hardstyle", MusicGenre.Hardstyle },
+                { "Hardcore", MusicGenre.Hardcore },
+                { "CLASSIC", MusicGenre.Classic }
             };
 
-            foreach (string? genre in genres)
+            foreach ((string spotifyName, MusicGenre expected) in genreBySpotifyName)
             {
-                MusicGenre value = LaserShowGeneratorAlgorithm.GetMusicGenreFromSpotifyGenre(new List<string> { genre });
-                Assert.IsNotNull(value);
-                Assert.IsTrue(value.ToString().Length > 2);
+                MusicGenre value = LaserShowGeneratorAlgorithm.GetMusicGenreFromSpotifyGenre([spotifyName]);
+                Assert.AreEqual(expected, value);
             }
+        }
+
+        [TestMethod]
+        public void GetMusicGenreFromUnknownSpotifyGenreReturnsUnsupportedTest()
+        {
+            MusicGenre value = LaserShowGeneratorAlgorithm.GetMusicGenreFromSpotifyGenre(["some-unknown-genre"]);
+            Assert.AreEqual(MusicGenre.Unsupported, value);
+        }
+
+        [TestMethod]
+        public void GetMusicGenreFromEmptyListReturnsUnsupportedTest()
+        {
+            MusicGenre value = LaserShowGeneratorAlgorithm.GetMusicGenreFromSpotifyGenre([]);
+            Assert.AreEqual(MusicGenre.Unsupported, value);
         }
 
         [TestMethod]

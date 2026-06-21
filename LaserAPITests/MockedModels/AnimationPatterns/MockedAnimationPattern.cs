@@ -16,6 +16,7 @@ namespace LaserAPITests.MockedModels.AnimationPatterns
             {
                 Uuid = Guid.Parse("a9de1d0b-a623-433e-8a17-57555d3c5e4e"),
                 AnimationUuid = Guid.Parse("824e91dd-f0ac-46a9-bd51-4723f45af2b0"),
+                PatternUuid = Guid.Parse("ca1529e8-ac96-4cfb-93fb-1bb075969766"),
                 Name = "Pattern",
                 Pattern = new MockedPattern().Pattern,
                 AnimationPatternKeyFrames = new MockedAnimationPatternKeyFrames().AnimationPatternKeyFrames,

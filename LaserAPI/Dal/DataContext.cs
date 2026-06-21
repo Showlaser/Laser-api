@@ -49,7 +49,10 @@ namespace LaserAPI.Dal
                 .WithOne()
                 .HasForeignKey(ap => ap.AnimationPatternUuid);
 
-                e.Ignore(ap => ap.Pattern);
+                e.HasOne(ap => ap.Pattern)
+                    .WithMany()
+                    .HasForeignKey(ap => ap.PatternUuid)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             builder.Entity<AnimationPatternKeyFrameDto>(e =>
@@ -81,7 +84,10 @@ namespace LaserAPI.Dal
             builder.Entity<LasershowAnimationDto>(e =>
             {
                 e.HasKey(la => la.Uuid);
-                e.Ignore(la => la.Animation);
+                e.HasOne(la => la.Animation)
+                    .WithMany()
+                    .HasForeignKey(la => la.AnimationUuid)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             builder.Entity<RegisteredLaserDto>(e =>

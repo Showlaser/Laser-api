@@ -3,7 +3,7 @@ using System;
 
 namespace LaserAPI.Models.FromLaser
 {
-    public class RegisteredLaser
+    public class UDPBroadcast
     {
         public Guid Uuid { get; set; }
         public string Name { get; set; }

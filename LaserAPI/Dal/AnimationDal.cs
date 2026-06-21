@@ -21,8 +21,21 @@ namespace LaserAPI.Dal
 
         public async Task Add(AnimationDto animation)
         {
+            DetachSharedPatterns(animation);
             await _context.Animation.AddAsync(animation);
             await _context.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Patterns are shared library items referenced by PatternUuid. Null the navigation
+        /// so EF only persists the foreign key and does not try to re-insert the pattern.
+        /// </summary>
+        private static void DetachSharedPatterns(AnimationDto animation)
+        {
+            foreach (AnimationPatternDto animationPattern in animation.AnimationPatterns)
+            {
+                animationPattern.Pattern = null;
+            }
         }
 
         private async Task<AnimationDto> Find(Guid uuid)
@@ -35,27 +48,13 @@ namespace LaserAPI.Dal
 
         public async Task<List<AnimationDto>> All()
         {
-            List<AnimationDto> animations = await _context.Animation
+            return await _context.Animation
                 .Include(a => a.AnimationPatterns)
-                .ThenInclude(pa => pa.AnimationPatternKeyFrames)
-                .Include(pa => pa.AnimationPatterns).ToListAsync();
-
-            IEnumerable<Guid> patternUuids = animations.SelectMany(a => a.AnimationPatterns.Select(ap => ap.PatternUuid));
-            List<PatternDto> patterns = await _context.Pattern.Where(p => patternUuids.Contains(p.Uuid)).Include(p => p.Points).ToListAsync();
-
-            int animationsLength = animations.Count;
-            for (int i = 0; i < animationsLength; i++)
-            {
-                AnimationDto animation = animations[i];
-                int animationPatternsLength = animation.AnimationPatterns.Count;
-                for (int j = 0; j < animationPatternsLength; j++)
-                {
-                    AnimationPatternDto animationPattern = animation.AnimationPatterns[j];
-                    animationPattern.Pattern = patterns.Single(p => p.Uuid == animationPattern.PatternUuid);
-                }
-            }
-
-            return animations;
+                    .ThenInclude(ap => ap.AnimationPatternKeyFrames)
+                .Include(a => a.AnimationPatterns)
+                    .ThenInclude(ap => ap.Pattern)
+                        .ThenInclude(p => p.Points)
+                .ToListAsync();
         }
 
         public async Task<bool> Exists(Guid uuid)
@@ -74,6 +73,7 @@ namespace LaserAPI.Dal
             dbAnimation.Image = animation.Image;
             _context.Animation.Update(dbAnimation);
 
+            DetachSharedPatterns(animation);
             _context.PatternAnimation.RemoveRange(dbAnimation.AnimationPatterns);
             await _context.PatternAnimation.AddRangeAsync(animation.AnimationPatterns);
             await _context.SaveChangesAsync();

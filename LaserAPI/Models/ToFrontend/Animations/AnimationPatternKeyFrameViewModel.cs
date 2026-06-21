@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LaserAPI.Models.Helper;
+using System;
 
 namespace LaserAPI.Models.ToFrontend.Animations
 {
@@ -7,7 +8,7 @@ namespace LaserAPI.Models.ToFrontend.Animations
         public Guid Uuid { get; set; }
         public Guid AnimationPatternUuid { get; set; }
         public int TimeMs { get; set; }
-        public string PropertyEdited { get; set; }
+        public PropertyEdited PropertyEdited { get; set; }
         public double PropertyValue { get; set; }
     }
 }

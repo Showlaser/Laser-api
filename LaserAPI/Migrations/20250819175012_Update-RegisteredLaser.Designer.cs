@@ -3,6 +3,7 @@ using System;
 using LaserAPI.Dal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,12 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LaserAPI.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250819175012_Update-RegisteredLaser")]
+    partial class UpdateRegisteredLaser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.8");
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.AnimationDto", b =>
                 {
@@ -58,8 +61,6 @@ namespace LaserAPI.Migrations
                     b.HasKey("Uuid");
 
                     b.HasIndex("AnimationUuid");
-
-                    b.HasIndex("PatternUuid");
 
                     b.ToTable("PatternAnimation");
                 });
@@ -144,8 +145,6 @@ namespace LaserAPI.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Uuid");
-
-                    b.HasIndex("AnimationUuid");
 
                     b.HasIndex("LasershowUuid");
 
@@ -244,26 +243,11 @@ namespace LaserAPI.Migrations
                     b.Property<string>("IPAddress")
                         .HasColumnType("TEXT");
 
-                    b.Property<byte>("MaxPowerPerlaserInPercentage")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("ModelType")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
-
-                    b.Property<byte>("ProjectionBottomInPercentage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<byte>("ProjectionLeftInPercentage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<byte>("ProjectionRightInPercentage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<byte>("ProjectionTopInPercentage")
-                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
@@ -280,14 +264,6 @@ namespace LaserAPI.Migrations
                         .HasForeignKey("AnimationUuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("LaserAPI.Models.Dto.Patterns.PatternDto", "Pattern")
-                        .WithMany()
-                        .HasForeignKey("PatternUuid")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Pattern");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Animations.AnimationPatternKeyFrameDto", b =>
@@ -310,19 +286,11 @@ namespace LaserAPI.Migrations
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Lasershows.LasershowAnimationDto", b =>
                 {
-                    b.HasOne("LaserAPI.Models.Dto.Animations.AnimationDto", "Animation")
-                        .WithMany()
-                        .HasForeignKey("AnimationUuid")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("LaserAPI.Models.Dto.Lasershows.LasershowDto", null)
                         .WithMany("LasershowAnimations")
                         .HasForeignKey("LasershowUuid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Animation");
                 });
 
             modelBuilder.Entity("LaserAPI.Models.Dto.Patterns.PointDto", b =>

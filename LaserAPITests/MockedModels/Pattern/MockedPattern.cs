@@ -19,6 +19,8 @@ namespace LaserAPITests.MockedModels.Pattern
             {
                 Scale = 1.0,
                 Uuid = Guid.Parse("ca1529e8-ac96-4cfb-93fb-1bb075969766"),
+                Name = "Pattern",
+                Image = "123",
                 Points =
                 [
                     new()

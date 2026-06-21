@@ -14,50 +14,36 @@ namespace LaserAPI.Dal
     {
         public async Task Add(LasershowDto lasershow)
         {
+            DetachSharedAnimations(lasershow);
             await _context.Lasershow.AddAsync(lasershow);
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Animations are shared library items referenced by AnimationUuid. Null the navigation
+        /// so EF only persists the foreign key and does not try to re-insert the animation.
+        /// </summary>
+        private static void DetachSharedAnimations(LasershowDto lasershow)
+        {
+            foreach (LasershowAnimationDto lasershowAnimation in lasershow.LasershowAnimations)
+            {
+                lasershowAnimation.Animation = null;
+            }
+        }
+
         public async Task<List<LasershowDto>> All()
         {
-            List<LasershowDto> lasershows = await _context.Lasershow
-            .Include(e => e.LasershowAnimations)
+            return await _context.Lasershow
+                .Include(l => l.LasershowAnimations)
+                    .ThenInclude(la => la.Animation)
+                        .ThenInclude(a => a.AnimationPatterns)
+                            .ThenInclude(ap => ap.AnimationPatternKeyFrames)
+                .Include(l => l.LasershowAnimations)
+                    .ThenInclude(la => la.Animation)
+                        .ThenInclude(a => a.AnimationPatterns)
+                            .ThenInclude(ap => ap.Pattern)
+                                .ThenInclude(p => p.Points)
                 .ToListAsync();
-
-            IEnumerable<Guid> animationUuids = lasershows.SelectMany(l => l.LasershowAnimations.Select(la => la.AnimationUuid));
-            List<AnimationDto> animations = await _context.Animation.Where(a => animationUuids.Contains(a.Uuid))
-                 .Include(a => a.AnimationPatterns)
-                 .ThenInclude(pa => pa.AnimationPatternKeyFrames)
-                 .Include(pa => pa.AnimationPatterns).ToListAsync();
-
-            IEnumerable<Guid> patternUuids = animations.SelectMany(a => a.AnimationPatterns.Select(ap => ap.PatternUuid));
-            List<PatternDto> patterns = await _context.Pattern.Where(p => patternUuids.Contains(p.Uuid)).Include(p => p.Points).ToListAsync();
-
-            int animationsLength = animations.Count;
-            for (int i = 0; i < animationsLength; i++)
-            {
-                AnimationDto animation = animations[i];
-                int animationPatternsLength = animation.AnimationPatterns.Count;
-                for (int j = 0; j < animationPatternsLength; j++)
-                {
-                    AnimationPatternDto animationPattern = animation.AnimationPatterns[j];
-                    animationPattern.Pattern = patterns.Single(p => p.Uuid == animationPattern.PatternUuid);
-                }
-            }
-
-            int lasershowsLength = lasershows.Count;
-            for (int i = 0; i < lasershowsLength; i++)
-            {
-                LasershowDto lasershow = lasershows[i];
-                int lasershowAnimationsLength = lasershow.LasershowAnimations.Count;
-                for (int j = 0; j < lasershowAnimationsLength; j++)
-                {
-                    LasershowAnimationDto lasershowAnimation = lasershow.LasershowAnimations[j];
-                    lasershowAnimation.Animation = animations.Single(a => a.Uuid == lasershowAnimation.AnimationUuid);
-                }
-            }
-
-            return lasershows;
         }
 
         public Task<bool> Exists(Guid uuid)
@@ -84,6 +70,7 @@ namespace LaserAPI.Dal
             dbLasershow.Image = lasershow.Image;
             _context.Lasershow.Update(dbLasershow);
 
+            DetachSharedAnimations(lasershow);
             _context.LasershowAnimation.RemoveRange(dbLasershow.LasershowAnimations);
             await _context.LasershowAnimation.AddRangeAsync(lasershow.LasershowAnimations);
             await _context.SaveChangesAsync();
