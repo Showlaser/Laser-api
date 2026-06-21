@@ -28,37 +28,18 @@ namespace LaserAPI.Controllers
             return await _controllerResultHandler.Execute(Action());
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<RegisteredLaserDto>>> GetStatuses()
+        [HttpGet("alive")]
+        public ActionResult AliveCheck(Guid uuid)
         {
-            static async Task<List<RegisteredLaserDto>> Action()
+            void Action()
             {
-                return await LaserConnectionLogic.GetStatus();
+                if (!LaserConnectionLogicState.RegisteredLasers.Exists(rl => rl.Uuid == uuid))
+                {
+                    throw new KeyNotFoundException();
+                }
             }
 
-            return await _controllerResultHandler.Execute(Action());
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> ProjectPoints([FromBody] List<PointWrapper> points)
-        {
-            async Task Action()
-            {
-                await LaserConnectionLogic.SendData(points);
-            }
-
-            return await _controllerResultHandler.Execute(Action());
-        }
-
-        [HttpDelete("{uuid}")]
-        public async Task<ActionResult> RemoveLaser(Guid uuid)
-        {
-            async Task Action()
-            {
-                await _laserConnectionLogic.Remove(uuid);
-            }
-
-            return await _controllerResultHandler.Execute(Action());
+            return _controllerResultHandler.Execute(Action);
         }
     }
 }

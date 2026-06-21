@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Net;
@@ -44,29 +45,47 @@ namespace LaserAPI
                     JsonStringEnumConverter enumConverter = new();
                     opts.JsonSerializerOptions.Converters.Add(enumConverter);
                 });
+
             AddDependencyInjection(ref services);
-            Task.Run(() => ListenForBroadcasts());
         }
 
         private void ListenForBroadcasts()
         {
             int listenPort = 8888;
-            using (UdpClient udpClient = new(listenPort))
-            {
-                IPEndPoint remoteEndPoint = new(IPAddress.Any, 0);
-                Console.WriteLine($"Listening for UDP broadcasts on port {listenPort}...");
+            using UdpClient udpClient = new(listenPort);
+            IPEndPoint remoteEndPoint = new(IPAddress.Any, 0);
 
-                while (true)
+            Console.WriteLine("Make sure you have opened port 8888 and 5004 on your Windows firewall to allow the showlasers to communicate with the controller.\n" +
+                "Execute the following commands in PowerShell with Administrator rights to open the ports:");
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("New-NetFirewallRule -DisplayName \"LaserAPI UDP 8888\" -Direction Inbound -Protocol UDP -LocalPort 8888 -Action Allow -Profile Any");
+            Console.WriteLine("New-NetFirewallRule -DisplayName \"LaserAPI 5004\" -Direction Inbound -Protocol TCP -LocalPort 5004 -Action Allow -Profile Private,Public \n");
+            Console.ForegroundColor = ConsoleColor.White;
+
+            Console.WriteLine($"Listening for UDP broadcasts on port {listenPort}...");
+
+            while (true)
+            {
+                try
                 {
                     byte[] receivedBytes = udpClient.Receive(ref remoteEndPoint);
                     string message = Encoding.UTF8.GetString(receivedBytes);
                     UDPBroadcast broadcast = Newtonsoft.Json.JsonConvert.DeserializeObject<UDPBroadcast>(message);
 
-                    if (!LaserConnectionLogicState.AdoptionPending.Exists(ap => ap.Uuid == broadcast.Uuid)) {
+                    if (!LaserConnectionLogicState.AdoptionPending.Exists(ap => ap.Uuid == broadcast.Uuid) && !LaserConnectionLogicState.RegisteredLasers.Exists(rl => rl.Uuid == broadcast.Uuid))
+                    {
                         LaserConnectionLogicState.AdoptionPending.Add(broadcast);
                     }
 
                     Console.WriteLine($"[{DateTime.Now}] {remoteEndPoint}: {message}");
+                }
+                catch (Exception ex)
+                {
+                    // Keep listening: a single malformed packet or transient socket
+                    // error must not tear down the discovery loop (it runs on a
+                    // fire-and-forget Task, so a rethrow would silently stop discovery).
+                    Console.WriteLine($"[{DateTime.Now}] Error handling UDP broadcast: {ex.Message}");
                 }
             }
         }
@@ -123,6 +142,14 @@ namespace LaserAPI
             });
 
             CreateDatabaseIfNotExist(app);
+            IServiceScope serviceScope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope();
+
+            var laserConnectionLogic = serviceScope.ServiceProvider.GetService<LaserConnectionLogic>();
+            laserConnectionLogic.Init().Wait();
+            Task.Run(() => ListenForBroadcasts());
+
             // SetProjectionZones(app);
 
             System.Timers.Timer timer = new() { Interval = 30000 };

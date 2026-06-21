@@ -25,5 +25,10 @@ namespace LaserAPI.Models.Dto.RegisteredLaser
         public LaserModel ModelType { get; set; }
         public LaserStatus Status { get; set; }
         public string IPAddress { get; set; }
+        public byte MaxPowerPerlaserInPercentage { get; set; }
+        public byte ProjectionTopInPercentage { get; set; }
+        public byte ProjectionBottomInPercentage { get; set; }
+        public byte ProjectionLeftInPercentage { get; set; }
+        public byte ProjectionRightInPercentage { get; set; }
     }
 }
