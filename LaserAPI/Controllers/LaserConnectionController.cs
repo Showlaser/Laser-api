@@ -21,8 +21,22 @@ namespace LaserAPI.Controllers
         {
             async Task Action()
             {
+                Console.WriteLine($"[{DateTime.Now}] Incoming connection request from showlaser: {registeredLaser.Name}");
                 RegisteredLaserDto registeredLaserDto = registeredLaser.Adapt<RegisteredLaserDto>();
                 await _laserConnectionLogic.Connect(registeredLaserDto);
+            }
+
+            return await _controllerResultHandler.Execute(Action());
+        }
+
+        [HttpPut()]
+        public async Task<ActionResult> Update([FromBody] RegisteredLaser registeredLaser)
+        {
+            async Task Action()
+            {
+                Console.WriteLine($"[{DateTime.Now}] Incoming update request from showlaser: {registeredLaser.Name}");
+                RegisteredLaserDto registeredLaserDto = registeredLaser.Adapt<RegisteredLaserDto>();
+                await _laserConnectionLogic.Update(registeredLaserDto);
             }
 
             return await _controllerResultHandler.Execute(Action());

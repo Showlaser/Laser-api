@@ -21,10 +21,9 @@ namespace LaserAPI.Interfaces
         public Task<bool> Adopt(RegisteredLaserDto registeredLaser);
 
         /// <summary>
-        /// Sends a data request to the lasers to send telemetry data back, the result is returned
+        /// Updates the data of the showlaser
         /// </summary>
-        /// <returns>A list with telemetry data</returns>
-        public static Task<List<RegisteredLaserDto>> Status { get; }
+        public Task Update(RegisteredLaserDto registeredLaser);
 
         /// <summary>
         /// Removes the specified laser from the database and the connected laser list
