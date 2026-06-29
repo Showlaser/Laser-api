@@ -1,4 +1,5 @@
 ﻿using LaserAPI.Logic;
+using LaserAPI.Migrations;
 using LaserAPI.Models.Dto.RegisteredLaser;
 using LaserAPI.Models.FromFrontend.Points;
 using LaserAPI.Models.FromLaser;
@@ -7,6 +8,7 @@ using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace LaserAPI.Controllers
@@ -20,11 +22,40 @@ namespace LaserAPI.Controllers
         {
             static List<RegisteredLaserViewModel> Action()
             {
-                List<RegisteredLaserDto> lasers = LaserConnectionLogicState.RegisteredLasers;
-                return lasers.Adapt<List<RegisteredLaserViewModel>>();
+                return LaserConnectionLogicState.RegisteredLasers.Adapt<List<RegisteredLaserViewModel>>();
             }
 
             return _controllerResultHandler.Execute(Action);
+        }
+
+        [HttpGet("sd-card")]
+        public async Task<ActionResult<List<SDCardJsonFile>>> SDCardGetFiles(Guid uuid)
+        {
+            async Task<List<SDCardJsonFile>> Action()
+            {
+
+                RegisteredLaserDto registeredLaser = LaserConnectionLogicState.RegisteredLasers.Single(rl => rl.Uuid == uuid);
+                return await _laserConnectionLogic.GetSDCardFiles(registeredLaser);
+            }
+
+            return await _controllerResultHandler.Execute(Action());
+        }
+
+        [HttpDelete("sd-card")]
+        public async Task<ActionResult> SDCardDeleteFile(Guid uuid, string filename)
+        {
+            async Task Action()
+            {
+
+                RegisteredLaserDto registeredLaser = LaserConnectionLogicState.RegisteredLasers.Single(rl => rl.Uuid == uuid);
+                SDCardJsonFile file = new()
+                {
+                    Filename = filename
+                };
+                await _laserConnectionLogic.DeleteSDCardFile(registeredLaser, file);
+            }
+
+            return await _controllerResultHandler.Execute(Action());
         }
 
         [HttpPut]

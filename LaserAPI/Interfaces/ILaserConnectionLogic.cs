@@ -1,4 +1,5 @@
 ﻿using LaserAPI.Models.Dto.RegisteredLaser;
+using LaserAPI.Models.FromLaser;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,6 +20,13 @@ namespace LaserAPI.Interfaces
         /// <param name="registeredLaser"></param>
         /// <returns></returns>
         public Task<bool> Adopt(RegisteredLaserDto registeredLaser);
+
+        /// <summary>
+        /// Fetches the files from the SD card from the showlaser
+        /// </summary>
+        /// <param name="registeredLaser"></param>
+        /// <returns>An (empty) list of files</returns>
+        public Task<List<SDCardJsonFile>> GetSDCardFiles(RegisteredLaserDto registeredLaser);
 
         /// <summary>
         /// Updates the data of the showlaser

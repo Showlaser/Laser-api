@@ -172,6 +172,67 @@ namespace LaserAPI.Logic
             httpClient.Dispose();
         }
 
+        public async Task<List<SDCardJsonFile>> GetSDCardFiles(RegisteredLaserDto registeredLaser)
+        {
+            int length = LaserConnectionLogicState.RegisteredLasers.Count;
+            if (length == 0 || !LaserConnectionLogicState.RegisteredLasers.Exists(rl => rl.Uuid == registeredLaser.Uuid))
+            {
+                return [];
+            }
+
+            using HttpClient httpClient = new();
+            {
+                try
+                {
+                    Console.WriteLine($"Get SDCard files from showlaser: {registeredLaser.Name}");
+                    HttpResponseMessage response = await httpClient.GetAsync($"http://{registeredLaser.IPAddress}/sd-card");
+                    string json = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<List<SDCardJsonFile>>(json);
+                }
+                catch (HttpRequestException)
+                {
+                    if (registeredLaser.Status != LaserStatus.ConnectionLost)
+                    {
+                        Console.WriteLine($"Connection lost for laser {registeredLaser.Name}");
+                        return [];
+                    }
+                }
+            }
+
+            httpClient.Dispose();
+            return [];
+        }
+
+        public async Task DeleteSDCardFile(RegisteredLaserDto registeredLaser, SDCardJsonFile file)
+        {
+            int length = LaserConnectionLogicState.RegisteredLasers.Count;
+            if (length == 0 || !LaserConnectionLogicState.RegisteredLasers.Exists(rl => rl.Uuid == registeredLaser.Uuid))
+            {
+                throw new KeyNotFoundException(nameof(registeredLaser.Uuid));
+            }
+
+            using HttpClient httpClient = new();
+            {
+                try
+                {
+                    Console.WriteLine($"Delete SDCard file {file.Filename} from showlaser: {registeredLaser.Name}");
+                    HttpResponseMessage response = await httpClient.PutAsJsonAsync($"http://{registeredLaser.IPAddress}/sd-card", file);
+                    string json = await response.Content.ReadAsStringAsync();
+                }
+                catch (HttpRequestException)
+                {
+                    if (registeredLaser.Status != LaserStatus.ConnectionLost)
+                    {
+                        Console.WriteLine($"Connection lost for laser {registeredLaser.Name}");
+                        throw new TimeoutException();
+                    }
+                }
+            }
+
+            httpClient.Dispose();
+            return;
+        }
+
         public static List<UDPBroadcast> GetPendingAdoptions()
         {
             return LaserConnectionLogicState.AdoptionPending;
