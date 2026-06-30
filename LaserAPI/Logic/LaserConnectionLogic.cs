@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.Unicode;
@@ -37,6 +38,33 @@ namespace LaserAPI.Logic
             }
 
             LaserConnectionLogicState.RegisteredLasers = registeredShowlasers;
+        }
+
+        private static bool RequestsCanBeSendToLaser(RegisteredLaserDto registeredLaser)
+        {
+            int length = LaserConnectionLogicState.RegisteredLasers.Count;
+            if (length > 0 && LaserConnectionLogicState.RegisteredLasers.Exists(rl => rl.Uuid == registeredLaser.Uuid))
+            {
+                RegisteredLaserDto laser = LaserConnectionLogicState.RegisteredLasers.Find(l => l.Uuid == registeredLaser.Uuid);
+                if (laser.Status == LaserStatus.Standby || laser.Status == LaserStatus.Emitting || laser.Status == LaserStatus.EmergencyButtonPressed)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool ShowlaserValid(RegisteredLaserDto registeredLaserDto)
+        {
+            return registeredLaserDto.Uuid != Guid.Empty &&
+                registeredLaserDto.Name.Length > 0 &&
+                registeredLaserDto.IPAddress.Length > 0 &&
+                registeredLaserDto.MaxPowerPerlaserInPercentage.IsBetweenOrEqualTo(0, 100) &&
+                registeredLaserDto.ProjectionTopInPercentage.IsBetweenOrEqualTo(0, 100) &&
+                registeredLaserDto.ProjectionBottomInPercentage.IsBetweenOrEqualTo(0, 100) &&
+                registeredLaserDto.ProjectionLeftInPercentage.IsBetweenOrEqualTo(0, 100) &&
+                registeredLaserDto.ProjectionRightInPercentage.IsBetweenOrEqualTo(0, 100);
         }
 
         public async Task<bool> Adopt(RegisteredLaserDto registeredLaser)
@@ -87,20 +115,13 @@ namespace LaserAPI.Logic
             LaserConnectionLogicState.RegisteredLasers.Add(registeredLaser);
         }
 
-        private static bool ShowlaserValid(RegisteredLaserDto registeredLaserDto)
-        {
-            return registeredLaserDto.Uuid != Guid.Empty && 
-                registeredLaserDto.Name.Length > 0 && 
-                registeredLaserDto.IPAddress.Length > 0 &&
-                registeredLaserDto.MaxPowerPerlaserInPercentage.IsBetweenOrEqualTo(0, 100) && 
-                registeredLaserDto.ProjectionTopInPercentage.IsBetweenOrEqualTo(0, 100) && 
-                registeredLaserDto.ProjectionBottomInPercentage.IsBetweenOrEqualTo(0, 100) && 
-                registeredLaserDto.ProjectionLeftInPercentage.IsBetweenOrEqualTo(0, 100) && 
-                registeredLaserDto.ProjectionRightInPercentage.IsBetweenOrEqualTo(0, 100);
-        }
-
         public async Task UpdateShowlaser(RegisteredLaserDto registeredLaser)
         {
+            if (!RequestsCanBeSendToLaser(registeredLaser))
+            {
+                throw new InvalidOperationException("Request cannot be send to showlaser");
+            }
+
             if (!ShowlaserValid(registeredLaser))
             {
                 throw new InvalidDataException();
@@ -130,6 +151,11 @@ namespace LaserAPI.Logic
 
         public async Task Update(RegisteredLaserDto registeredLaser)
         {
+            if (!RequestsCanBeSendToLaser(registeredLaser))
+            {
+                throw new InvalidOperationException("Request cannot be send to showlaser");
+            }
+
             bool valid = ShowlaserValid(registeredLaser);
             if (!valid)
             {
@@ -174,10 +200,9 @@ namespace LaserAPI.Logic
 
         public async Task<List<SDCardJsonFile>> GetSDCardFiles(RegisteredLaserDto registeredLaser)
         {
-            int length = LaserConnectionLogicState.RegisteredLasers.Count;
-            if (length == 0 || !LaserConnectionLogicState.RegisteredLasers.Exists(rl => rl.Uuid == registeredLaser.Uuid))
+            if (!RequestsCanBeSendToLaser(registeredLaser))
             {
-                return [];
+                throw new InvalidOperationException("Request cannot be send to showlaser");
             }
 
             using HttpClient httpClient = new();
@@ -205,10 +230,9 @@ namespace LaserAPI.Logic
 
         public async Task DeleteSDCardFile(RegisteredLaserDto registeredLaser, SDCardJsonFile file)
         {
-            int length = LaserConnectionLogicState.RegisteredLasers.Count;
-            if (length == 0 || !LaserConnectionLogicState.RegisteredLasers.Exists(rl => rl.Uuid == registeredLaser.Uuid))
+            if (!RequestsCanBeSendToLaser(registeredLaser))
             {
-                throw new KeyNotFoundException(nameof(registeredLaser.Uuid));
+                throw new InvalidOperationException("Request cannot be send to showlaser");
             }
 
             using HttpClient httpClient = new();
@@ -244,21 +268,7 @@ namespace LaserAPI.Logic
         /// <param name="wrappedPoints">A model with points and info about the laser to send the data to</param>
         public static async Task SendData(List<PointWrapper> wrappedPoints)
         {
-            using HttpClient httpClient = new();
-            List<Task> tasks = [];
 
-            foreach (RegisteredLaserDto connectedLaser in LaserConnectionLogicState.RegisteredLasers.FindAll(cl =>
-                cl.Status is LaserStatus.Emitting or
-                LaserStatus.Standby))
-            {
-                string url = $"{connectedLaser.IPAddress}/send";
-                List<PointWrapper> wrappedPointToPlayOnLaser = wrappedPoints.FindAll(wp => wp.LaserToProjectOnUuid == connectedLaser.Uuid);
-
-                tasks.Add(httpClient.PostAsJsonAsync(url, wrappedPointToPlayOnLaser));
-            }
-
-            await Task.WhenAll(tasks);
-            httpClient.Dispose();
         }
 
         /// <summary>
