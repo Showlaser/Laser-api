@@ -232,6 +232,15 @@ namespace LaserAPI.Logic
             return [];
         }
 
+        // Must stay in sync with MAX_LIVE_SHOW_BYTES in the showlaser firmware
+        // (NetworkController.cpp): the laser rejects live uploads larger than this to
+        // protect its RAM.
+        private const int MaxLiveShowBytes = 128 * 1024;
+
+        // Scratch file used when a preview is too large for the laser's RAM; it is
+        // overwritten on every large preview and is not one of the user's saved shows.
+        private const string LivePreviewFilename = "_live-preview";
+
         // Shows are stored on the SD card as ".lzs" now. Normalise whatever name the
         // frontend supplied (no extension, or a legacy ".json") to a ".lzs" name.
         private static string ToLzsFilename(string filename)
@@ -285,10 +294,8 @@ namespace LaserAPI.Logic
                 }
                 catch (HttpRequestException)
                 {
-                    if (fileWrapper.RegisteredLaser.Status != LaserStatus.ConnectionLost)
-                    {
-                        Console.WriteLine($"Connection lost for laser {fileWrapper.RegisteredLaser.Name}");
-                    }
+                    Console.WriteLine($"Connection lost for laser {fileWrapper.RegisteredLaser.Name}");
+                    throw;
                 }
             }
 
@@ -297,8 +304,8 @@ namespace LaserAPI.Logic
 
         /// <summary>
         /// Plays a lasershow on the showlaser. Lasershows are stored on the SD card and
-        /// streamed from there, so the show is uploaded first only if it is not already
-        /// present, then playback is triggered by filename.
+        /// streamed from there. The show is always uploaded first, so the SD card can
+        /// never hold a stale version of an edited show.
         /// </summary>
         public async Task PlayLasershow(SDCardJsonFileWrapper fileWrapper)
         {
@@ -307,17 +314,8 @@ namespace LaserAPI.Logic
                 throw new InvalidOperationException("Request cannot be send to showlaser");
             }
 
-            string filename = ToLzsFilename(fileWrapper.Filename);
-
-            List<SDCardJsonFileWrapper> filesOnSdCard = await GetSDCardFiles(fileWrapper.RegisteredLaser);
-            bool alreadyOnSdCard = filesOnSdCard.Exists(f =>
-                string.Equals(f.Filename, filename, StringComparison.OrdinalIgnoreCase));
-            if (!alreadyOnSdCard)
-            {
-                await SaveSDCardFile(fileWrapper);
-            }
-
-            await SendPlaySDCardFileRequest(fileWrapper.RegisteredLaser, filename);
+            await SaveSDCardFile(fileWrapper);
+            await SendPlaySDCardFileRequest(fileWrapper.RegisteredLaser, ToLzsFilename(fileWrapper.Filename));
         }
 
         private static async Task SendPlaySDCardFileRequest(RegisteredLaserDto registeredLaser, string filename)
@@ -344,10 +342,8 @@ namespace LaserAPI.Logic
                 }
                 catch (HttpRequestException)
                 {
-                    if (registeredLaser.Status != LaserStatus.ConnectionLost)
-                    {
-                        Console.WriteLine($"Connection lost for laser {registeredLaser.Name}");
-                    }
+                    Console.WriteLine($"Connection lost for laser {registeredLaser.Name}");
+                    throw;
                 }
             }
 
@@ -355,10 +351,12 @@ namespace LaserAPI.Logic
         }
 
         /// <summary>
-        /// Plays a pattern or animation live on the showlaser. These are NOT stored on the
-        /// laser: the show JSON is converted to the compact .lzs binary and streamed into
-        /// the laser's RAM, where it is looped. Uses the same converter as a lasershow (a
-        /// pattern is a single-frame show, an animation a multi-frame show).
+        /// Plays a pattern, animation or lasershow preview live on the showlaser without
+        /// persisting anything of the user's. Small shows are streamed into the laser's
+        /// RAM and looped; a show too large for the laser's RAM buffer falls back to a
+        /// scratch file on the SD card (overwritten on every large preview) and is
+        /// played from there. Uses the same converter for all of them (a pattern is a
+        /// single-frame show, an animation/lasershow a multi-frame show).
         /// </summary>
         public async Task PlayLiveShow(SDCardJsonFileWrapper fileWrapper)
         {
@@ -368,37 +366,45 @@ namespace LaserAPI.Logic
             }
 
             byte[] lzs = LasershowBinaryConverter.JsonToBinary(fileWrapper.FileJson);
-
-            using HttpClient httpClient = new();
+            if (lzs.Length > MaxLiveShowBytes)
             {
-                try
+                // SaveSDCardFile converts the JSON again; that costs milliseconds and
+                // keeps the SD upload path single-sourced.
+                SDCardJsonFileWrapper scratch = new()
                 {
-                    Console.WriteLine($"Project live show on showlaser: {fileWrapper.RegisteredLaser.Name}");
-
-                    using ByteArrayContent content = new(lzs);
-                    content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-
-                    HttpResponseMessage response = await httpClient.PostAsync(
-                        $"http://{fileWrapper.RegisteredLaser.IPAddress}/live-binary", content);
-                    response.EnsureSuccessStatusCode();
-
-                    string json = await response.Content.ReadAsStringAsync();
-                    var apiResponse = JsonConvert.DeserializeObject<APIResponse>(json);
-                    if (!apiResponse.Success)
-                    {
-                        throw new JsonException($"Error projecting live show: {apiResponse.Error}");
-                    }
-                }
-                catch (HttpRequestException)
-                {
-                    if (fileWrapper.RegisteredLaser.Status != LaserStatus.ConnectionLost)
-                    {
-                        Console.WriteLine($"Connection lost for laser {fileWrapper.RegisteredLaser.Name}");
-                    }
-                }
+                    RegisteredLaser = fileWrapper.RegisteredLaser,
+                    Filename = LivePreviewFilename,
+                    FileJson = fileWrapper.FileJson
+                };
+                await SaveSDCardFile(scratch);
+                await SendPlaySDCardFileRequest(scratch.RegisteredLaser, ToLzsFilename(LivePreviewFilename));
+                return;
             }
 
-            httpClient.Dispose();
+            using HttpClient httpClient = new();
+            try
+            {
+                Console.WriteLine($"Project live show on showlaser: {fileWrapper.RegisteredLaser.Name}");
+
+                using ByteArrayContent content = new(lzs);
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+
+                HttpResponseMessage response = await httpClient.PostAsync(
+                    $"http://{fileWrapper.RegisteredLaser.IPAddress}/live-binary", content);
+                response.EnsureSuccessStatusCode();
+
+                string json = await response.Content.ReadAsStringAsync();
+                var apiResponse = JsonConvert.DeserializeObject<APIResponse>(json);
+                if (!apiResponse.Success)
+                {
+                    throw new JsonException($"Error projecting live show: {apiResponse.Error}");
+                }
+            }
+            catch (HttpRequestException)
+            {
+                Console.WriteLine($"Connection lost for laser {fileWrapper.RegisteredLaser.Name}");
+                throw;
+            }
         }
 
         /// <summary>
@@ -423,10 +429,8 @@ namespace LaserAPI.Logic
                 }
                 catch (HttpRequestException)
                 {
-                    if (registeredLaser.Status != LaserStatus.ConnectionLost)
-                    {
-                        Console.WriteLine($"Connection lost for laser {registeredLaser.Name}");
-                    }
+                    Console.WriteLine($"Connection lost for laser {registeredLaser.Name}");
+                    throw;
                 }
             }
 
