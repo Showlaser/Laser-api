@@ -78,7 +78,7 @@ namespace LaserAPI
                         LaserConnectionLogicState.AdoptionPending.Add(broadcast);
                     }
 
-                    Console.WriteLine($"[{DateTime.Now}] {remoteEndPoint}: {message}");
+                    Console.WriteLine($"[{DateTime.Now}] Incoming broadcast from: {remoteEndPoint}: {message}");
                 }
                 catch (Exception ex)
                 {
@@ -152,10 +152,10 @@ namespace LaserAPI
 
             // SetProjectionZones(app);
 
-            System.Timers.Timer timer = new() { Interval = 30000 };
+            System.Timers.Timer timer = new() { Interval = 15000 };
             timer.Elapsed += delegate (object o, ElapsedEventArgs eventArgs)
             {
-                _ = LaserConnectionLogic.GetStatus();
+                _ = LaserConnectionLogic.AliveCheck();
             };
 
             timer.Start();

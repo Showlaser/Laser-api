@@ -1,4 +1,7 @@
-﻿using LaserAPI.Models.Dto.RegisteredLaser;
+﻿using LaserAPI.Models.Dto.Patterns;
+using LaserAPI.Models.Dto.RegisteredLaser;
+using LaserAPI.Models.FromFrontend.Showlaser;
+using LaserAPI.Models.FromFrontend.Showlaser.SDCard;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -21,15 +24,27 @@ namespace LaserAPI.Interfaces
         public Task<bool> Adopt(RegisteredLaserDto registeredLaser);
 
         /// <summary>
-        /// Sends a data request to the lasers to send telemetry data back, the result is returned
+        /// Fetches the files from the SD card from the showlaser
         /// </summary>
-        /// <returns>A list with telemetry data</returns>
-        public static Task<List<RegisteredLaserDto>> Status { get; }
+        /// <param name="registeredLaser"></param>
+        /// <returns>An (empty) list of files</returns>
+        public Task<List<SDCardJsonFileWrapper>> GetSDCardFiles(RegisteredLaserDto registeredLaser);
+
+        /// <summary>
+        /// Updates the data of the showlaser
+        /// </summary>
+        public Task Update(RegisteredLaserDto registeredLaser);
 
         /// <summary>
         /// Removes the specified laser from the database and the connected laser list
         /// </summary>
         /// <param name="registeredLaser">The laser to remove</param>
         public Task Remove(Guid uuid);
+
+        /// <summary>
+        /// Projects the safety zone
+        /// </summary>
+        /// <param name="safetyZone"></param>
+        public Task ProjectSafetyZone(ProjectSafetyZoneWrapper projectSafetyZoneWrapper);
     }
 }

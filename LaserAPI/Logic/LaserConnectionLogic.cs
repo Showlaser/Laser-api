@@ -1,8 +1,12 @@
-﻿using LaserAPI.Interfaces;
+﻿using LaserAPI.Enums;
+using LaserAPI.Interfaces;
 using LaserAPI.Interfaces.Dal;
+using LaserAPI.Models.Dto.Patterns;
 using LaserAPI.Models.Dto.RegisteredLaser;
 using LaserAPI.Models.FromFrontend.Laser;
 using LaserAPI.Models.FromFrontend.Points;
+using LaserAPI.Models.FromFrontend.Showlaser;
+using LaserAPI.Models.FromFrontend.Showlaser.SDCard;
 using LaserAPI.Models.FromLaser;
 using LaserAPI.Models.Helper;
 using Newtonsoft.Json;
@@ -10,7 +14,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.Unicode;
@@ -28,7 +34,41 @@ namespace LaserAPI.Logic
     {
         public async Task Init()
         {
-            LaserConnectionLogicState.RegisteredLasers = await _registeredLaserDal.All();
+            var registeredShowlasers = await _registeredLaserDal.All();
+            int registeredShowlasersCount = registeredShowlasers.Count;
+            for (int i = 0; i < registeredShowlasersCount; i++)
+            {
+                registeredShowlasers[i].Status = LaserStatus.ConnectionLost;
+            }
+
+            LaserConnectionLogicState.RegisteredLasers = registeredShowlasers;
+        }
+
+        private static bool RequestsCanBeSendToLaser(RegisteredLaserDto registeredLaser)
+        {
+            int length = LaserConnectionLogicState.RegisteredLasers.Count;
+            if (length > 0 && LaserConnectionLogicState.RegisteredLasers.Exists(rl => rl.Uuid == registeredLaser.Uuid))
+            {
+                RegisteredLaserDto laser = LaserConnectionLogicState.RegisteredLasers.Find(l => l.Uuid == registeredLaser.Uuid);
+                if (laser.Status == LaserStatus.Standby || laser.Status == LaserStatus.Emitting || laser.Status == LaserStatus.EmergencyButtonPressed)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool ShowlaserValid(RegisteredLaserDto registeredLaserDto)
+        {
+            return registeredLaserDto.Uuid != Guid.Empty &&
+                registeredLaserDto.Name.Length > 0 &&
+                registeredLaserDto.IPAddress.Length > 0 &&
+                registeredLaserDto.MaxPowerPerlaserInPercentage.IsBetweenOrEqualTo(0, 100) &&
+                registeredLaserDto.ProjectionTopInPercentage.IsBetweenOrEqualTo(0, 100) &&
+                registeredLaserDto.ProjectionBottomInPercentage.IsBetweenOrEqualTo(0, 100) &&
+                registeredLaserDto.ProjectionLeftInPercentage.IsBetweenOrEqualTo(0, 100) &&
+                registeredLaserDto.ProjectionRightInPercentage.IsBetweenOrEqualTo(0, 100);
         }
 
         public async Task<bool> Adopt(RegisteredLaserDto registeredLaser)
@@ -79,20 +119,13 @@ namespace LaserAPI.Logic
             LaserConnectionLogicState.RegisteredLasers.Add(registeredLaser);
         }
 
-        private static bool ShowlaserValid(RegisteredLaserDto registeredLaserDto)
-        {
-            return registeredLaserDto.Uuid != Guid.Empty && 
-                registeredLaserDto.Name.Length > 0 && 
-                registeredLaserDto.IPAddress.Length > 0 &&
-                registeredLaserDto.MaxPowerPerlaserInPercentage.IsBetweenOrEqualTo(0, 100) && 
-                registeredLaserDto.ProjectionTopInPercentage.IsBetweenOrEqualTo(0, 100) && 
-                registeredLaserDto.ProjectionBottomInPercentage.IsBetweenOrEqualTo(0, 100) && 
-                registeredLaserDto.ProjectionLeftInPercentage.IsBetweenOrEqualTo(0, 100) && 
-                registeredLaserDto.ProjectionRightInPercentage.IsBetweenOrEqualTo(0, 100);
-        }
-
         public async Task UpdateShowlaser(RegisteredLaserDto registeredLaser)
         {
+            if (!RequestsCanBeSendToLaser(registeredLaser))
+            {
+                throw new InvalidOperationException("Request cannot be send to showlaser");
+            }
+
             if (!ShowlaserValid(registeredLaser))
             {
                 throw new InvalidDataException();
@@ -111,7 +144,7 @@ namespace LaserAPI.Logic
                 HttpResponseMessage response = await httpClient.PutAsync($"http://{registeredLaser.IPAddress}/settings", content);
                 response.EnsureSuccessStatusCode();
 
-                Console.WriteLine("Settings Update send successfull");
+                Console.WriteLine("Settings Update send successful");
                 await _registeredLaserDal.Update(registerLaserFromDb);
             }
             catch (Exception)
@@ -120,33 +153,317 @@ namespace LaserAPI.Logic
             }
         }
 
-        /// <summary>
-        /// Gets the status from all lasers in the database that are online
-        /// This function is called every 30 seconds in Startup.cs to keep the list updated
-        /// </summary>
-        /// <returns>The results of all the lasers in the connected lasers list</returns>
-        public static async Task<List<RegisteredLaserDto>> GetStatus()
+        public async Task Update(RegisteredLaserDto registeredLaser)
+        {
+            if (!RequestsCanBeSendToLaser(registeredLaser))
+            {
+                throw new InvalidOperationException("Request cannot be send to showlaser");
+            }
+
+            bool valid = ShowlaserValid(registeredLaser);
+            if (!valid)
+            {
+                throw new InvalidDataException();
+            }
+
+            int index = LaserConnectionLogicState.RegisteredLasers.FindIndex(rl => rl.Uuid == registeredLaser.Uuid);
+            LaserConnectionLogicState.RegisteredLasers[index] = registeredLaser;
+            await _registeredLaserDal.Update(registeredLaser);
+        }
+
+        public static async Task AliveCheck()
         {
             int length = LaserConnectionLogicState.RegisteredLasers.Count;
             if (length == 0)
             {
-                return LaserConnectionLogicState.RegisteredLasers;
+                return;
             }
 
             using HttpClient httpClient = new();
             for (int i = 0; i < length; i++)
             {
-                RegisteredLaserDto connectedLaser = LaserConnectionLogicState.RegisteredLasers[i];
+                RegisteredLaserDto registeredLaser = LaserConnectionLogicState.RegisteredLasers[i];
                 try
                 {
-                    HttpResponseMessage response = await httpClient.GetAsync($"{connectedLaser.IPAddress}/telemetry");
-                    LaserTelemetry laserTelemetry = await response.Content.ReadFromJsonAsync<LaserTelemetry>();
+                    HttpResponseMessage response = await httpClient.GetAsync($"http://{registeredLaser.IPAddress}/alive");
+                    LaserConnectionLogicState.RegisteredLasers[i].Status = LaserStatus.Standby;
                 }
-                catch (HttpRequestException) {}
+                catch (HttpRequestException) 
+                {
+                    if (registeredLaser.Status != LaserStatus.ConnectionLost)
+                    {
+                        Console.WriteLine($"Connection lost for laser {registeredLaser.Name}");
+                    }
+
+                    LaserConnectionLogicState.RegisteredLasers[i].Status = LaserStatus.ConnectionLost;
+                }
             }
 
             httpClient.Dispose();
-            return LaserConnectionLogicState.RegisteredLasers;
+        }
+
+        public async Task<List<SDCardJsonFileWrapper>> GetSDCardFiles(RegisteredLaserDto registeredLaser)
+        {
+            if (!RequestsCanBeSendToLaser(registeredLaser))
+            {
+                throw new InvalidOperationException("Request cannot be send to showlaser");
+            }
+
+            using HttpClient httpClient = new();
+            {
+                try
+                {
+                    Console.WriteLine($"Get SDCard files from showlaser: {registeredLaser.Name}");
+                    HttpResponseMessage response = await httpClient.GetAsync($"http://{registeredLaser.IPAddress}/sd-card");
+                    string json = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<List<SDCardJsonFileWrapper>>(json);
+                }
+                catch (HttpRequestException)
+                {
+                    if (registeredLaser.Status != LaserStatus.ConnectionLost)
+                    {
+                        Console.WriteLine($"Connection lost for laser {registeredLaser.Name}");
+                        return [];
+                    }
+                }
+            }
+
+            httpClient.Dispose();
+            return [];
+        }
+
+        // Must stay in sync with MAX_LIVE_SHOW_BYTES in the showlaser firmware
+        // (NetworkController.cpp): the laser rejects live uploads larger than this to
+        // protect its RAM.
+        private const int MaxLiveShowBytes = 128 * 1024;
+
+        // Scratch file used when a preview is too large for the laser's RAM; it is
+        // overwritten on every large preview and is not one of the user's saved shows.
+        private const string LivePreviewFilename = "_live-preview";
+
+        // Shows are stored on the SD card as ".lzs" now. Normalise whatever name the
+        // frontend supplied (no extension, or a legacy ".json") to a ".lzs" name.
+        private static string ToLzsFilename(string filename)
+        {
+            string name = string.IsNullOrWhiteSpace(filename) ? "show" : filename.Trim();
+            if (name.EndsWith(".lzs", StringComparison.OrdinalIgnoreCase))
+            {
+                return name;
+            }
+            if (name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            {
+                name = name[..^5];
+            }
+            return name + ".lzs";
+        }
+
+        public async Task SaveSDCardFile(SDCardJsonFileWrapper fileWrapper)
+        {
+            if (!RequestsCanBeSendToLaser(fileWrapper.RegisteredLaser))
+            {
+                throw new InvalidOperationException("Request cannot be send to showlaser");
+            }
+
+            // Convert the show JSON to the compact .lzs binary here so the showlaser
+            // never deserializes a multi-KB document in RAM: it streams the bytes we
+            // send straight to its SD card. The filename goes in a header so the body
+            // is the raw show and nothing needs parsing on the laser.
+            byte[] lzs = LasershowBinaryConverter.JsonToBinary(fileWrapper.FileJson);
+            string filename = ToLzsFilename(fileWrapper.Filename);
+
+            using HttpClient httpClient = new();
+            {
+                try
+                {
+                    Console.WriteLine($"Save SDCard file on showlaser: {fileWrapper.RegisteredLaser.Name}");
+
+                    using ByteArrayContent content = new(lzs);
+                    content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                    content.Headers.Add("X-Filename", filename);
+
+                    HttpResponseMessage response = await httpClient.PostAsync(
+                        $"http://{fileWrapper.RegisteredLaser.IPAddress}/sd-card-binary", content);
+                    response.EnsureSuccessStatusCode();
+
+                    string json = await response.Content.ReadAsStringAsync();
+                    var apiResponse = JsonConvert.DeserializeObject<APIResponse>(json);
+                    if (!apiResponse.Success)
+                    {
+                        throw new JsonException($"Error saving SDCard file: {apiResponse.Error}");
+                    }
+                }
+                catch (HttpRequestException)
+                {
+                    Console.WriteLine($"Connection lost for laser {fileWrapper.RegisteredLaser.Name}");
+                    throw;
+                }
+            }
+
+            httpClient.Dispose();
+        }
+
+        /// <summary>
+        /// Plays a lasershow on the showlaser. Lasershows are stored on the SD card and
+        /// streamed from there. The show is always uploaded first, so the SD card can
+        /// never hold a stale version of an edited show.
+        /// </summary>
+        public async Task PlayLasershow(SDCardJsonFileWrapper fileWrapper)
+        {
+            if (!RequestsCanBeSendToLaser(fileWrapper.RegisteredLaser))
+            {
+                throw new InvalidOperationException("Request cannot be send to showlaser");
+            }
+
+            await SaveSDCardFile(fileWrapper);
+            await SendPlaySDCardFileRequest(fileWrapper.RegisteredLaser, ToLzsFilename(fileWrapper.Filename));
+        }
+
+        private static async Task SendPlaySDCardFileRequest(RegisteredLaserDto registeredLaser, string filename)
+        {
+            using HttpClient httpClient = new();
+            {
+                try
+                {
+                    Console.WriteLine($"Play SDCard file {filename} on showlaser: {registeredLaser.Name}");
+
+                    string body = JsonConvert.SerializeObject(new { filename });
+                    StringContent content = new(body, Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage response = await httpClient.PostAsync(
+                        $"http://{registeredLaser.IPAddress}/sd-card-play", content);
+                    response.EnsureSuccessStatusCode();
+
+                    string json = await response.Content.ReadAsStringAsync();
+                    var apiResponse = JsonConvert.DeserializeObject<APIResponse>(json);
+                    if (!apiResponse.Success)
+                    {
+                        throw new JsonException($"Error playing SDCard file: {apiResponse.Error}");
+                    }
+                }
+                catch (HttpRequestException)
+                {
+                    Console.WriteLine($"Connection lost for laser {registeredLaser.Name}");
+                    throw;
+                }
+            }
+
+            httpClient.Dispose();
+        }
+
+        /// <summary>
+        /// Plays a pattern, animation or lasershow preview live on the showlaser without
+        /// persisting anything of the user's. Small shows are streamed into the laser's
+        /// RAM and looped; a show too large for the laser's RAM buffer falls back to a
+        /// scratch file on the SD card (overwritten on every large preview) and is
+        /// played from there. Uses the same converter for all of them (a pattern is a
+        /// single-frame show, an animation/lasershow a multi-frame show).
+        /// </summary>
+        public async Task PlayLiveShow(SDCardJsonFileWrapper fileWrapper)
+        {
+            if (!RequestsCanBeSendToLaser(fileWrapper.RegisteredLaser))
+            {
+                throw new InvalidOperationException("Request cannot be send to showlaser");
+            }
+
+            byte[] lzs = LasershowBinaryConverter.JsonToBinary(fileWrapper.FileJson);
+            if (lzs.Length > MaxLiveShowBytes)
+            {
+                // SaveSDCardFile converts the JSON again; that costs milliseconds and
+                // keeps the SD upload path single-sourced.
+                SDCardJsonFileWrapper scratch = new()
+                {
+                    RegisteredLaser = fileWrapper.RegisteredLaser,
+                    Filename = LivePreviewFilename,
+                    FileJson = fileWrapper.FileJson
+                };
+                await SaveSDCardFile(scratch);
+                await SendPlaySDCardFileRequest(scratch.RegisteredLaser, ToLzsFilename(LivePreviewFilename));
+                return;
+            }
+
+            using HttpClient httpClient = new();
+            try
+            {
+                Console.WriteLine($"Project live show on showlaser: {fileWrapper.RegisteredLaser.Name}");
+
+                using ByteArrayContent content = new(lzs);
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+
+                HttpResponseMessage response = await httpClient.PostAsync(
+                    $"http://{fileWrapper.RegisteredLaser.IPAddress}/live-binary", content);
+                response.EnsureSuccessStatusCode();
+
+                string json = await response.Content.ReadAsStringAsync();
+                var apiResponse = JsonConvert.DeserializeObject<APIResponse>(json);
+                if (!apiResponse.Success)
+                {
+                    throw new JsonException($"Error projecting live show: {apiResponse.Error}");
+                }
+            }
+            catch (HttpRequestException)
+            {
+                Console.WriteLine($"Connection lost for laser {fileWrapper.RegisteredLaser.Name}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Stops whatever the showlaser is currently playing (an SD lasershow or a live
+        /// pattern/animation) and blanks the laser.
+        /// </summary>
+        public async Task StopPlayback(RegisteredLaserDto registeredLaser)
+        {
+            if (!RequestsCanBeSendToLaser(registeredLaser))
+            {
+                throw new InvalidOperationException("Request cannot be send to showlaser");
+            }
+
+            using HttpClient httpClient = new();
+            {
+                try
+                {
+                    Console.WriteLine($"Stop playback on showlaser: {registeredLaser.Name}");
+                    HttpResponseMessage response = await httpClient.PostAsync(
+                        $"http://{registeredLaser.IPAddress}/stop", null);
+                    response.EnsureSuccessStatusCode();
+                }
+                catch (HttpRequestException)
+                {
+                    Console.WriteLine($"Connection lost for laser {registeredLaser.Name}");
+                    throw;
+                }
+            }
+
+            httpClient.Dispose();
+        }
+
+        public async Task DeleteSDCardFile(RegisteredLaserDto registeredLaser, SDCardJsonFileWrapper file)
+        {
+            if (!RequestsCanBeSendToLaser(registeredLaser))
+            {
+                throw new InvalidOperationException("Request cannot be send to showlaser");
+            }
+
+            using HttpClient httpClient = new();
+            {
+                try
+                {
+                    Console.WriteLine($"Delete SDCard file {file.Filename} from showlaser: {registeredLaser.Name}");
+                    HttpResponseMessage response = await httpClient.PutAsJsonAsync($"http://{registeredLaser.IPAddress}/sd-card", file);
+                    string json = await response.Content.ReadAsStringAsync();
+                }
+                catch (HttpRequestException)
+                {
+                    if (registeredLaser.Status != LaserStatus.ConnectionLost)
+                    {
+                        Console.WriteLine($"Connection lost for laser {registeredLaser.Name}");
+                        throw new TimeoutException();
+                    }
+                }
+            }
+
+            httpClient.Dispose();
+            return;
         }
 
         public static List<UDPBroadcast> GetPendingAdoptions()
@@ -160,21 +477,7 @@ namespace LaserAPI.Logic
         /// <param name="wrappedPoints">A model with points and info about the laser to send the data to</param>
         public static async Task SendData(List<PointWrapper> wrappedPoints)
         {
-            using HttpClient httpClient = new();
-            List<Task> tasks = [];
 
-            foreach (RegisteredLaserDto connectedLaser in LaserConnectionLogicState.RegisteredLasers.FindAll(cl =>
-                cl.Status is (LaserStatus)Enums.LaserStatus.Emitting or
-                (LaserStatus)Enums.LaserStatus.Standby))
-            {
-                string url = $"{connectedLaser.IPAddress}/send";
-                List<PointWrapper> wrappedPointToPlayOnLaser = wrappedPoints.FindAll(wp => wp.LaserToProjectOnUuid == connectedLaser.Uuid);
-
-                tasks.Add(httpClient.PostAsJsonAsync(url, wrappedPointToPlayOnLaser));
-            }
-
-            await Task.WhenAll(tasks);
-            httpClient.Dispose();
         }
 
         /// <summary>
@@ -185,6 +488,35 @@ namespace LaserAPI.Logic
         {
             await _registeredLaserDal.Remove(uuid);
             LaserConnectionLogicState.RegisteredLasers.RemoveAll(cl => cl.Uuid == uuid);
+        }
+
+        public async Task ProjectSafetyZone(ProjectSafetyZoneWrapper projectSafetyZoneWrapper)
+        {
+            if (!RequestsCanBeSendToLaser(projectSafetyZoneWrapper.RegisteredLaser))
+            {
+                throw new InvalidOperationException("Request cannot be send to showlaser");
+            }
+
+            using HttpClient httpClient = new();
+            {
+                try
+                {
+                    Console.WriteLine($"Project safety zone on showlaser {projectSafetyZoneWrapper.RegisteredLaser.Name}");
+                    HttpResponseMessage response = await httpClient.PostAsJsonAsync($"http://{projectSafetyZoneWrapper.RegisteredLaser.IPAddress}/safety-zone", projectSafetyZoneWrapper);
+                    string json = await response.Content.ReadAsStringAsync();
+                }
+                catch (HttpRequestException)
+                {
+                    if (projectSafetyZoneWrapper.RegisteredLaser.Status != LaserStatus.ConnectionLost)
+                    {
+                        Console.WriteLine($"Connection lost for laser {projectSafetyZoneWrapper.RegisteredLaser.Name}");
+                        throw new TimeoutException();
+                    }
+                }
+            }
+
+            httpClient.Dispose();
+            return;
         }
     }
 }
