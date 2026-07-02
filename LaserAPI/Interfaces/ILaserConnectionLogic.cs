@@ -1,5 +1,7 @@
-﻿using LaserAPI.Models.Dto.RegisteredLaser;
-using LaserAPI.Models.FromLaser;
+﻿using LaserAPI.Models.Dto.Patterns;
+using LaserAPI.Models.Dto.RegisteredLaser;
+using LaserAPI.Models.FromFrontend.Showlaser;
+using LaserAPI.Models.FromFrontend.Showlaser.SDCard;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -26,7 +28,7 @@ namespace LaserAPI.Interfaces
         /// </summary>
         /// <param name="registeredLaser"></param>
         /// <returns>An (empty) list of files</returns>
-        public Task<List<SDCardJsonFile>> GetSDCardFiles(RegisteredLaserDto registeredLaser);
+        public Task<List<SDCardJsonFileWrapper>> GetSDCardFiles(RegisteredLaserDto registeredLaser);
 
         /// <summary>
         /// Updates the data of the showlaser
@@ -38,5 +40,11 @@ namespace LaserAPI.Interfaces
         /// </summary>
         /// <param name="registeredLaser">The laser to remove</param>
         public Task Remove(Guid uuid);
+
+        /// <summary>
+        /// Projects the safety zone
+        /// </summary>
+        /// <param name="safetyZone"></param>
+        public Task ProjectSafetyZone(ProjectSafetyZoneWrapper projectSafetyZoneWrapper);
     }
 }
